@@ -1,0 +1,24 @@
+# dependencies
+node_modules
+npm-debug.log*
+
+# env files
+.env
+.env.*
+
+# logs
+logs
+*.log
+
+# macOS
+.DS_Store
+
+# build
+dist
+build
+
+# docker
+mongo_data
+
+# editor
+.vscode

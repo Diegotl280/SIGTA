@@ -15,17 +15,17 @@ async function start() {
   try {
     if (!MONGO_URI) throw new Error("Falta MONGO_URI en variables de entorno");
     await mongoose.connect(MONGO_URI);
-    console.log("✅ Mongo conectado");
+    console.log("Mongo conectado");
 
     app.get("/", (_req: Request, res: Response) => {
-      res.json({ ok: true, msg: "SIGTA backend running" });
+      res.json({ ok: true, msg: "Saludos desde el backend de SIGTA" });
     });
 
     app.listen(Number(PORT), "0.0.0.0", () => {
-      console.log(`🚀 Backend en http://localhost:${PORT}`);
+      console.log(`Backend en http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Error al iniciar:", err);
+    console.error("Error al iniciar:", err);
     process.exit(1);
   }
 }

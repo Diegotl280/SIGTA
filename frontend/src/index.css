@@ -1,68 +1,382 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --text-main: #333333;
+  --text-muted: #666666;
+  --bg-color: #ffffff;
+  --pill-bg: #f5f5f5;
+  --pill-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  --red-accent: #e11d48;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
+#root {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+/* Header */
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 3rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.zacatecas-icon {
+  width: 45px;
+  height: 50px;
+  background-color: #9f2241;
+  border-radius: 4px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #9f2241;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  line-height: 1.1;
+  color: #333;
+}
+
+.logo-text strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.small-text {
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.secretaria-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: #666;
+  border-left: 1px solid #ddd;
+  padding-left: 1rem;
+  line-height: 1.2;
+}
+
+.secretaria-text strong {
+  color: #333;
+}
+
+/* Nav Pill */
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  background: var(--pill-bg);
+  border-radius: 50px;
+  padding: 0.3rem 0.5rem 0.3rem 1.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #111;
+  cursor: pointer;
+  padding: 0.5rem 0.8rem;
+  font-weight: 500;
+}
+
+.nav-link.active {
+  color: var(--red-accent);
+}
+
+.nav-link.text-red {
+  color: var(--red-accent);
+}
+
+.divider {
+  width: 1px;
+  height: 14px;
+  background-color: #ccc;
+  margin: 0 0.2rem;
+}
+
+.nav-arrow {
+  background: #e5e5e5;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+}
+
+/* Header Right */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.profile-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #ccc;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-icon::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  background-color: #a3a3a3;
+  border-radius: 50% 50% 0 0;
+}
+
+.profile-icon::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background-color: #a3a3a3;
+  border-radius: 50%;
+}
+
+/* Main Content (Admin Search) */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5rem;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #f1f1f1;
+  border-radius: 20px;
+  padding: 0.8rem 1.2rem;
+  width: 100%;
+}
+
+.search-icon {
+  color: #999;
+  margin-right: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+}
+
+.search-btn {
+  background: #f9f9f9;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+
+.search-btn:hover {
+  background: #fff;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+
+/* LABSOL Widget */
+.labsol-widget {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  background: #a3a3a3;
+  border-radius: 12px 12px 0 0;
+  padding: 0.8rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #444;
+}
+
+.labsol-icon {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ef4444;
+  position: relative;
+  transform: rotate(45deg);
+}
+
+.labsol-text {
+  display: flex;
+  flex-direction: column;
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.labsol-text strong {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: #333;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.labsol-text span {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  color: #555;
+}
+
+/* AUTH PAGES (kept simple light schema for login) */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.auth-box {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.auth-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.6rem;
+  color: #333;
+  text-align: center;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: #777;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.input-group input {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  border-color: #9f2241;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 0.9rem;
+  background-color: #9f2241;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.auth-button:hover {
+  background-color: #7a1831;
+}
+
+.auth-alert {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
 }

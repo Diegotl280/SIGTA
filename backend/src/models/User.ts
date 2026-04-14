@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-
+// Schema para usuarios
 const UserSchema = new Schema({
   email: {
     type: String,

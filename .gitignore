@@ -22,3 +22,6 @@ mongo_data
 
 # editor
 .vscode
+
+# uploads
+uploads/

@@ -1,0 +1,16 @@
+import { Router } from 'express';
+import { requireAuth } from '../middlewares/auth.middleware';
+import { expedienteController } from '../controllers/expediente.controller';
+
+const router = Router();
+
+// Todas las rutas requieren estar autenticado
+router.use(requireAuth);
+
+router.post('/', expedienteController.crear);
+router.get('/', expedienteController.listar);
+router.get('/:id', expedienteController.obtener);
+router.patch('/:id/enviar', expedienteController.enviar);
+router.patch('/:id/estado', expedienteController.cambiarEstado);
+
+export default router;

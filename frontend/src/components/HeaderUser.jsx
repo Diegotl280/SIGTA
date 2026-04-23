@@ -34,7 +34,7 @@ const HeaderUser = () => {
       </div>
 
       <div className="header-right">
-        <span className="user-name">Cesantoni</span>
+        <span className="user-name">{user.name}</span>
         <div className="profile-container" style={{ position: 'relative' }}>
           <div
             className="profile-icon"

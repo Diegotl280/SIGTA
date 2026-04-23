@@ -1,3 +1,4 @@
+//Esto es solo para crear los tramites de prueba, no es necesario para el funcionamiento del programa
 import mongoose from 'mongoose';
 import 'dotenv/config';
 import { ConfigTramite } from './models/ConfigTramite';

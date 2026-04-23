@@ -1,3 +1,4 @@
+// Esto es solo para crear usuarios de prueba, no es necesario para el funcionamiento del programa
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { User } from "./src/models/User";

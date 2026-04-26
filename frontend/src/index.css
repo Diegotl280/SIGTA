@@ -447,10 +447,18 @@ body {
 .admin-page-container { padding: 2rem; text-align: center; width: 100%; }
 .empresas-container { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 3rem 2rem; gap: 4rem; }
 .empresas-grid { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; max-width: 1000px; }
-.empresa-card { background-color: #b3b3b3; width: 220px; height: 90px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.2rem; font-weight: 500; color: #111; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.empresa-edit-icon { position: absolute; top: -10px; right: -10px; background-color: #009900; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.empresa-card { background-color: #b3b3b3; width: 260px; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.4rem; font-weight: 500; color: #111; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+.empresa-action-container { position: absolute; top: -15px; right: -15px; z-index: 10; }
+.empresa-edit-icon { background-color: #009900; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
 .empresa-edit-icon:hover { transform: scale(1.1); }
-.edit-pencil { font-size: 0.8rem; transform: rotate(-15deg); }
+.edit-pencil { font-size: 1rem; transform: rotate(-15deg); }
+
+.empresa-action-dropdown { background-color: #009900; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; width: 80px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: fadeIn 0.2s; }
+.action-btn { border: none; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.action-btn.edit-btn { background-color: #009900; padding-top: 10px; }
+.action-btn.edit-btn:hover { background-color: #007a00; }
+.action-btn.delete-btn { background-color: #ff0000; padding-bottom: 8px; }
+.action-btn.delete-btn:hover { background-color: #cc0000; }
 .agregar-empresa-btn { background-color: #b3b3b3; border: none; border-radius: 8px; padding: 1.2rem 2.5rem; font-size: 1.1rem; font-weight: 500; color: #111; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s, transform 0.1s; }
 .agregar-empresa-btn:hover { background-color: #a3a3a3; }
 .agregar-empresa-btn:active { transform: scale(0.98); }

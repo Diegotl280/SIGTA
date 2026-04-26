@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
+import { useGetUser } from '../api/UserApi';
+
 const HeaderUser = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
+  //Obtiene la información del usuario autenticado
+  const { data } = useGetUser();
+  const userName = data?.user?.nombre || "Usuario";
 
   return (
+    /** Encabezado */
     <header className="top-header">
       <div className="header-left">
         <div className="logo-placeholder">
@@ -17,6 +23,7 @@ const HeaderUser = () => {
             <span className="small-text">2021-2027</span>
           </div>
         </div>
+        {/*Nombre de la secretaría */}
         <div className="secretaria-text">
           <span>SECRETARÍA DEL</span>
           <strong>AGUA Y</strong>
@@ -24,17 +31,18 @@ const HeaderUser = () => {
         </div>
       </div>
 
+      {/*Enlaces de navegación */}
       <div className="header-center">
         <nav className="nav-pill">
-          <NavLink 
-            to="/notificaciones" 
+          <NavLink
+            to="/notificaciones"
             className={({ isActive }) => `nav-link ${isActive ? 'text-red active' : ''}`}
           >
             Notificaciones
           </NavLink>
           <span className="divider"></span>
-          <NavLink 
-            to="/tramites" 
+          <NavLink
+            to="/tramites"
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             Tramites
@@ -42,8 +50,9 @@ const HeaderUser = () => {
         </nav>
       </div>
 
+      {/*Información del usuario */}
       <div className="header-right">
-        <span className="user-name">{user.name}</span>
+        <span className="user-name">{userName}</span>
         <div className="profile-container" style={{ position: 'relative' }}>
           <div
             className="profile-icon"
@@ -51,7 +60,7 @@ const HeaderUser = () => {
             style={{ cursor: 'pointer' }}
           ></div>
 
-          {showDropdown && (
+          {showDropdown && (/**Dropdown */
             <div className="profile-dropdown fade-in">
               <button
                 className="logout-btn"

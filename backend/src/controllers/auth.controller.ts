@@ -16,7 +16,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      res.status(400).json({ ok: false, msg: 'El correo electrónico ya está registrado' });
+      res.status(400).json({ ok: false, msg: 'ese correo ya existe' });
       return;
     }
 
@@ -95,5 +95,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Error in login:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor' });
+  }
+};
+
+export const getEmpresas = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const empresas = await User.find({ role: 'usuario' }, 'nombre email _id').sort({ nombre: 1 });
+    res.json({ ok: true, empresas });
+  } catch (error) {
+    console.error('Error in getEmpresas:', error);
+    res.status(500).json({ ok: false, msg: 'Error al obtener empresas' });
   }
 };

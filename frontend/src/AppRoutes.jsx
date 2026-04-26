@@ -64,6 +64,9 @@ const AppRoutes = () => {
             <TramitesUser />
           </ProtectedRoute>
         } />
+
+        {/* Ruta para capturar cualquier URL no reconocida y redirigir al inicio correspondiente */}
+        <Route path="*" element={<HomeRedirect />} />
       </Route>
     </Routes>
   );

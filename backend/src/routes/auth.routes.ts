@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login } from '../controllers/auth.controller';
+import { register, login, getEmpresas } from '../controllers/auth.controller';
 import { requireAuth, AuthRequest } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -11,5 +11,8 @@ router.post('/login', login);
 router.get('/me', requireAuth, (req: AuthRequest, res) => {
   res.json({ ok: true, user: req.user });
 });
+
+// Ruta para listar empresas
+router.get('/empresas', requireAuth, getEmpresas);
 
 export default router;

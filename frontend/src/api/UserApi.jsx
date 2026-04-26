@@ -88,3 +88,25 @@ export function useGetUser() {
         retry: false,
     }); //Fin del return
 }//Fin de useGetUser
+
+/**
+ * Hook para obtener la lista de todas las empresas (usuarios)
+ */
+export function useGetEmpresas() {
+    const getEmpresasRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/auth/empresas`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+    
+    return useQuery({
+        queryKey: ['empresas'],
+        queryFn: getEmpresasRequest,
+    });
+}

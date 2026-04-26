@@ -1,8 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import EmpresasAdmin from './pages/EmpresasAdmin';
+import AgregarEmpresa from './pages/AgregarEmpresa';
+import NotificacionesAdmin from './pages/NotificacionesAdmin';
+import TramitesAdmin from './pages/TramitesAdmin';
 import NotifiUsuario from './pages/NotifiUsuario';
 import TramitesUser from './pages/TramitesUser';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -19,8 +22,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
+
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<HomeRedirect />} />
 
@@ -28,6 +30,26 @@ const AppRoutes = () => {
         <Route path="admin" element={
           <ProtectedRoute allowedRole="administrador">
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="admin/empresas" element={
+          <ProtectedRoute allowedRole="administrador">
+            <EmpresasAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="admin/empresas/agregar" element={
+          <ProtectedRoute allowedRole="administrador">
+            <AgregarEmpresa />
+          </ProtectedRoute>
+        } />
+        <Route path="admin/tramites" element={
+          <ProtectedRoute allowedRole="administrador">
+            <TramitesAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="admin/notificaciones" element={
+          <ProtectedRoute allowedRole="administrador">
+            <NotificacionesAdmin />
           </ProtectedRoute>
         } />
 

@@ -26,7 +26,7 @@ const AgregarEmpresa = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     createUser({
       ...formData,
       role: 'usuario',
@@ -46,47 +46,47 @@ const AgregarEmpresa = () => {
 
       <form onSubmit={handleSubmit} className="agregar-empresa-form">
         <div className="input-line-group">
-          <input 
-            type="text" 
-            name="nombre" 
-            placeholder="Nombre de la empresa" 
+          <input
+            type="text"
+            name="nombre"
+            placeholder="Nombre de la empresa"
             value={formData.nombre}
             onChange={handleInputChange}
-            required 
+            required
             className="input-line-style italic-placeholder"
           />
           <span className="input-icon-green">✎</span>
         </div>
 
         <div className="input-line-group">
-          <input 
-            type="email" 
-            name="email" 
-            placeholder="Correo electronico" 
+          <input
+            type="email"
+            name="email"
+            placeholder="Correo electronico"
             value={formData.email}
             onChange={handleInputChange}
-            required 
+            required
             className="input-line-style"
           />
         </div>
 
         <div className="input-line-group">
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="Contraseña" 
+          <input
+            type="password"
+            name="password"
+            placeholder="Contraseña"
             value={formData.password}
             onChange={handleInputChange}
-            required 
+            required
             className="input-line-style"
           />
         </div>
-
+        {/*ESTO ES SOLO UN EJEMPLO DE LOS TRAMITES QUE PODRAN ACCEDER LAS EMPRESAS. LUEGO LO CONECTAREMOS CON LA BASE DE DATOS*/}
         <div className="tramites-toggles-container">
           {/* COA */}
           <div className="tramite-toggle-item box-cyan">
-            <div 
-              className={`custom-toggle ${tramites.coa ? 'on' : 'off'}`} 
+            <div
+              className={`custom-toggle ${tramites.coa ? 'on' : 'off'}`}
               onClick={() => handleToggle('coa')}
             >
               <div className="toggle-circle"></div>
@@ -96,8 +96,8 @@ const AgregarEmpresa = () => {
 
           {/* LAU */}
           <div className="tramite-toggle-item box-orange">
-            <div 
-              className={`custom-toggle ${tramites.lau ? 'on' : 'off'}`} 
+            <div
+              className={`custom-toggle ${tramites.lau ? 'on' : 'off'}`}
               onClick={() => handleToggle('lau')}
             >
               <div className="toggle-circle"></div>
@@ -107,8 +107,8 @@ const AgregarEmpresa = () => {
 
           {/* MIA */}
           <div className="tramite-toggle-item box-green">
-            <div 
-              className={`custom-toggle ${tramites.mia ? 'on' : 'off'}`} 
+            <div
+              className={`custom-toggle ${tramites.mia ? 'on' : 'off'}`}
               onClick={() => handleToggle('mia')}
             >
               <div className="toggle-circle"></div>
@@ -118,17 +118,17 @@ const AgregarEmpresa = () => {
         </div>
 
         <div className="form-actions-bottom">
-          <button 
-            type="button" 
-            className="btn-cancelar" 
+          <button
+            type="button"
+            className="btn-cancelar"
             onClick={() => navigate('/admin/empresas')}
             disabled={loading}
           >
             <span className="btn-icon">✖</span> Cancelar
           </button>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className="btn-continuar"
             disabled={loading}
           >

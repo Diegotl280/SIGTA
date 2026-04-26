@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 const EmpresasAdmin = () => {
   const navigate = useNavigate();
-  const empresas = ['Corona', 'Cesantoni', 'LyM', 'Jhonson Electric'];
+  {/* Traer las empresas de la base de datos */ }
+  const empresas = ['  XD   '];
 
   return (
     <div className="empresas-container fade-in">
@@ -17,7 +18,7 @@ const EmpresasAdmin = () => {
           </div>
         ))}
       </div>
-      <button 
+      <button
         className="agregar-empresa-btn"
         onClick={() => navigate('/admin/empresas/agregar')}
       >

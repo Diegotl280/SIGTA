@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from '../auth/AuthContext';
+import { useNavigate, NavLink } from 'react-router-dom';
 const HeaderAdmin = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -27,15 +26,15 @@ const HeaderAdmin = () => {
 
       <div className="header-center">
         <nav className="nav-pill">
-          <button className="nav-link">Notificaciones</button>
+          <NavLink to="/admin/notificaciones" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Notificaciones</NavLink>
           <span className="divider"></span>
-          <button className="nav-link">Empresas</button>
+          <NavLink to="/admin/empresas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Empresas</NavLink>
           <span className="divider"></span>
-          <button className="nav-link active">Inicio</button>
+          <NavLink to="/admin" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Inicio</NavLink>
           <span className="divider"></span>
-          <button className="nav-link">Tramites</button>
+          <NavLink to="/admin/tramites" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Tramites</NavLink>
           <span className="divider"></span>
-          <button className="nav-link">Configuracion</button>
+          <NavLink to="/admin/configuracion" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Configuracion</NavLink>
         </nav>
       </div>
 

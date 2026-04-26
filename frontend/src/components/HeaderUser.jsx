@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from '../auth/AuthContext';
+import { useNavigate, NavLink } from 'react-router-dom';
 const HeaderUser = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -27,9 +26,19 @@ const HeaderUser = () => {
 
       <div className="header-center">
         <nav className="nav-pill">
-          <button className="nav-link text-red">Notificaciones</button>
+          <NavLink 
+            to="/notificaciones" 
+            className={({ isActive }) => `nav-link ${isActive ? 'text-red active' : ''}`}
+          >
+            Notificaciones
+          </NavLink>
           <span className="divider"></span>
-          <button className="nav-link">Tramites</button>
+          <NavLink 
+            to="/tramites" 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            Tramites
+          </NavLink>
         </nav>
       </div>
 

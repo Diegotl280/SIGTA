@@ -7,16 +7,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sigta_2026';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, role } = req.body;
+    const { nombre, email, password, role } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ ok: false, msg: 'Email y contraseña son requeridos' });
+    if (!nombre || !email || !password) {
+      res.status(400).json({ ok: false, msg: 'Nombre, email y contraseña son requeridos' });
       return;
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      res.status(400).json({ ok: false, msg: 'El correo electrónico ya está registrado' });
+      res.status(400).json({ ok: false, msg: 'ese correo ya existe' });
       return;
     }
 
@@ -24,6 +24,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
+      nombre,
       email: email.toLowerCase(),
       password: hashedPassword,
       role: role && ['administrador', 'usuario'].includes(role) ? role : 'usuario'
@@ -32,7 +33,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await newUser.save();
 
     const token = jwt.sign(
-      { uid: newUser._id, email: newUser.email, role: newUser.role },
+      { uid: newUser._id, nombre: newUser.nombre, email: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -42,6 +43,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       msg: 'Usuario registrado con éxito',
       /*user: {
         uid: newUser._id,
+        nombre: newUser.nombre,
         email: newUser.email,
         role: newUser.role
       },*/
@@ -76,7 +78,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign(
-      { uid: user._id, email: user.email, role: user.role },
+      { uid: user._id, nombre: user.nombre, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -85,6 +87,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       ok: true,
       user: {
         uid: user._id,
+        nombre: user.nombre,
         email: user.email,
         role: user.role
       },
@@ -93,5 +96,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Error en login:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor' });
+  }
+};
+
+export const getEmpresas = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const empresas = await User.find({ role: 'usuario' }, 'nombre email _id').sort({ nombre: 1 });
+    res.json({ ok: true, empresas });
+  } catch (error) {
+    console.error('Error in getEmpresas:', error);
+    res.status(500).json({ ok: false, msg: 'Error al obtener empresas' });
   }
 };

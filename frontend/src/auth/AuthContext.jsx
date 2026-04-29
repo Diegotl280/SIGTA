@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await axios.get('/api/auth/me', {
+        const res = await axios.get(`${API_BASE_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.ok) {
@@ -45,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { email, password });
       if (res.data.ok) {
         localStorage.setItem('token', res.data.token);
         setIsAuthenticated(true);
@@ -60,7 +62,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password, role) => {
     try {
-      const res = await axios.post('/api/auth/register', { email, password, role });
+      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, { email, password, role });
       if (res.data.ok) {
         localStorage.setItem('token', res.data.token);
         setIsAuthenticated(true);

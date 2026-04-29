@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,41 +22,45 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box fade-in">
-        <h2 className="auth-title">Bienvenido a SIGTA</h2>
-        <p className="auth-subtitle">Inicia sesión en tu cuenta</p>
-        
-        {error && <div className="auth-alert">{error}</div>}
+    <div className="login-split-container">
+      <div className="login-left-pane"></div>
+      
+      <div className="login-right-pane">
+        <div className="login-form-container fade-in">
+          <h1 className="login-title">LOGIN</h1>
+          
+          {error && <div className="login-error-alert">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="input-group">
-            <label htmlFor="email">Correo Electrónico</label>
-            <input 
-              id="email" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
-              placeholder="tu@correo.com"
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password">Contraseña</label>
-            <input 
-              id="password" 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              placeholder="••••••••"
-            />
-          </div>
-          <button type="submit" className="auth-button">
-            Iniciar Sesión
-          </button>
-        </form>
-        
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="login-input-group">
+              <input 
+                id="email" 
+                type="text" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+                placeholder="USUARIO O ID"
+              />
+            </div>
+            
+            <div className="login-input-group">
+              <input 
+                id="password" 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                placeholder="CONTRASEÑA"
+              />
+            </div>
+            
+            <div className="login-button-container">
+              <button type="submit" className="login-submit-btn">
+                Continuar <span className="login-btn-icon"></span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

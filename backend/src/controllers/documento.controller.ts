@@ -22,7 +22,7 @@ export const documentoController = {
       if (!tipoRequisito) {
         // Eliminar el archivo subido si falta el tipo
         fs.unlinkSync(req.file.path);
-        res.status(400).json({ ok: false, msg: 'Debes indicar el tipoRequisito del documento' });
+        res.status(400).json({ ok: false, msg: 'Debes indicar el tipo Requisito del documento' });
         return;
       }
 
@@ -49,7 +49,7 @@ export const documentoController = {
         });
         return;
       }
-
+      // HACER FUNCIONES PARA IRLAS RECICLANDO DENTRO DEL CODIGO Y QUE SE OPTIMICE
       // Si el expediente tiene observaciones, verificar que no venció el plazo
       if (expediente.estado === 'con_observaciones' && expediente.fechaLimiteCorreccion) {
         if (new Date() > expediente.fechaLimiteCorreccion) {

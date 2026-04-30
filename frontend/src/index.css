@@ -201,7 +201,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 5rem;
+  padding-top: 2rem;
 }
 
 .search-container {
@@ -257,16 +257,12 @@ body {
 
 /* LABSOL Widget */
 .labsol-widget {
-  position: absolute;
-  bottom: 0;
-  left: 20px;
+  width: 100%;
   background: #a3a3a3;
-  border-radius: 12px 12px 0 0;
-  padding: 0.8rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  color: #444;
+  box-sizing: border-box;
 }
 
 .labsol-icon {
@@ -554,3 +550,7 @@ body {
 .doc-estado.con-obs { background: #fee2e2; color: #b91c1c; }
 .doc-nombre { font-size: 0.75rem; color: #666; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .loader { text-align: center; padding: 3rem; color: #666; font-size: 1rem; }
+
+/* ── LOGOS ── */
+.gobierno-logo-img { height: 52px; width: auto; object-fit: contain; }
+.labsol-logo-img { height: 85px; width: auto; object-fit: contain; }

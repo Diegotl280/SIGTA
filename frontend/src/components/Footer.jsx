@@ -1,11 +1,9 @@
+import labsolLogo from '../assets/Labsol.png';
+
 const Footer = () => {
   return (
     <div className="labsol-widget">
-      <div className="labsol-icon"></div>
-      <div className="labsol-text">
-        <strong>LABSOL</strong>
-        <span>Laboratorio de Software Libre</span>
-      </div>
+      <img src={labsolLogo} alt="LABSOL" className="labsol-logo-img" />
     </div>
   );
 };

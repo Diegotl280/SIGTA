@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { register, login, getEmpresas } from '../controllers/auth.controller';
 import { requireAuth, AuthRequest } from '../middlewares/auth.middleware';
+import configTramiteRoutes from './configTramite.routes';
 
 const router = Router();
 

@@ -6,13 +6,10 @@ const EmpresasAdmin = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useGetEmpresas();
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [vistaLista, setVistaLista] = useState(false);
 
   const toggleDropdown = (id) => {
-    if (activeDropdown === id) {
-      setActiveDropdown(null);
-    } else {
-      setActiveDropdown(id);
-    }
+    setActiveDropdown(activeDropdown === id ? null : id);
   };
 
   if (isLoading) return <div className="loader">Cargando empresas...</div>;
@@ -22,39 +19,89 @@ const EmpresasAdmin = () => {
 
   return (
     <div className="empresas-container fade-in">
-      <div className="empresas-grid">
-        {empresas.map((empresa) => (
-          <div key={empresa._id} className="empresa-card">
-            <span>{empresa.nombre}</span>
-            <div className="empresa-action-container">
-              {activeDropdown === empresa._id ? (
-                <div className="empresa-action-dropdown fade-in">
-                  <button className="action-btn edit-btn" onClick={() => setActiveDropdown(null)}>
-                    <span className="edit-pencil">✎</span>
-                    Editar
-                  </button>
-                  <button className="action-btn delete-btn" onClick={() => setActiveDropdown(null)}>
-                    Eliminar
-                  </button>
-                </div>
-              ) : (
-                <div 
-                  className="empresa-edit-icon" 
-                  title="Opciones"
-                  onClick={() => toggleDropdown(empresa._id)}
-                >
-                  <span className="edit-pencil">✎</span>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+
+      {/* Toggle vista */}
+      <div className="empresas-toolbar">
+        <span className="empresas-count">{empresas.length} empresa{empresas.length !== 1 ? 's' : ''}</span>
+        <div className="vista-toggle">
+          <button
+            className={`vista-btn ${!vistaLista ? 'active' : ''}`}
+            onClick={() => setVistaLista(false)}
+            title="Vista cuadrícula"
+          >⊞</button>
+          <button
+            className={`vista-btn ${vistaLista ? 'active' : ''}`}
+            onClick={() => setVistaLista(true)}
+            title="Vista lista"
+          >☰</button>
+        </div>
       </div>
+
+      {/* Vista cuadrícula */}
+      {!vistaLista && (
+        <div className="empresas-grid">
+          {empresas.length === 0 && (
+            <div className="lista-vacia">No hay empresas registradas</div>
+          )}
+          {empresas.map((empresa) => (
+            <div key={empresa._id} className="empresa-card">
+              <span>{empresa.nombre || empresa.email}</span>
+              <div className="empresa-action-container">
+                {activeDropdown === empresa._id ? (
+                  <div className="empresa-action-dropdown fade-in">
+                    <button className="action-btn edit-btn" onClick={() => setActiveDropdown(null)}>
+                      <span className="edit-pencil">✎</span>
+                      Editar
+                    </button>
+                    <button className="action-btn delete-btn" onClick={() => setActiveDropdown(null)}>
+                      Eliminar
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="empresa-edit-icon"
+                    title="Opciones"
+                    onClick={() => toggleDropdown(empresa._id)}
+                  >
+                    <span className="edit-pencil">✎</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Vista lista */}
+      {vistaLista && (
+        <div className="empresas-lista-view">
+          {empresas.length === 0 && (
+            <div className="lista-vacia">No hay empresas registradas</div>
+          )}
+          {empresas.map((empresa) => (
+            <div key={empresa._id} className="empresa-lista-row">
+              <div className="empresa-lista-info">
+                <span className="empresa-lista-nombre">{empresa.nombre || '—'}</span>
+                <span className="empresa-lista-email">{empresa.email}</span>
+              </div>
+              <div className="empresa-lista-acciones">
+                <button className="btn-lista-edit" onClick={() => toggleDropdown(empresa._id)}>
+                  ✎ Editar
+                </button>
+                <button className="btn-lista-delete">
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <button
         className="agregar-empresa-btn"
         onClick={() => navigate('/admin/empresas/agregar')}
       >
-        Agregar empresa
+        + Agregar empresa
       </button>
     </div>
   );

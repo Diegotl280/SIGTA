@@ -6,6 +6,7 @@ import "dotenv/config";
 import authRoutes from "./routes/auth.routes";
 import expedienteRoutes from "./routes/expediente.routes";
 import documentoRoutes from "./routes/documento.routes"
+import configTramiteRoutes from './routes/configTramite.routes';
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/expedientes", expedienteRoutes);
 app.use("/api/expedientes/:expedienteId/documentos", documentoRoutes);
+app.use('/api/config-tramites', configTramiteRoutes);
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || "";

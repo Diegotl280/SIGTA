@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
@@ -107,4 +107,11 @@ export const getEmpresas = async (req: Request, res: Response): Promise<void> =>
     console.error('Error in getEmpresas:', error);
     res.status(500).json({ ok: false, msg: 'Error al obtener empresas' });
   }
+};
+// Listar todos los usuarios con role 'usuario' (empresas)
+getEmpresas: async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const empresas = await User.find({ role: 'usuario' }).select('-password').sort({ createdAt: -1 });
+    res.json({ ok: true, empresas });
+  } catch (err) { next(err); }
 };

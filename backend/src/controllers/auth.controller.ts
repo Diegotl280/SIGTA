@@ -41,16 +41,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       ok: true,
       msg: 'Usuario registrado con éxito',
-      user: {
+      /*user: {
         uid: newUser._id,
         nombre: newUser.nombre,
         email: newUser.email,
         role: newUser.role
-      },
+      },*/
+      user : newUser,  // Línea optimizada
       token
     });
   } catch (error) {
-    console.error('Error in register:', error);
+    console.error('Error en register:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor' });
   }
 };
@@ -93,7 +94,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       token
     });
   } catch (error) {
-    console.error('Error in login:', error);
+    console.error('Error en login:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor' });
   }
 };

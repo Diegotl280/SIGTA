@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Crear carpeta uploads si no existe
-const uploadsDir = path.join(__dirname, '../../uploads');
+const uploadsDir = path.join(__dirname, '../../uploads'); // REVISAR TODO LO DE LAS RUTAS RELATIVAS Y MEJOR USAR RUTAS GLOBALES. EN EL ARCHIVO DE CONFIGURACION VER BIEN QUE ONDA PARA EL DESPLIEGUE
 console.log('uploadsDir:', uploadsDir); 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });

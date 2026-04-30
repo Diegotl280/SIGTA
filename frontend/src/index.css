@@ -495,3 +495,62 @@ body {
 .btn-cancelar { background-color: #f59e0b; color: #111; border: none; border-radius: 20px; padding: 0.6rem 1.5rem; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .btn-continuar { background-color: #10b981; color: #111; border: none; border-radius: 20px; padding: 0.6rem 1.5rem; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .btn-icon { font-size: 1rem; display: flex; align-items: center; justify-content: center; border: 2px solid #111; border-radius: 50%; width: 20px; height: 20px; }
+
+/* ── TRAMITES ADMIN ── */
+.tramites-admin-container { display: flex; flex-direction: column; align-items: center; padding: 3rem 2rem; gap: 3rem; width: 100%; }
+.tramites-btn-grid { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; max-width: 700px; }
+.tramite-tipo-btn { background-color: #b3b3b3; border: none; border-radius: 8px; padding: 1.2rem 2.5rem; font-size: 1.4rem; font-weight: 700; color: #111; cursor: pointer; min-width: 130px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s, transform 0.1s; }
+.tramite-tipo-btn:hover { background-color: #9f2241; color: white; transform: translateY(-2px); }
+.tramites-acciones { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+.tramite-accion-btn { border: none; border-radius: 8px; padding: 1rem 2rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.tramite-accion-btn.cyan { background-color: #cffafe; color: #0e7490; }
+.tramite-accion-btn.green { background-color: #d1fae5; color: #065f46; }
+.tramite-accion-btn:hover { opacity: 0.85; }
+
+/* ── LISTA EXPEDIENTES ── */
+.tramites-lista-container { padding: 2rem 3rem; width: 100%; max-width: 1000px; margin: 0 auto; }
+.lista-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+.lista-header h2 { margin: 0; font-size: 1.5rem; }
+.lista-vacia { text-align: center; color: #666; margin-top: 3rem; font-size: 1.1rem; }
+.expedientes-lista { display: flex; flex-direction: column; gap: 0.8rem; }
+.expediente-row { display: flex; align-items: center; gap: 1.5rem; background: #f5f5f5; border-radius: 8px; padding: 1rem 1.5rem; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+.expediente-row:hover { background-color: #e5e5e5; transform: translateX(4px); }
+.exp-folio { font-weight: 700; font-size: 0.95rem; min-width: 200px; color: #111; }
+.exp-usuario { flex: 1; color: #555; font-size: 0.9rem; }
+.exp-estado { padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+.exp-fecha { color: #888; font-size: 0.85rem; min-width: 90px; }
+.exp-ver { color: #9f2241; font-weight: 600; font-size: 0.9rem; }
+
+/* ── DETALLE EXPEDIENTE ── */
+.tramites-detalle-container { padding: 2rem 3rem; width: 100%; max-width: 1000px; margin: 0 auto; }
+.detalle-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.detalle-header h2 { margin: 0; font-size: 1.4rem; }
+.detalle-header h2 span { color: #9f2241; }
+.estado-badge { padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+.detalle-info { display: flex; gap: 2rem; flex-wrap: wrap; background: #f5f5f5; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
+.detalle-obs { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.8rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.9rem; }
+.detalle-acciones { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.btn-estado { border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.btn-estado.en-revision { background-color: #fef3c7; color: #92400e; }
+.btn-estado.validado { background-color: #d1fae5; color: #065f46; }
+.btn-estado.con-obs { background-color: #fee2e2; color: #b91c1c; }
+.btn-estado:hover { opacity: 0.8; }
+.btn-volver { background: none; border: 1px solid #ddd; border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.9rem; color: #555; transition: background-color 0.2s; }
+.btn-volver:hover { background-color: #f5f5f5; }
+
+/* ── CHECKLIST ── */
+.checklist-titulo { font-size: 1rem; font-weight: 600; color: #555; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.checklist-lista { display: flex; flex-direction: column; gap: 0.6rem; }
+.checklist-item { display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; border-radius: 8px; padding: 0.8rem 1.2rem; gap: 1rem; flex-wrap: wrap; }
+.checklist-nombre { display: flex; align-items: center; gap: 0.8rem; flex: 1; font-size: 0.9rem; color: #333; }
+.req-badge { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; white-space: nowrap; }
+.req-badge.oblig { background-color: #fee2e2; color: #b91c1c; }
+.req-badge.opcional { background-color: #e0f2fe; color: #0369a1; }
+.checklist-estado { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+.doc-estado { font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 4px; }
+.doc-estado.no-subido { background: #f3f4f6; color: #9ca3af; }
+.doc-estado.pendiente { background: #fef3c7; color: #92400e; }
+.doc-estado.validado { background: #d1fae5; color: #065f46; }
+.doc-estado.con-obs { background: #fee2e2; color: #b91c1c; }
+.doc-nombre { font-size: 0.75rem; color: #666; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.loader { text-align: center; padding: 3rem; color: #666; font-size: 1rem; }

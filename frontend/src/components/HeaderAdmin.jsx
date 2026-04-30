@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { useNavigate, NavLink } from "react-router-dom";
+import gobiernoLogo from "../assets/Gobierno.jpeg";
+
 const HeaderAdmin = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -10,13 +12,13 @@ const HeaderAdmin = () => {
     <header className="top-header">
       <div className="header-left">
         <div className="logo-placeholder">
-          <div className="logo-icon zacatecas-icon"></div>
-          <div className="logo-text">
-            <strong>Zacatecas</strong>
-            <span>GOBIERNO DEL ESTADO</span>
-            <span className="small-text">2021-2027</span>
-          </div>
+          <img
+            src={gobiernoLogo}
+            alt="Gobierno de Zacatecas"
+            className="gobierno-logo-img"
+          />
         </div>
+
         <div className="secretaria-text">
           <span>SECRETARÍA DEL</span>
           <strong>AGUA Y</strong>
@@ -25,26 +27,55 @@ const HeaderAdmin = () => {
       </div>
 
       <div className="header-center">
+
         <nav className="nav-pill">
-          <NavLink to="/admin/notificaciones" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Notificaciones</NavLink>
+           <NavLink
+            to="/admin"
+            end
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Inicio
+          </NavLink>
           <span className="divider"></span>
-          <NavLink to="/admin/empresas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Empresas</NavLink>
+          <NavLink
+            to="/admin/empresas"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Empresas
+          </NavLink>         
           <span className="divider"></span>
-          <NavLink to="/admin" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Inicio</NavLink>
+          <NavLink
+            to="/admin/tramites"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Trámites
+          </NavLink>
           <span className="divider"></span>
-          <NavLink to="/admin/tramites" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Tramites</NavLink>
+          <NavLink
+            to="/admin/notificaciones"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Notificaciones
+          </NavLink>
           <span className="divider"></span>
-          <NavLink to="/admin/configuracion" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Configuracion</NavLink>
+          <NavLink
+            to="/admin/configuracion"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Configuración
+          </NavLink>
         </nav>
       </div>
 
+
+
       <div className="header-right">
         <span className="user-name">Bienvenido Admin</span>
-        <div className="profile-container" style={{ position: 'relative' }}>
+        <div className="profile-container" style={{ position: "relative" }}>
           <div
             className="profile-icon"
             onClick={() => setShowDropdown(!showDropdown)}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           ></div>
 
           {showDropdown && (
@@ -53,7 +84,7 @@ const HeaderAdmin = () => {
                 className="logout-btn"
                 onClick={() => {
                   logout();
-                  navigate('/login');
+                  navigate("/login");
                 }}
               >
                 <div className="logout-icon-container">

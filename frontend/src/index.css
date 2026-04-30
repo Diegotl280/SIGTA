@@ -553,9 +553,6 @@ body {
 .doc-estado.validado { background: #d1fae5; color: #065f46; }
 .doc-estado.con-obs { background: #fee2e2; color: #b91c1c; }
 .doc-nombre { font-size: 0.75rem; color: #666; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-<<<<<<< Updated upstream
-.loader { text-align: center; padding: 3rem; color: #666; font-size: 1rem; }
-=======
 .loader { text-align: center; padding: 3rem; color: #666; font-size: 1rem; }
 
 /* ── LOGOS ── */
@@ -624,4 +621,3 @@ body {
 .btn-oblig-toggle.opcional { background: #e0f2fe; color: #0369a1; }
 .btn-add-req { background: #111; color: white; border: none; border-radius: 6px; padding: 0.5rem 0.8rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .btn-add-req:hover { background: #333; }
->>>>>>> Stashed changes

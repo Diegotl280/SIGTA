@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetEmpresas, useDeshabilitarEmpresa } from '../api/UserApi';
+import editarIcon from '../assets/editar.png';
 
 const EmpresasAdmin = () => {
   const navigate = useNavigate();
@@ -35,21 +36,35 @@ const EmpresasAdmin = () => {
       {/* Toggle vista */}
       <div className="empresas-toolbar">
         <span className="empresas-count">{empresas.length} empresa{empresas.length !== 1 ? 's' : ''}</span>
-        <div className="vista-toggle">
-          <button
-            className={`vista-btn ${!vistaLista ? 'active' : ''}`}
-            onClick={() => setVistaLista(false)}
-            title="Vista cuadrícula"
-          >⊞</button>
-          <button
-            className={`vista-btn ${vistaLista ? 'active' : ''}`}
-            onClick={() => setVistaLista(true)}
-            title="Vista lista"
-          >☰</button>
-        </div>
       </div>
 
-      {/* Vista cuadrícula */}
+      <div className="toggle-bottom-right">
+        <button
+          className={`vista-btn ${!vistaLista ? 'active' : ''}`}
+          onClick={() => setVistaLista(false)}
+          title="Vista cuadrícula"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button
+          className={`vista-btn ${vistaLista ? 'active' : ''}`}
+          onClick={() => setVistaLista(true)}
+          title="Vista lista"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9f2241" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      {/* Vista cuadrícula (Antiguo diseño) */}
       {!vistaLista && (
         <div className="empresas-grid">
           {empresas.length === 0 && (
@@ -57,7 +72,7 @@ const EmpresasAdmin = () => {
           )}
           {empresas.map((empresa) => (
             <div key={empresa._id} className="empresa-card">
-              <span>{empresa.nombre || empresa.email}</span>
+              <span className="empresa-name-text">{empresa.nombre || empresa.email}</span>
               <div className="empresa-action-container">
                 {activeDropdown === empresa._id ? (
                   <div className="empresa-action-dropdown fade-in">
@@ -65,7 +80,7 @@ const EmpresasAdmin = () => {
                       setActiveDropdown(null);
                       navigate('/admin/empresas/agregar', { state: { empresa } });
                     }}>
-                      <span className="edit-pencil">✎</span>
+                      <img src={editarIcon} alt="Editar" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
                       Editar
                     </button>
                     <button className="action-btn delete-btn" onClick={() => handleDelete(empresa._id, empresa.nombre)}>
@@ -78,49 +93,64 @@ const EmpresasAdmin = () => {
                     title="Opciones"
                     onClick={() => toggleDropdown(empresa._id)}
                   >
-                    <span className="edit-pencil">✎</span>
+                    <img src={editarIcon} alt="Editar" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
                   </div>
                 )}
               </div>
             </div>
           ))}
+          <button
+            className="agregar-empresa-btn"
+            onClick={() => navigate('/admin/empresas/agregar')}
+            style={{ width: '260px', marginTop: '1rem' }}
+          >
+            + Agregar empresa
+          </button>
         </div>
       )}
 
-      {/* Vista lista */}
+      {/* Vista lista (Nuevo diseño) */}
       {vistaLista && (
-        <div className="empresas-lista-view">
+        <div className="empresas-grid-wide">
           {empresas.length === 0 && (
             <div className="lista-vacia">No hay empresas registradas</div>
           )}
           {empresas.map((empresa) => (
-            <div key={empresa._id} className="empresa-lista-row">
-              <div className="empresa-lista-info">
-                <span className="empresa-lista-nombre">{empresa.nombre || '—'}</span>
-                <span className="empresa-lista-email">{empresa.email}</span>
-              </div>
-              <div className="empresa-lista-acciones">
-                <button className="btn-lista-edit" onClick={() => {
-                  toggleDropdown(empresa._id);
-                  navigate('/admin/empresas/agregar', { state: { empresa } });
-                }}>
-                  ✎ Editar
-                </button>
-                <button className="btn-lista-delete" onClick={() => handleDelete(empresa._id, empresa.nombre)}>
-                  Eliminar
-                </button>
+            <div key={empresa._id} className="empresa-card-wide">
+              <span className="empresa-name-text">{empresa.nombre || empresa.email}</span>
+              <div className="empresa-action-container-wide">
+                {activeDropdown === empresa._id ? (
+                  <div className="empresa-dropdown-expanded fade-in">
+                    <button className="btn-edit-half" onClick={() => {
+                      setActiveDropdown(null);
+                      navigate('/admin/empresas/agregar', { state: { empresa } });
+                    }}>
+                      Editar
+                    </button>
+                    <button className="btn-delete-half" onClick={() => handleDelete(empresa._id, empresa.nombre)}>
+                      Eliminar
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="empresa-action-square"
+                    onClick={() => toggleDropdown(empresa._id)}
+                  >
+                    <img src={editarIcon} alt="Editar" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                  </div>
+                )}
               </div>
             </div>
           ))}
+          
+          <button
+            className="btn-agregar-wide"
+            onClick={() => navigate('/admin/empresas/agregar')}
+          >
+            Agregar empresa
+          </button>
         </div>
       )}
-
-      <button
-        className="agregar-empresa-btn"
-        onClick={() => navigate('/admin/empresas/agregar')}
-      >
-        + Agregar empresa
-      </button>
     </div>
   );
 };

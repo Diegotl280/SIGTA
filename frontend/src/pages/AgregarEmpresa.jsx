@@ -4,6 +4,7 @@ import { useCreateUser, useUpdateEmpresaAdmin } from '../api/UserApi';
 
 const AgregarEmpresa = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const empresaToEdit = location.state?.empresa;
 
   const [formData, setFormData] = useState({
@@ -103,7 +104,12 @@ const AgregarEmpresa = () => {
             name="telefono"
             placeholder="Teléfono"
             value={formData.telefono}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || /^[0-9]+$/.test(val)) {
+                handleInputChange(e);
+              }
+            }}
             className="input-line-style"
           />
         </div>

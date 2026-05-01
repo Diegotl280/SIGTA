@@ -434,7 +434,178 @@ body {
   align-items: center;
   width: 100%;
   padding: 3rem 2rem;
-  gap: 4rem;
+  gap: 2rem;
+  position: relative;
+  min-height: calc(100vh - 200px);
+}
+
+/* NEW WIDE LIST DESIGN */
+.empresas-grid-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.empresa-name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 60px);
+  padding: 0 1rem;
+}
+
+.empresa-card-wide {
+  background-color: #d4d4d4;
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #111;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.empresa-action-container-wide {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.empresa-action-square {
+  background-color: #009900;
+  color: #000;
+  width: 50px;
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s;
+  border: 1px solid #007a00;
+}
+
+.empresa-action-square:hover {
+  background-color: #007a00;
+}
+
+.empresa-dropdown-expanded {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.2s;
+}
+
+.btn-edit-half {
+  flex: 1;
+  background-color: #009900;
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit-half:hover {
+  background-color: #007a00;
+}
+
+.btn-delete-half {
+  flex: 1;
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete-half:hover {
+  background-color: #cc0000;
+}
+
+.btn-agregar-wide {
+  background-color: #a3a3a3;
+  width: 300px;
+  max-width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 2rem;
+  font-size: 1.2rem;
+  color: #111;
+  border: none;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.btn-agregar-wide:hover {
+  background-color: #8f8f8f;
+}
+
+.toggle-bottom-right {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem; /* inferior derecha como fue solicitado */
+  background-color: #f1f1f1;
+  border-radius: 12px;
+  padding: 0.4rem;
+  display: flex;
+  gap: 0.2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e5e5;
+  z-index: 100;
+}
+
+.vista-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.vista-btn.active {
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.vista-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .empresas-grid {
@@ -443,6 +614,7 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   max-width: 1000px;
+  width: 100%;
 }
 
 .empresa-card {
@@ -1176,17 +1348,6 @@ body {
   background: #f1f1f1;
   border-radius: 8px;
   padding: 0.2rem;
-}
-
-.vista-btn {
-  background: none;
-  border: none;
-  border-radius: 6px;
-  padding: 0.3rem 0.6rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: #666;
-  transition: all 0.2s;
 }
 
 .vista-btn.active {

@@ -110,3 +110,61 @@ export function useGetEmpresas() {
         queryFn: getEmpresasRequest,
     });
 }
+
+/**
+ * Hook para deshabilitar una empresa (eliminación lógica)
+ */
+export function useDeshabilitarEmpresa() {
+    const queryClient = useQueryClient();
+
+    const deshabilitarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.put(`${API_BASE_URL}/api/auth/empresas/${id}/deshabilitar`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: deshabilitarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al eliminar la empresa");
+        },
+        onSuccess: (data) => {
+            toast.success("Empresa eliminada exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['empresas'] });
+        }
+    });
+}
+
+/**
+ * Hook para actualizar una empresa por el administrador
+ */
+export function useUpdateEmpresaAdmin() {
+    const queryClient = useQueryClient();
+
+    const updateRequest = async ({ id, data }) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.put(`${API_BASE_URL}/api/auth/empresas/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: updateRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al actualizar la empresa");
+        },
+        onSuccess: (data) => {
+            toast.success("Empresa actualizada exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['empresas'] });
+        }
+    });
+}

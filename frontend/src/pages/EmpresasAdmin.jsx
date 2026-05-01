@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetEmpresas } from '../api/UserApi';
+import { useGetEmpresas, useDeshabilitarEmpresa } from '../api/UserApi';
 
 const EmpresasAdmin = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useGetEmpresas();
+  const { mutate: deshabilitarEmpresa } = useDeshabilitarEmpresa();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [vistaLista, setVistaLista] = useState(false);
 
   const toggleDropdown = (id) => {
     setActiveDropdown(activeDropdown === id ? null : id);
+  };
+
+  const handleDelete = (empresaId, empresaNombre) => {
+    const nombreParaConfirmar = empresaNombre || 'Sin nombre';
+    const inputName = window.prompt(`Para confirmar, escribe el nombre de la empresa: ${nombreParaConfirmar}`);
+    if (inputName === nombreParaConfirmar) {
+      deshabilitarEmpresa(empresaId);
+      setActiveDropdown(null);
+    } else if (inputName !== null) {
+      alert("El nombre no coincide. No se eliminó la empresa.");
+    }
   };
 
   if (isLoading) return <div className="loader">Cargando empresas...</div>;
@@ -49,11 +61,14 @@ const EmpresasAdmin = () => {
               <div className="empresa-action-container">
                 {activeDropdown === empresa._id ? (
                   <div className="empresa-action-dropdown fade-in">
-                    <button className="action-btn edit-btn" onClick={() => setActiveDropdown(null)}>
+                    <button className="action-btn edit-btn" onClick={() => {
+                      setActiveDropdown(null);
+                      navigate('/admin/empresas/agregar', { state: { empresa } });
+                    }}>
                       <span className="edit-pencil">✎</span>
                       Editar
                     </button>
-                    <button className="action-btn delete-btn" onClick={() => setActiveDropdown(null)}>
+                    <button className="action-btn delete-btn" onClick={() => handleDelete(empresa._id, empresa.nombre)}>
                       Eliminar
                     </button>
                   </div>
@@ -85,10 +100,13 @@ const EmpresasAdmin = () => {
                 <span className="empresa-lista-email">{empresa.email}</span>
               </div>
               <div className="empresa-lista-acciones">
-                <button className="btn-lista-edit" onClick={() => toggleDropdown(empresa._id)}>
+                <button className="btn-lista-edit" onClick={() => {
+                  toggleDropdown(empresa._id);
+                  navigate('/admin/empresas/agregar', { state: { empresa } });
+                }}>
                   ✎ Editar
                 </button>
-                <button className="btn-lista-delete">
+                <button className="btn-lista-delete" onClick={() => handleDelete(empresa._id, empresa.nombre)}>
                   Eliminar
                 </button>
               </div>

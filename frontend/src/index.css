@@ -1153,14 +1153,7 @@ body {
   white-space: nowrap;
 }
 
-<<<<<<<<< Temporary merge branch 1=========<<<<<<< Updated upstream .loader {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-  font-size: 1rem;
-}
-
-=======>>>>>>>>>Temporary merge branch 2 .loader {
+.loader {
   text-align: center;
   padding: 3rem;
   color: #666;
@@ -1174,13 +1167,7 @@ body {
   object-fit: contain;
 }
 
-<<<<<<<<< Temporary merge branch 1 .labsol-logo-img {
-  height: 85px;
-  width: auto;
-  object-fit: contain;
-}
-
-=========.labsol-logo-img {
+.labsol-logo-img {
   height: 85px;
   width: auto;
   object-fit: contain;
@@ -1583,5 +1570,3 @@ body {
 .btn-add-req:hover {
   background: #333;
 }
-
->>>>>>>Stashed changes>>>>>>>>>Temporary merge branch 2

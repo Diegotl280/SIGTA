@@ -157,42 +157,24 @@ body {
   gap: 1rem;
 }
 
-.user-name {
+.user-pill {
+  background-color: #ccffb3; /* Light green from the image */
+  color: #111;
+  padding: 0.5rem 2rem;
+  border-radius: 50px;
   font-size: 1.1rem;
   font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, background-color 0.2s;
 }
 
-.profile-icon {
-  width: 48px;
-  height: 48px;
-  background-color: #ccc;
-  border-radius: 50%;
-  position: relative;
-  overflow: hidden;
-}
-
-.profile-icon::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 24px;
-  background-color: #a3a3a3;
-  border-radius: 50% 50% 0 0;
-}
-
-.profile-icon::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 16px;
-  background-color: #a3a3a3;
-  border-radius: 50%;
+.user-pill:hover {
+  background-color: #bdfa9a;
+  transform: scale(1.02);
 }
 
 /* Main Content (Admin Search) */

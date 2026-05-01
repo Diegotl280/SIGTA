@@ -70,13 +70,13 @@ const HeaderAdmin = () => {
 
 
       <div className="header-right">
-        <span className="user-name">Bienvenido Admin</span>
         <div className="profile-container" style={{ position: "relative" }}>
           <div
-            className="profile-icon"
+            className="user-pill"
             onClick={() => setShowDropdown(!showDropdown)}
-            style={{ cursor: "pointer" }}
-          ></div>
+          >
+            Admin
+          </div>
 
           {showDropdown && (
             <div className="profile-dropdown fade-in">

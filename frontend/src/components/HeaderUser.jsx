@@ -52,13 +52,13 @@ const HeaderUser = () => {
 
       {/*Información del usuario */}
       <div className="header-right">
-        <span className="user-name">{userName}</span>
         <div className="profile-container" style={{ position: 'relative' }}>
           <div
-            className="profile-icon"
+            className="user-pill"
             onClick={() => setShowDropdown(!showDropdown)}
-            style={{ cursor: 'pointer' }}
-          ></div>
+          >
+            {userName}
+          </div>
 
           {showDropdown && (/**Dropdown */
             <div className="profile-dropdown fade-in">

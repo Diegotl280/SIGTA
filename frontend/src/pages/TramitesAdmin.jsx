@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import editarIcon from '../assets/editar.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const token = () => localStorage.getItem('token');
@@ -35,7 +36,8 @@ const modalBase = {
 
 const TramitesAdmin = () => {
   const [tramites, setTramites]               = useState([]);
-  const [modoEdicion, setModoEdicion]         = useState(false);
+  const [vistaLista, setVistaLista]           = useState(false);
+  const [activeDropdown, setActiveDropdown]   = useState(null);
   const [modalAbierto, setModalAbierto]       = useState(false);
   const [tramiteEditando, setTramiteEditando] = useState(null);
   const [form, setForm]                       = useState(modalBase);
@@ -67,7 +69,6 @@ const TramitesAdmin = () => {
     setTramiteEditando(null);
     setForm(modalBase);
     setModalAbierto(true);
-    setModoEdicion(false);
   };
 
   const abrirEditar = (t) => {
@@ -131,8 +132,12 @@ const TramitesAdmin = () => {
   };
 
   // ── Expedientes ──
+  const toggleDropdown = (id, e) => {
+    e.stopPropagation();
+    setActiveDropdown(activeDropdown === id ? null : id);
+  };
+
   const seleccionarTramite = async (t) => {
-    if (modoEdicion) { abrirEditar(t); return; }
     setTramiteSeleccionado(t);
     setExpedienteDetalle(null);
     setLoadingExp(true);
@@ -243,42 +248,95 @@ const TramitesAdmin = () => {
 
   // Vista principal — botones de trámites
   return (
-    <div className="tramites-admin-container fade-in">
+    <div className="empresas-container fade-in">
+      
+      {/* Toolbar superior para contar trámites */}
+      <div className="empresas-toolbar" style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'flex-start', paddingBottom: '1rem' }}>
+        <span className="empresas-count">{tramites.length} trámite{tramites.length !== 1 ? 's' : ''}</span>
+      </div>
 
-      {/* Botones Agregar / Editar */}
-      <div className="tramites-acciones-top">
-        <button className="btn-agregar-tramite" onClick={abrirAgregar}>
-          + Agregar trámite
+      <div className="toggle-bottom-right">
+        <button className={`vista-btn ${!vistaLista ? 'active' : ''}`} onClick={() => setVistaLista(false)} title="Vista cuadrícula">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
         </button>
-        <button
-          className={`btn-editar-tramite ${modoEdicion ? 'cancelar' : ''}`}
-          onClick={() => setModoEdicion(!modoEdicion)}
-        >
-          {modoEdicion ? '✕ Cancelar' : '✎ Editar trámite'}
+        <button className={`vista-btn ${vistaLista ? 'active' : ''}`} onClick={() => setVistaLista(true)} title="Vista lista">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9f2241" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
         </button>
       </div>
 
-      {modoEdicion && (
-        <p className="modo-edicion-hint fade-in">Selecciona el trámite que deseas editar</p>
+      {/* Vista cuadrícula */}
+      {!vistaLista && (
+        <div className="empresas-grid">
+          {tramites.length === 0 && <div className="lista-vacia">No hay trámites configurados.</div>}
+          {tramites.map((t) => (
+            <div key={t._id} className="empresa-card" onClick={() => seleccionarTramite(t)} style={{ cursor: 'pointer' }}>
+              <span className="empresa-name-text">{t.tipo}</span>
+              <div className="empresa-action-container">
+                {activeDropdown === t._id ? (
+                  <div className="empresa-action-dropdown fade-in" onClick={e => e.stopPropagation()}>
+                    <button className="action-btn edit-btn" style={{ paddingBottom: '10px' }} onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveDropdown(null);
+                      abrirEditar(t);
+                    }}>
+                      <img src={editarIcon} alt="Editar" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                      Editar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="empresa-edit-icon" title="Opciones" onClick={(e) => toggleDropdown(t._id, e)}>
+                    <img src={editarIcon} alt="Editar" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          <button className="agregar-empresa-btn" onClick={abrirAgregar} style={{ width: '260px', marginTop: '1rem' }}>
+            + Agregar trámite
+          </button>
+        </div>
       )}
 
-      {/* Grid de trámites */}
-      <div className="tramites-btn-grid">
-        {tramites.map(t => (
-          <div key={t._id} className={`tramite-btn-wrapper ${modoEdicion ? 'modo-edicion' : ''}`}>
-            {modoEdicion && <span className="tramite-edit-badge">✎</span>}
-            <button
-              className={`tramite-tipo-btn ${!t.activo ? 'inactivo' : ''}`}
-              onClick={() => seleccionarTramite(t)}
-            >
-              {t.tipo}
-            </button>
-          </div>
-        ))}
-        {tramites.length === 0 && (
-          <div className="lista-vacia">No hay trámites configurados. Agrega uno.</div>
-        )}
-      </div>
+      {/* Vista lista */}
+      {vistaLista && (
+        <div className="empresas-grid-wide">
+          {tramites.length === 0 && <div className="lista-vacia">No hay trámites configurados.</div>}
+          {tramites.map((t) => (
+            <div key={t._id} className="empresa-card-wide" onClick={() => seleccionarTramite(t)} style={{ cursor: 'pointer' }}>
+              <span className="empresa-name-text">{t.tipo} — {t.nombre}</span>
+              <div className="empresa-action-container-wide">
+                {activeDropdown === t._id ? (
+                  <div className="empresa-dropdown-expanded fade-in" onClick={e => e.stopPropagation()}>
+                    <button className="btn-edit-half" style={{ height: '100%' }} onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveDropdown(null);
+                      abrirEditar(t);
+                    }}>
+                      Editar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="empresa-action-square" onClick={(e) => toggleDropdown(t._id, e)}>
+                    <img src={editarIcon} alt="Editar" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          <button className="btn-agregar-wide" onClick={abrirAgregar}>
+            Agregar trámite
+          </button>
+        </div>
+      )}
 
       {/* Modal Agregar / Editar */}
       {modalAbierto && (

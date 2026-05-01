@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCreateUser } from '../api/UserApi';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCreateUser, useUpdateEmpresaAdmin } from '../api/UserApi';
 
 const AgregarEmpresa = () => {
+  const location = useLocation();
   const navigate = useNavigate();
+  const empresaToEdit = location.state?.empresa;
+
   const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    password: ''
+    nombre: empresaToEdit?.nombre || '',
+    email: empresaToEdit?.email || '',
+    password: '',
+    rfc: empresaToEdit?.rfc || '',
+    telefono: empresaToEdit?.telefono || ''
   });
   const [tramites, setTramites] = useState({
     coa: false,
     lau: false,
     mia: false
   });
-  const { mutate: createUser, isPending: loading } = useCreateUser();
+  const { mutate: createUser, isPending: creating } = useCreateUser();
+  const { mutate: updateEmpresa, isPending: updating } = useUpdateEmpresaAdmin();
+  const loading = creating || updating;
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,21 +34,31 @@ const AgregarEmpresa = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    createUser({
+    const payload = {
       ...formData,
       role: 'usuario',
       tramitesPermitidos: tramites
-    }, {
-      onSuccess: () => {
-        navigate('/admin/empresas');
-      }
-    });
+    };
+
+    if (empresaToEdit) {
+      updateEmpresa({ id: empresaToEdit._id, data: payload }, {
+        onSuccess: () => {
+          navigate('/admin/empresas');
+        }
+      });
+    } else {
+      createUser(payload, {
+        onSuccess: () => {
+          navigate('/admin/empresas');
+        }
+      });
+    }
   };
 
   return (
     <div className="agregar-empresa-page fade-in">
       <div className="agregar-empresa-header">
-        <h2 style={{ color: '#9f2241' }}>Agregar empresa</h2>
+        <h2 style={{ color: '#9f2241' }}>{empresaToEdit ? 'Editar empresa' : 'Agregar empresa'}</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="agregar-empresa-form">
@@ -72,12 +89,39 @@ const AgregarEmpresa = () => {
 
         <div className="input-line-group">
           <input
+            type="text"
+            name="rfc"
+            placeholder="RFC"
+            value={formData.rfc}
+            onChange={handleInputChange}
+            className="input-line-style"
+          />
+        </div>
+
+        <div className="input-line-group">
+          <input
+            type="text"
+            name="telefono"
+            placeholder="Teléfono"
+            value={formData.telefono}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || /^[0-9]+$/.test(val)) {
+                handleInputChange(e);
+              }
+            }}
+            className="input-line-style"
+          />
+        </div>
+
+        <div className="input-line-group">
+          <input
             type="password"
             name="password"
-            placeholder="Contraseña"
+            placeholder={empresaToEdit ? "Contraseña (dejar en blanco para no cambiar)" : "Contraseña"}
             value={formData.password}
             onChange={handleInputChange}
-            required
+            required={!empresaToEdit}
             className="input-line-style"
           />
         </div>

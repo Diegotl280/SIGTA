@@ -15,6 +15,19 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  rfc: {
+    type: String,
+    required: false,
+  },
+  telefono: {
+    type: String,
+    required: false,
+  },
+  status: {
+    type: String,
+    enum: ['activo', 'deshabilitado'],
+    default: 'activo',
+  },
   role: {
     type: String,
     enum: ['administrador', 'usuario'],

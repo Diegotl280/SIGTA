@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCreateUser, useUpdateEmpresaAdmin } from '../api/UserApi';
+import axios from 'axios';
 
 const AgregarEmpresa = () => {
   const location = useLocation();
@@ -14,11 +15,25 @@ const AgregarEmpresa = () => {
     rfc: empresaToEdit?.rfc || '',
     telefono: empresaToEdit?.telefono || ''
   });
-  const [tramites, setTramites] = useState({
-    coa: false,
-    lau: false,
-    mia: false
-  });
+  const [tramitesDisponibles, setTramitesDisponibles] = useState([]);
+  const [tramitesPermitidos, setTramitesPermitidos] = useState(
+    empresaToEdit?.tramitesPermitidos || []
+  );
+
+  useEffect(() => {
+    const fetchTramites = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/config-tramites`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setTramitesDisponibles(res.data.tramites || []);
+      } catch (err) {
+        console.error("Error cargando tramites", err);
+      }
+    };
+    fetchTramites();
+  }, []);
   const { mutate: createUser, isPending: creating } = useCreateUser();
   const { mutate: updateEmpresa, isPending: updating } = useUpdateEmpresaAdmin();
   const loading = creating || updating;
@@ -27,8 +42,12 @@ const AgregarEmpresa = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleToggle = (tramite) => {
-    setTramites({ ...tramites, [tramite]: !tramites[tramite] });
+  const handleToggle = (tramiteTipo) => {
+    if (tramitesPermitidos.includes(tramiteTipo)) {
+      setTramitesPermitidos(tramitesPermitidos.filter(t => t !== tramiteTipo));
+    } else {
+      setTramitesPermitidos([...tramitesPermitidos, tramiteTipo]);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -37,7 +56,7 @@ const AgregarEmpresa = () => {
     const payload = {
       ...formData,
       role: 'usuario',
-      tramitesPermitidos: tramites
+      tramitesPermitidos
     };
 
     if (empresaToEdit) {
@@ -125,39 +144,28 @@ const AgregarEmpresa = () => {
             className="input-line-style"
           />
         </div>
-        {/*ESTO ES SOLO UN EJEMPLO DE LOS TRAMITES QUE PODRAN ACCEDER LAS EMPRESAS. LUEGO LO CONECTAREMOS CON LA BASE DE DATOS*/}
-        <div className="tramites-toggles-container">
-          {/* COA */}
-          <div className="tramite-toggle-item box-cyan">
-            <div
-              className={`custom-toggle ${tramites.coa ? 'on' : 'off'}`}
-              onClick={() => handleToggle('coa')}
-            >
-              <div className="toggle-circle"></div>
-            </div>
-            <p>REQUISITOS PARA EL TRÁMITE DE LA CÉDULA DE OPERACIÓN ANUAL (COA)</p>
-          </div>
-
-          {/* LAU */}
-          <div className="tramite-toggle-item box-orange">
-            <div
-              className={`custom-toggle ${tramites.lau ? 'on' : 'off'}`}
-              onClick={() => handleToggle('lau')}
-            >
-              <div className="toggle-circle"></div>
-            </div>
-            <p>REQUISITOS PARA EL TRÁMITE DE LA LICENCIA AMBIENTAL UNICA (LAU)</p>
-          </div>
-
-          {/* MIA */}
-          <div className="tramite-toggle-item box-green">
-            <div
-              className={`custom-toggle ${tramites.mia ? 'on' : 'off'}`}
-              onClick={() => handleToggle('mia')}
-            >
-              <div className="toggle-circle"></div>
-            </div>
-            <p>REQUISITOS PARA EL TRÁMITE DE LA MANIFESTACIÓN DE IMPACTO AMBIENTAL (MIA) E INFORME PREVENTIVO (IP)</p>
+        <div className="tramites-aplicables-wrapper">
+          <h3 className="tramites-aplicables-title">Tramites aplicables a esta empresa</h3>
+          <div className="tramites-toggles-container">
+            {tramitesDisponibles.length === 0 && (
+              <p>Cargando trámites disponibles...</p>
+            )}
+            {tramitesDisponibles.map((tramite, index) => {
+              const bgColors = ['box-cyan', 'box-orange', 'box-green'];
+              const colorClass = bgColors[index % bgColors.length];
+              const isEnabled = tramitesPermitidos.includes(tramite.tipo);
+              return (
+                <div key={tramite._id} className={`tramite-toggle-item ${colorClass} ${!isEnabled ? 'disabled-text' : ''}`}>
+                  <div
+                    className={`custom-toggle ${isEnabled ? 'on' : 'off'}`}
+                    onClick={() => handleToggle(tramite.tipo)}
+                  >
+                    <div className="toggle-circle"></div>
+                  </div>
+                  <p>REQUISITOS PARA EL TRÁMITE DE {tramite.nombre ? tramite.nombre.toUpperCase() : tramite.tipo}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
 

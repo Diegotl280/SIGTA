@@ -28,6 +28,10 @@ const UserSchema = new Schema({
     enum: ['activo', 'deshabilitado'],
     default: 'activo',
   },
+  tramitesPermitidos: {
+    type: [String],
+    default: [],
+  },
   role: {
     type: String,
     enum: ['administrador', 'usuario'],

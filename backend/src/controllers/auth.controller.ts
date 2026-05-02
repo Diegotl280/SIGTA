@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sigta_2026';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nombre, email, password, role, rfc, telefono } = req.body;
+    const { nombre, email, password, role, rfc, telefono, tramitesPermitidos } = req.body;
 
     if (!nombre || !email || !password) {
       res.status(400).json({ ok: false, msg: 'Nombre, email y contraseña son requeridos' });
@@ -29,7 +29,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       password: hashedPassword,
       role: role && ['administrador', 'usuario'].includes(role) ? role : 'usuario',
       rfc: rfc || '',
-      telefono: telefono || ''
+      telefono: telefono || '',
+      tramitesPermitidos: Array.isArray(tramitesPermitidos) ? tramitesPermitidos : []
     });
 
     await newUser.save();
@@ -109,7 +110,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const getEmpresas = async (req: Request, res: Response): Promise<void> => {
   try {
-    const empresas = await User.find({ role: 'usuario', status: { $ne: 'deshabilitado' } }, 'nombre email rfc telefono _id').sort({ nombre: 1 });
+    const empresas = await User.find({ role: 'usuario', status: { $ne: 'deshabilitado' } }, 'nombre email rfc telefono tramitesPermitidos _id').sort({ nombre: 1 });
     res.json({ ok: true, empresas });
   } catch (error) {
     console.error('Error in getEmpresas:', error);
@@ -141,7 +142,7 @@ export const deshabilitarEmpresa = async (req: Request, res: Response): Promise<
 export const updateEmpresa = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { nombre, email, password, rfc, telefono } = req.body;
+    const { nombre, email, password, rfc, telefono, tramitesPermitidos } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -163,6 +164,8 @@ export const updateEmpresa = async (req: Request, res: Response): Promise<void> 
     if (rfc !== undefined) user.rfc = rfc;
     // @ts-ignore
     if (telefono !== undefined) user.telefono = telefono;
+    // @ts-ignore
+    if (tramitesPermitidos !== undefined) user.tramitesPermitidos = Array.isArray(tramitesPermitidos) ? tramitesPermitidos : [];
 
     if (password && password.trim() !== '') {
       const salt = await bcrypt.genSalt(10);

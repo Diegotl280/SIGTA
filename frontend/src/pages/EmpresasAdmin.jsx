@@ -72,7 +72,7 @@ const EmpresasAdmin = () => {
           )}
           {empresas.map((empresa) => (
             <div key={empresa._id} className="empresa-card">
-              <span className="empresa-name-text">{empresa.nombre || empresa.email}</span>
+              <span className="empresa-name-text" onClick={() => navigate(`/admin/empresas/detalle/${empresa._id}`)} style={{ cursor: 'pointer' }}>{empresa.nombre || empresa.email}</span>
               <div className="empresa-action-container">
                 {activeDropdown === empresa._id ? (
                   <div className="empresa-action-dropdown fade-in">
@@ -117,7 +117,7 @@ const EmpresasAdmin = () => {
           )}
           {empresas.map((empresa) => (
             <div key={empresa._id} className="empresa-card-wide">
-              <span className="empresa-name-text">{empresa.nombre || empresa.email}</span>
+              <span className="empresa-name-text" onClick={() => navigate(`/admin/empresas/detalle/${empresa._id}`)} style={{ cursor: 'pointer' }}>{empresa.nombre || empresa.email}</span>
               <div className="empresa-action-container-wide">
                 {activeDropdown === empresa._id ? (
                   <div className="empresa-dropdown-expanded fade-in">

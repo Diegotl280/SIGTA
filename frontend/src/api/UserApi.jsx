@@ -168,3 +168,71 @@ export function useUpdateEmpresaAdmin() {
         }
     });
 }
+
+/**
+ * Hook para obtener los expedientes de una empresa específica (Solo Administrador)
+ */
+export function useGetExpedientesByEmpresa(empresaId) {
+    const getExpedientesRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/expedientes/usuario/${empresaId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['expedientesEmpresa', empresaId],
+        queryFn: getExpedientesRequest,
+        enabled: !!empresaId, // Solo se ejecuta si hay un empresaId
+    });
+}
+
+/**
+ * Hook para obtener la configuración de trámites (nombres, requisitos, etc.)
+ */
+export function useGetConfigTramites() {
+    const getConfigRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/config-tramites`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['configTramites'],
+        queryFn: getConfigRequest,
+    });
+}
+
+/**
+ * Hook para obtener los documentos de un expediente
+ */
+export function useGetDocumentosByExpediente(expedienteId) {
+    const getDocumentosRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/expedientes/${expedienteId}/documentos`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['documentosExpediente', expedienteId],
+        queryFn: getDocumentosRequest,
+        enabled: !!expedienteId, // Solo se ejecuta si hay un expedienteId
+    });
+}

@@ -3,6 +3,7 @@ import { useAuth } from './auth/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import EmpresasAdmin from './pages/EmpresasAdmin';
+import EmpresaDetalleAdmin from './pages/EmpresaDetalleAdmin';
 import AgregarEmpresa from './pages/AgregarEmpresa';
 import NotificacionesAdmin from './pages/NotificacionesAdmin';
 import TramitesAdmin from './pages/TramitesAdmin';
@@ -35,6 +36,11 @@ const AppRoutes = () => {
         <Route path="admin/empresas" element={
           <ProtectedRoute allowedRole="administrador">
             <EmpresasAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="admin/empresas/detalle/:id" element={
+          <ProtectedRoute allowedRole="administrador">
+            <EmpresaDetalleAdmin />
           </ProtectedRoute>
         } />
         <Route path="admin/empresas/agregar" element={

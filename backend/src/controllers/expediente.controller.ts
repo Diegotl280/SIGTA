@@ -67,6 +67,23 @@ export const expedienteController = {
     } catch (err) { next(err); }
   },
 
+  // Ver expedientes de un usuario especifico (solo administrador)
+  listarPorUsuario: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede ver expedientes de otros usuarios' });
+        return;
+      }
+
+      const { usuarioId } = req.params;
+      const expedientes = await Expediente.find({ usuario: usuarioId })
+        .populate('usuario', 'email')
+        .sort({ createdAt: -1 });
+
+      res.json({ ok: true, expedientes });
+    } catch (err) { next(err); }
+  },
+
   // Ver un expediente por ID
   obtener: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {

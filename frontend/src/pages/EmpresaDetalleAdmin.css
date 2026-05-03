@@ -148,6 +148,12 @@
   background-color: #4ade80;
 }
 
+.pdf-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 /* Footer form */
 .footer-seccion {
   margin-top: 3rem;

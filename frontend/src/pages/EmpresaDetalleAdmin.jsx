@@ -5,17 +5,10 @@ import { useGetDocumentosByExpediente } from '../api/DocApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
+import iconPdf from '../assets/icon_pdf.png';
 import './EmpresaDetalleAdmin.css';
 
-// SVG para el ícono de PDF
-const PdfIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="18" height="18" rx="2" fill="#E11D48"/>
-    <path d="M8 11V15M8 11H10.5C11.3284 11 12 11.6716 12 12.5C12 13.3284 11.3284 14 10.5 14H8M8 11V9H10.5C11.3284 9 12 9.6716 12 10.5C12 11.3284 11.3284 12 10.5 12H8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 9V15M16 9H18M16 12H17.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 15V9H13.5C14.3284 9 15 9.6716 15 10.5V13.5C15 14.3284 14.3284 15 13.5 15H12Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+
 
 const EmpresaDetalleAdmin = () => {
   const { id } = useParams();
@@ -198,7 +191,7 @@ const EmpresaDetalleAdmin = () => {
                   <div key={idx} className="requisito-card">
                     <span className="req-texto">{req.nombre}</span>
                     <div className="req-acciones">
-                      <PdfIcon />
+                      <img src={iconPdf} alt="PDF" className="pdf-icon" />
                       {docSubido ? (
                         <button 
                           onClick={() => handleDescargarPdf(expedienteActual._id, docSubido._id, docSubido.nombreArchivo)}

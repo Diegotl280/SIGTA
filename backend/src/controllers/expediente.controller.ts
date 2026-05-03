@@ -25,6 +25,19 @@ export const expedienteController = {
         return;
       }
 
+      // Prevenir múltiples expedientes activos del mismo tipo para el mismo usuario
+      const existente = await Expediente.findOne({ 
+        tipo, 
+        usuario: req.user.uid, 
+        estado: { $nin: ['aprobado', 'cerrado'] } 
+      });
+      
+      if (existente) {
+        // Si ya existe uno activo, lo devolvemos en lugar de crear otro
+        res.status(200).json({ ok: true, expediente: existente });
+        return;
+      }
+
       // Verificar periodo de fechas si aplica (ej. COA enero–abril)
       if (config.fechaApertura && config.fechaCierre) {
         const ahora = new Date();
@@ -39,14 +52,29 @@ export const expedienteController = {
         }
       }
 
-      const folio = await generarFolio(tipo);
+      let expediente;
+      let retries = 0;
+      let folio;
 
-      const expediente = await Expediente.create({
-        folio,
-        tipo,
-        usuario: req.user.uid,
-        estado: 'borrador',
-      });
+      while (retries < 3) {
+        try {
+          folio = await generarFolio(tipo);
+          expediente = await Expediente.create({
+            folio,
+            tipo,
+            usuario: req.user.uid,
+            estado: 'borrador',
+          });
+          break; // Si se crea exitosamente, salimos del bucle
+        } catch (error: any) {
+          if (error.code === 11000) {
+            retries++;
+            if (retries === 3) throw error; // Si falla 3 veces, lanzamos el error
+          } else {
+            throw error; // Cualquier otro error lo lanzamos
+          }
+        }
+      }
 
       res.status(201).json({ ok: true, expediente });
     } catch (err) { next(err); }

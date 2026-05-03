@@ -21,6 +21,16 @@ app.use("/api/expedientes", expedienteRoutes);
 app.use("/api/expedientes/:expedienteId/documentos", documentoRoutes);
 app.use('/api/config-tramites', configTramiteRoutes);
 
+// Manejador global de errores
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("Error no manejado:", err);
+  if (err.name === 'MongoServerError' && err.code === 11000) {
+    res.status(400).json({ ok: false, msg: 'Error: Registro duplicado detectado' });
+  } else {
+    res.status(500).json({ ok: false, msg: err.message || 'Error interno del servidor' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || "";
 

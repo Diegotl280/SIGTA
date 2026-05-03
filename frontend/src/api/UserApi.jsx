@@ -213,26 +213,3 @@ export function useGetConfigTramites() {
         queryFn: getConfigRequest,
     });
 }
-
-/**
- * Hook para obtener los documentos de un expediente
- */
-export function useGetDocumentosByExpediente(expedienteId) {
-    const getDocumentosRequest = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("No token available");
-
-        const res = await axios.get(`${API_BASE_URL}/api/expedientes/${expedienteId}/documentos`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return res.data;
-    }
-
-    return useQuery({
-        queryKey: ['documentosExpediente', expedienteId],
-        queryFn: getDocumentosRequest,
-        enabled: !!expedienteId, // Solo se ejecuta si hay un expedienteId
-    });
-}

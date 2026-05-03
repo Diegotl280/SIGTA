@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useGetEmpresas, useGetExpedientesByEmpresa, useGetConfigTramites, useGetDocumentosByExpediente } from '../api/UserApi';
+import { useGetEmpresas, useGetExpedientesByEmpresa, useGetConfigTramites } from '../api/UserApi';
+import { useGetDocumentosByExpediente } from '../api/DocApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';

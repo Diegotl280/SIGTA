@@ -9,6 +9,7 @@ router.use(requireAuth);
 
 router.post('/', expedienteController.crear);
 router.get('/', expedienteController.listar);
+router.get('/usuario/:usuarioId', expedienteController.listarPorUsuario);
 router.get('/:id', expedienteController.obtener);
 router.patch('/:id/enviar', expedienteController.enviar);
 router.patch('/:id/estado', expedienteController.cambiarEstado);

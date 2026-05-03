@@ -168,4 +168,37 @@ export const documentoController = {
       res.json({ ok: true, msg: `Documento marcado como: ${estado}`, documento });
     } catch (err) { next(err); }
   },
+
+  // Descargar un documento de forma segura
+  descargar: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const { documentoId } = req.params;
+      const documento = await Documento.findById(documentoId).populate('expediente');
+
+      if (!documento) {
+        res.status(404).json({ ok: false, msg: 'Documento no encontrado' });
+        return;
+      }
+
+      const expediente: any = documento.expediente;
+
+      // Verificar permisos: administrador o el dueño del expediente
+      if (
+        req.user.role !== 'administrador' &&
+        expediente.usuario.toString() !== req.user.uid
+      ) {
+        res.status(403).json({ ok: false, msg: 'No tienes permiso para descargar este documento' });
+        return;
+      }
+
+      const fileRuta = path.join(process.cwd(), documento.rutaArchivo);
+
+      if (!fs.existsSync(fileRuta)) {
+        res.status(404).json({ ok: false, msg: 'El archivo físico no existe en el servidor' });
+        return;
+      }
+
+      res.download(fileRuta, documento.nombreArchivo);
+    } catch (err) { next(err); }
+  },
 };

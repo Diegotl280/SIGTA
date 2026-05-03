@@ -108,6 +108,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const getMe = async (req: any, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.user.uid).select('-password');
+    if (!user) {
+      res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+      return;
+    }
+    
+    // Devolver un objeto 'usuario' con los datos completos
+    res.json({ ok: true, usuario: user });
+  } catch (error) {
+    console.error('Error en getMe:', error);
+    res.status(500).json({ ok: false, msg: 'Error de servidor' });
+  }
+};
+
 export const getEmpresas = async (req: Request, res: Response): Promise<void> => {
   try {
     const empresas = await User.find({ role: 'usuario', status: { $ne: 'deshabilitado' } }, 'nombre email rfc telefono tramitesPermitidos _id').sort({ nombre: 1 });

@@ -168,3 +168,48 @@ export function useUpdateEmpresaAdmin() {
         }
     });
 }
+
+/**
+ * Hook para obtener los expedientes de una empresa específica (Solo Administrador)
+ */
+export function useGetExpedientesByEmpresa(empresaId) {
+    const getExpedientesRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/expedientes/usuario/${empresaId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['expedientesEmpresa', empresaId],
+        queryFn: getExpedientesRequest,
+        enabled: !!empresaId, // Solo se ejecuta si hay un empresaId
+    });
+}
+
+/**
+ * Hook para obtener la configuración de trámites (nombres, requisitos, etc.)
+ */
+export function useGetConfigTramites() {
+    const getConfigRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/config-tramites`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['configTramites'],
+        queryFn: getConfigRequest,
+    });
+}

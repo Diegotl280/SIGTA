@@ -9,19 +9,23 @@ const EmpresasAdmin = () => {
   const { mutate: deshabilitarEmpresa } = useDeshabilitarEmpresa();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [vistaLista, setVistaLista] = useState(false);
+  const [modalEliminar, setModalEliminar] = useState(null);
+  const [inputConfirm, setInputConfirm] = useState('');
 
   const toggleDropdown = (id) => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
 
   const handleDelete = (empresaId, empresaNombre) => {
-    const nombreParaConfirmar = empresaNombre || 'Sin nombre';
-    const inputName = window.prompt(`Para confirmar, escribe el nombre de la empresa: ${nombreParaConfirmar}`);
-    if (inputName === nombreParaConfirmar) {
-      deshabilitarEmpresa(empresaId);
-      setActiveDropdown(null);
-    } else if (inputName !== null) {
-      alert("El nombre no coincide. No se eliminó la empresa.");
+    setInputConfirm('');
+    setModalEliminar({ id: empresaId, nombre: empresaNombre || 'Sin nombre' });
+    setActiveDropdown(null);
+  };
+
+  const confirmarEliminar = () => {
+    if (inputConfirm === modalEliminar.nombre) {
+      deshabilitarEmpresa(modalEliminar.id);
+      setModalEliminar(null);
     }
   };
 
@@ -64,7 +68,7 @@ const EmpresasAdmin = () => {
         </button>
       </div>
 
-      {/* Vista cuadrícula (Antiguo diseño) */}
+      {/* Vista cuadrícula */}
       {!vistaLista && (
         <div className="empresas-grid">
           {empresas.length === 0 && (
@@ -109,7 +113,7 @@ const EmpresasAdmin = () => {
         </div>
       )}
 
-      {/* Vista lista (Nuevo diseño) */}
+      {/* Vista lista */}
       {vistaLista && (
         <div className="empresas-grid-wide">
           {empresas.length === 0 && (
@@ -142,7 +146,6 @@ const EmpresasAdmin = () => {
               </div>
             </div>
           ))}
-          
           <button
             className="btn-agregar-wide"
             onClick={() => navigate('/admin/empresas/agregar')}
@@ -151,6 +154,69 @@ const EmpresasAdmin = () => {
           </button>
         </div>
       )}
+
+      {/* Modal confirmación eliminar */}
+      {modalEliminar && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalEliminar(null)}>
+          <div className="modal-box" style={{ maxWidth: '420px' }}>
+            <div className="modal-header">
+              <h2>Eliminar empresa</h2>
+              <button className="modal-close" onClick={() => setModalEliminar(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '1rem' }}>
+                Esta acción deshabilitará la empresa permanentemente. Para confirmar, escribe el nombre exacto:
+              </p>
+              <div style={{ background: '#fee2e2', borderRadius: '8px', padding: '0.6rem 1rem', marginBottom: '1.2rem' }}>
+                <strong style={{ color: '#b91c1c' }}>{modalEliminar.nombre}</strong>
+              </div>
+              <input
+                type="text"
+                value={inputConfirm}
+                onChange={e => setInputConfirm(e.target.value)}
+                placeholder="Escribe el nombre de la empresa..."
+                onKeyDown={e => e.key === 'Enter' && confirmarEliminar()}
+                style={{
+                  width: '100%',
+                  border: `1px solid ${inputConfirm === modalEliminar.nombre ? '#10b981' : '#ddd'}`,
+                  borderRadius: '8px',
+                  padding: '0.6rem 0.8rem',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s',
+                }}
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancelar" onClick={() => setModalEliminar(null)}>
+                <span className="btn-icon">✖</span> Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminar}
+                disabled={inputConfirm !== modalEliminar.nombre}
+                style={{
+                  background: inputConfirm === modalEliminar.nombre ? '#ef4444' : '#fca5a5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '0.6rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: inputConfirm === modalEliminar.nombre ? 'pointer' : 'not-allowed',
+                  transition: 'background 0.2s',
+                }}
+              >
+                <span className="btn-icon">✔</span> Confirmar eliminación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

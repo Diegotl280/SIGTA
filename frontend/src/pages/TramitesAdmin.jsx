@@ -1,70 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import editarIcon from '../assets/editar.png';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import editarIcon from "../assets/editar.png";
+import { useLocation } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const token = () => localStorage.getItem('token');
+const token = () => localStorage.getItem("token");
 
-const TIPOS_DISPONIBLES = ['LAU', 'COA', 'MIA', 'PSE', 'RRME'];
+const TIPOS_DISPONIBLES = ["LAU", "COA", "MIA", "PSE", "RRME"];
+
 const NOMBRES_TRAMITE = {
-  LAU: 'Licencia Ambiental Única',
-  COA: 'Cédula de Operación Anual',
-  MIA: 'Manifestación de Impacto Ambiental',
-  PSE: 'Prestadores de Servicios Ecológicos',
-  RRME: 'Registro de Residuos de Manejo Especial',
+  LAU: "Licencia Ambiental Única",
+  COA: "Cédula de Operación Anual",
+  MIA: "Manifestación de Impacto Ambiental",
+  PSE: "Prestadores de Servicios Ecológicos",
+  RRME: "Registro de Residuos de Manejo Especial",
 };
 
 const ESTADO_COLORS = {
-  borrador:          { bg: '#e5e7eb', text: '#374151' },
-  enviado:           { bg: '#dbeafe', text: '#1d4ed8' },
-  en_revision:       { bg: '#fef3c7', text: '#92400e' },
-  con_observaciones: { bg: '#fee2e2', text: '#b91c1c' },
-  validado:          { bg: '#d1fae5', text: '#065f46' },
-  cerrado:           { bg: '#f3f4f6', text: '#6b7280' },
+  borrador: { bg: "#e5e7eb", text: "#374151" },
+  enviado: { bg: "#dbeafe", text: "#1d4ed8" },
+  en_revision: { bg: "#fef3c7", text: "#92400e" },
+  con_observaciones: { bg: "#fee2e2", text: "#b91c1c" },
+  validado: { bg: "#d1fae5", text: "#065f46" },
+  cerrado: { bg: "#f3f4f6", text: "#6b7280" },
 };
 
 const ESTADO_LABELS = {
-  borrador: 'Borrador', enviado: 'Enviado', en_revision: 'En revisión',
-  con_observaciones: 'Con observaciones', validado: 'Validado', cerrado: 'Cerrado',
+  borrador: "Borrador",
+  enviado: "Enviado",
+  en_revision: "En revisión",
+  con_observaciones: "Con observaciones",
+  validado: "Validado",
+  cerrado: "Cerrado",
 };
 
 const modalBase = {
-  tipo: '', nombre: '', activo: true,
-  fechaApertura: '', fechaCierre: '',
-  diasCorreccion: 10, requisitos: [],
+  tipo: "",
+  nombre: "",
+  activo: true,
+  fechaApertura: "",
+  fechaCierre: "",
+  diasCorreccion: 10,
+  requisitos: [],
 };
 
 const TramitesAdmin = () => {
-  const [tramites, setTramites]               = useState([]);
-  const [vistaLista, setVistaLista]           = useState(false);
-  const [activeDropdown, setActiveDropdown]   = useState(null);
-  const [modalAbierto, setModalAbierto]       = useState(false);
+  const location = useLocation();
+
+  const [tramites, setTramites] = useState([]);
+  const [vistaLista, setVistaLista] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [tramiteEditando, setTramiteEditando] = useState(null);
-  const [form, setForm]                       = useState(modalBase);
-  const [nuevoRequisito, setNuevoRequisito]   = useState('');
-  const [requisitoOblig, setRequisitoOblig]   = useState(true);
-  const [loading, setLoading]                 = useState(false);
+  const [form, setForm] = useState(modalBase);
+  const [nuevoRequisito, setNuevoRequisito] = useState("");
+  const [requisitoOblig, setRequisitoOblig] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Vista de expedientes
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
-  const [expedientes, setExpedientes]                 = useState([]);
-  const [loadingExp, setLoadingExp]                   = useState(false);
-  const [expedienteDetalle, setExpedienteDetalle]     = useState(null);
-  const [checklist, setChecklist]                     = useState([]);
-  const [loadingDetalle, setLoadingDetalle]           = useState(false);
+  const [expedientes, setExpedientes] = useState([]);
+  const [loadingExp, setLoadingExp] = useState(false);
+  const [expedienteDetalle, setExpedienteDetalle] = useState(null);
+  const [checklist, setChecklist] = useState([]);
+  const [loadingDetalle, setLoadingDetalle] = useState(false);
 
-  useEffect(() => { cargarTramites(); }, []);
+  useEffect(() => {
+    cargarTramites();
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.tipoAuto && tramites.length > 0) {
+      const tramite = tramites.find((t) => t.tipo === location.state.tipoAuto);
+      if (tramite) seleccionarTramite(tramite);
+    }
+  }, [tramites, location.state]);
 
   const cargarTramites = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/config-tramites`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
+
       setTramites(res.data.tramites || []);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // ── Modal ──
   const abrirAgregar = () => {
     setTramiteEditando(null);
     setForm(modalBase);
@@ -77,8 +99,8 @@ const TramitesAdmin = () => {
       tipo: t.tipo,
       nombre: t.nombre,
       activo: t.activo,
-      fechaApertura: t.fechaApertura ? t.fechaApertura.slice(0, 10) : '',
-      fechaCierre:   t.fechaCierre   ? t.fechaCierre.slice(0, 10)   : '',
+      fechaApertura: t.fechaApertura ? t.fechaApertura.slice(0, 10) : "",
+      fechaCierre: t.fechaCierre ? t.fechaCierre.slice(0, 10) : "",
       diasCorreccion: t.diasCorreccion,
       requisitos: t.requisitos || [],
     });
@@ -89,49 +111,66 @@ const TramitesAdmin = () => {
     setModalAbierto(false);
     setTramiteEditando(null);
     setForm(modalBase);
-    setNuevoRequisito('');
+    setNuevoRequisito("");
   };
 
   const agregarRequisito = () => {
     if (!nuevoRequisito.trim()) return;
-    setForm(f => ({
+
+    setForm((f) => ({
       ...f,
-      requisitos: [...f.requisitos, { nombre: nuevoRequisito.trim(), obligatorio: requisitoOblig }],
+      requisitos: [
+        ...f.requisitos,
+        {
+          nombre: nuevoRequisito.trim(),
+          obligatorio: requisitoOblig,
+        },
+      ],
     }));
-    setNuevoRequisito('');
+
+    setNuevoRequisito("");
   };
 
   const eliminarRequisito = (i) => {
-    setForm(f => ({ ...f, requisitos: f.requisitos.filter((_, idx) => idx !== i) }));
+    setForm((f) => ({
+      ...f,
+      requisitos: f.requisitos.filter((_, idx) => idx !== i),
+    }));
   };
 
   const guardarTramite = async () => {
     setLoading(true);
+
     try {
       const payload = {
         ...form,
         fechaApertura: form.fechaApertura || undefined,
-        fechaCierre:   form.fechaCierre   || undefined,
+        fechaCierre: form.fechaCierre || undefined,
       };
+
       if (tramiteEditando) {
-        await axios.put(`${API_BASE_URL}/api/config-tramites/${tramiteEditando._id}`, payload, {
-          headers: { Authorization: `Bearer ${token()}` },
-        });
+        await axios.put(
+          `${API_BASE_URL}/api/config-tramites/${tramiteEditando._id}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token()}` },
+          }
+        );
       } else {
         await axios.post(`${API_BASE_URL}/api/config-tramites`, payload, {
           headers: { Authorization: `Bearer ${token()}` },
         });
       }
+
       await cargarTramites();
       cerrarModal();
     } catch (err) {
-      alert(err.response?.data?.msg || 'Error al guardar');
+      alert(err.response?.data?.msg || "Error al guardar");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Expedientes ──
   const toggleDropdown = (id, e) => {
     e.stopPropagation();
     setActiveDropdown(activeDropdown === id ? null : id);
@@ -141,131 +180,429 @@ const TramitesAdmin = () => {
     setTramiteSeleccionado(t);
     setExpedienteDetalle(null);
     setLoadingExp(true);
+
     try {
       const res = await axios.get(`${API_BASE_URL}/api/expedientes`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
-      setExpedientes((res.data.expedientes || []).filter(e => e.tipo === t.tipo));
-    } catch (err) { console.error(err); }
-    finally { setLoadingExp(false); }
+
+      const filtrados = (res.data.expedientes || []).filter(
+        (e) => e.tipo === t.tipo
+      );
+
+      setExpedientes(filtrados);
+
+      if (location.state?.expedienteId) {
+        const expDirecto = filtrados.find(
+          (e) => e._id === location.state.expedienteId
+        );
+
+        if (expDirecto) verDetalle(expDirecto);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingExp(false);
+    }
   };
 
   const verDetalle = async (exp) => {
     setExpedienteDetalle(exp);
     setLoadingDetalle(true);
+
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/expedientes/${exp._id}/documentos`, {
-        headers: { Authorization: `Bearer ${token()}` },
-      });
+      const res = await axios.get(
+        `${API_BASE_URL}/api/expedientes/${exp._id}/documentos`,
+        {
+          headers: { Authorization: `Bearer ${token()}` },
+        }
+      );
+
       setChecklist(res.data.checklist || []);
-    } catch (err) { console.error(err); }
-    finally { setLoadingDetalle(false); }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingDetalle(false);
+    }
   };
 
-  const cambiarEstado = async (expId, nuevoEstado, obs = '') => {
+  const recargarChecklist = async () => {
+    if (!expedienteDetalle?._id) return;
+
+    const res = await axios.get(
+      `${API_BASE_URL}/api/expedientes/${expedienteDetalle._id}/documentos`,
+      {
+        headers: { Authorization: `Bearer ${token()}` },
+      }
+    );
+
+    setChecklist(res.data.checklist || []);
+  };
+
+  const cambiarEstado = async (expId, nuevoEstado, obs = "") => {
     try {
-      await axios.patch(`${API_BASE_URL}/api/expedientes/${expId}/estado`,
+      await axios.patch(
+        `${API_BASE_URL}/api/expedientes/${expId}/estado`,
         { estado: nuevoEstado, observacionesGenerales: obs },
         { headers: { Authorization: `Bearer ${token()}` } }
       );
-      setExpedientes(prev => prev.map(e => e._id === expId ? { ...e, estado: nuevoEstado } : e));
-      setExpedienteDetalle(prev => prev ? { ...prev, estado: nuevoEstado } : null);
-    } catch (err) { console.error(err); }
+
+      setExpedientes((prev) =>
+        prev.map((e) => (e._id === expId ? { ...e, estado: nuevoEstado } : e))
+      );
+
+      setExpedienteDetalle((prev) =>
+        prev ? { ...prev, estado: nuevoEstado } : null
+      );
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al cambiar estado del expediente");
+    }
   };
 
-  // ── Renders ──
+  const validarDocumento = async (documentoId, estado) => {
+    let observacion = "";
 
-  // Detalle expediente
-  if (expedienteDetalle) return (
-    <div className="tramites-detalle-container fade-in">
-      <div className="detalle-header">
-        <button className="btn-volver" onClick={() => setExpedienteDetalle(null)}>← Volver</button>
-        <h2>Expediente: <span>{expedienteDetalle.folio}</span></h2>
-        <span className="estado-badge" style={{ backgroundColor: ESTADO_COLORS[expedienteDetalle.estado]?.bg, color: ESTADO_COLORS[expedienteDetalle.estado]?.text }}>
-          {ESTADO_LABELS[expedienteDetalle.estado]}
-        </span>
-      </div>
-      <div className="detalle-info">
-        <span><strong>Tipo:</strong> {expedienteDetalle.tipo}</span>
-        <span><strong>Usuario:</strong> {expedienteDetalle.usuario?.email || expedienteDetalle.usuario}</span>
-        <span><strong>Enviado:</strong> {expedienteDetalle.fechaEnvio ? new Date(expedienteDetalle.fechaEnvio).toLocaleDateString('es-MX') : '—'}</span>
-        {expedienteDetalle.fechaLimiteCorreccion && (
-          <span style={{ color: '#b91c1c' }}><strong>Límite corrección:</strong> {new Date(expedienteDetalle.fechaLimiteCorreccion).toLocaleDateString('es-MX')}</span>
+    if (estado === "con_observaciones") {
+      observacion = prompt("Escribe la observación para este documento:");
+
+      if (observacion === null) return;
+
+      if (!observacion.trim()) {
+        alert("La observación no puede estar vacía.");
+        return;
+      }
+    }
+
+    try {
+      await axios.patch(
+        `${API_BASE_URL}/api/expedientes/${expedienteDetalle._id}/documentos/${documentoId}/validar`,
+        { estado, observacion },
+        { headers: { Authorization: `Bearer ${token()}` } }
+      );
+
+      await recargarChecklist();
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error al validar documento");
+    }
+  };
+
+  const abrirDocumento = async (rutaArchivo) => {
+    const url = `${API_BASE_URL}/${rutaArchivo}`;
+
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+
+      if (!res.ok) {
+        alert(
+          "El archivo no está disponible en este entorno. Probablemente fue subido desde otra computadora o servidor."
+        );
+        return;
+      }
+
+      window.open(url, "_blank");
+    } catch (error) {
+      alert("No se pudo acceder al archivo.");
+    }
+  };
+
+  if (expedienteDetalle) {
+    return (
+      <div className="tramites-detalle-container fade-in">
+        <div className="detalle-header">
+          <button
+            className="btn-volver"
+            onClick={() => setExpedienteDetalle(null)}
+          >
+            ← Volver
+          </button>
+
+          <h2>
+            Expediente: <span>{expedienteDetalle.folio}</span>
+          </h2>
+
+          <span
+            className="estado-badge"
+            style={{
+              backgroundColor: ESTADO_COLORS[expedienteDetalle.estado]?.bg,
+              color: ESTADO_COLORS[expedienteDetalle.estado]?.text,
+            }}
+          >
+            {ESTADO_LABELS[expedienteDetalle.estado]}
+          </span>
+        </div>
+
+        <div className="detalle-info">
+          <span>
+            <strong>Tipo:</strong> {expedienteDetalle.tipo}
+          </span>
+
+          <span>
+            <strong>Usuario:</strong>{" "}
+            {expedienteDetalle.usuario?.email || expedienteDetalle.usuario}
+          </span>
+
+          <span>
+            <strong>Enviado:</strong>{" "}
+            {expedienteDetalle.fechaEnvio
+              ? new Date(expedienteDetalle.fechaEnvio).toLocaleDateString(
+                  "es-MX"
+                )
+              : "—"}
+          </span>
+
+          {expedienteDetalle.fechaLimiteCorreccion && (
+            <span style={{ color: "#b91c1c" }}>
+              <strong>Límite corrección:</strong>{" "}
+              {new Date(
+                expedienteDetalle.fechaLimiteCorreccion
+              ).toLocaleDateString("es-MX")}
+            </span>
+          )}
+        </div>
+
+        {expedienteDetalle.observacionesGenerales && (
+          <div className="detalle-obs">
+            <strong>Observaciones generales:</strong>{" "}
+            {expedienteDetalle.observacionesGenerales}
+          </div>
+        )}
+
+        <div className="detalle-acciones">
+          <button
+            className="btn-estado en-revision"
+            onClick={() => cambiarEstado(expedienteDetalle._id, "en_revision")}
+          >
+            Marcar En revisión
+          </button>
+        </div>
+
+        <h3 className="checklist-titulo">
+          Requisitos — {expedienteDetalle.tipo}
+        </h3>
+
+        {loadingDetalle ? (
+          <div className="loader">Cargando...</div>
+        ) : (
+          <div className="checklist-lista">
+            {checklist.map((item, i) => (
+              <div key={i} className="checklist-item">
+                <div className="checklist-nombre">
+                  <span
+                    className={`req-badge ${
+                      item.obligatorio ? "oblig" : "opcional"
+                    }`}
+                  >
+                    {item.obligatorio ? "Requerido" : "Opcional"}
+                  </span>
+
+                  {item.requisito}
+                </div>
+
+                <div
+                  className="checklist-estado"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span
+                    className={`doc-estado ${item.estado.replace("_", "-")}`}
+                  >
+                    {item.estado === "no_subido"
+                      ? "No subido"
+                      : item.estado === "pendiente"
+                        ? "Pendiente"
+                        : item.estado === "validado"
+                          ? "✓ Validado"
+                          : "Con observaciones"}
+                  </span>
+
+                  {item.documento && (
+                    <>
+                      <button
+                        className="doc-nombre"
+                        onClick={() =>
+                          abrirDocumento(item.documento.rutaArchivo)
+                        }
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        📄 {item.documento.nombreArchivo}
+                      </button>
+
+                      <button
+                        className="btn-estado validado"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          validarDocumento(item.documento._id, "validado");
+                        }}
+                        style={{
+                          fontSize: "0.75rem",
+                          padding: "0.3rem 0.6rem",
+                        }}
+                      >
+                        ✓ Validar
+                      </button>
+
+                      <button
+                        className="btn-estado con-obs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          validarDocumento(
+                            item.documento._id,
+                            "con_observaciones"
+                          );
+                        }}
+                        style={{
+                          fontSize: "0.75rem",
+                          padding: "0.3rem 0.6rem",
+                        }}
+                      >
+                        ✕ Observación
+                      </button>
+
+                      {item.documento.observacion && (
+                        <div
+                          style={{
+                            width: "100%",
+                            fontSize: "0.78rem",
+                            color: "#b91c1c",
+                            marginTop: "0.25rem",
+                          }}
+                        >
+                          <strong>Observación:</strong>{" "}
+                          {item.documento.observacion}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
-      {expedienteDetalle.observacionesGenerales && (
-        <div className="detalle-obs"><strong>Observaciones:</strong> {expedienteDetalle.observacionesGenerales}</div>
-      )}
-      <div className="detalle-acciones">
-        <button className="btn-estado en-revision" onClick={() => cambiarEstado(expedienteDetalle._id, 'en_revision')}>Marcar En revisión</button>
-        <button className="btn-estado validado"    onClick={() => cambiarEstado(expedienteDetalle._id, 'validado')}>✓ Validar</button>
-        <button className="btn-estado con-obs"     onClick={() => { const o = prompt('Observaciones:'); if (o !== null) cambiarEstado(expedienteDetalle._id, 'con_observaciones', o); }}>✗ Con observaciones</button>
-      </div>
-      <h3 className="checklist-titulo">Requisitos — {expedienteDetalle.tipo}</h3>
-      {loadingDetalle ? <div className="loader">Cargando...</div> : (
-        <div className="checklist-lista">
-          {checklist.map((item, i) => (
-            <div key={i} className="checklist-item">
-              <div className="checklist-nombre">
-                <span className={`req-badge ${item.obligatorio ? 'oblig' : 'opcional'}`}>{item.obligatorio ? 'Requerido' : 'Opcional'}</span>
-                {item.requisito}
-              </div>
-              <div className="checklist-estado">
-                <span className={`doc-estado ${item.estado.replace('_', '-')}`}>{item.estado === 'no_subido' ? 'No subido' : item.estado === 'pendiente' ? 'Pendiente' : item.estado === 'validado' ? '✓ Validado' : 'Con obs.'}</span>
-                {item.documento && <span className="doc-nombre">📄 {item.documento.nombreArchivo}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+    );
+  }
 
-  // Lista expedientes
-  if (tramiteSeleccionado) return (
-    <div className="tramites-lista-container fade-in">
-      <div className="lista-header">
-        <button className="btn-volver" onClick={() => setTramiteSeleccionado(null)}>← Volver</button>
-        <h2>{tramiteSeleccionado.nombre}</h2>
-      </div>
-      {loadingExp ? <div className="loader">Cargando...</div> : expedientes.length === 0 ? (
-        <div className="lista-vacia">No hay expedientes para {tramiteSeleccionado.tipo}</div>
-      ) : (
-        <div className="expedientes-lista">
-          {expedientes.map(exp => (
-            <div key={exp._id} className="expediente-row" onClick={() => verDetalle(exp)}>
-              <span className="exp-folio">{exp.folio}</span>
-              <span className="exp-usuario">{exp.usuario?.email || '—'}</span>
-              <span className="exp-estado" style={{ backgroundColor: ESTADO_COLORS[exp.estado]?.bg, color: ESTADO_COLORS[exp.estado]?.text }}>{ESTADO_LABELS[exp.estado]}</span>
-              <span className="exp-fecha">{new Date(exp.createdAt).toLocaleDateString('es-MX')}</span>
-              <span className="exp-ver">Ver →</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  if (tramiteSeleccionado) {
+    return (
+      <div className="tramites-lista-container fade-in">
+        <div className="lista-header">
+          <button
+            className="btn-volver"
+            onClick={() => setTramiteSeleccionado(null)}
+          >
+            ← Volver
+          </button>
 
-  // Vista principal — botones de trámites
+          <h2>{tramiteSeleccionado.nombre}</h2>
+        </div>
+
+        {loadingExp ? (
+          <div className="loader">Cargando...</div>
+        ) : expedientes.length === 0 ? (
+          <div className="lista-vacia">
+            No hay expedientes para {tramiteSeleccionado.tipo}
+          </div>
+        ) : (
+          <div className="expedientes-lista">
+            {expedientes.map((exp) => (
+              <div
+                key={exp._id}
+                className="expediente-row"
+                onClick={() => verDetalle(exp)}
+              >
+                <span className="exp-folio">{exp.folio}</span>
+
+                <span className="exp-usuario">
+                  {exp.usuario?.email || "—"}
+                </span>
+
+                <span
+                  className="exp-estado"
+                  style={{
+                    backgroundColor: ESTADO_COLORS[exp.estado]?.bg,
+                    color: ESTADO_COLORS[exp.estado]?.text,
+                  }}
+                >
+                  {ESTADO_LABELS[exp.estado]}
+                </span>
+
+                <span className="exp-fecha">
+                  {new Date(exp.createdAt).toLocaleDateString("es-MX")}
+                </span>
+
+                <span className="exp-ver">Ver →</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="empresas-container fade-in">
-      
-      {/* Toolbar superior para contar trámites */}
-      <div className="empresas-toolbar" style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'flex-start', paddingBottom: '1rem' }}>
-        <span className="empresas-count">{tramites.length} trámite{tramites.length !== 1 ? 's' : ''}</span>
+      <div
+        className="empresas-toolbar"
+        style={{
+          width: "100%",
+          maxWidth: "1000px",
+          display: "flex",
+          justifyContent: "flex-start",
+          paddingBottom: "1rem",
+        }}
+      >
+        <span className="empresas-count">
+          {tramites.length} trámite{tramites.length !== 1 ? "s" : ""}
+        </span>
       </div>
 
       <div className="toggle-bottom-right">
-        <button className={`vista-btn ${!vistaLista ? 'active' : ''}`} onClick={() => setVistaLista(false)} title="Vista cuadrícula">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className={`vista-btn ${!vistaLista ? "active" : ""}`}
+          onClick={() => setVistaLista(false)}
+          title="Vista cuadrícula"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <rect x="3" y="3" width="7" height="7"></rect>
             <rect x="14" y="3" width="7" height="7"></rect>
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
         </button>
-        <button className={`vista-btn ${vistaLista ? 'active' : ''}`} onClick={() => setVistaLista(true)} title="Vista lista">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9f2241" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+
+        <button
+          className={`vista-btn ${vistaLista ? "active" : ""}`}
+          onClick={() => setVistaLista(true)}
+          title="Vista lista"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9f2241"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="4" y1="6" x2="20" y2="6"></line>
             <line x1="4" y1="12" x2="20" y2="12"></line>
             <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -273,158 +610,323 @@ const TramitesAdmin = () => {
         </button>
       </div>
 
-      {/* Vista cuadrícula */}
       {!vistaLista && (
         <div className="empresas-grid">
-          {tramites.length === 0 && <div className="lista-vacia">No hay trámites configurados.</div>}
+          {tramites.length === 0 && (
+            <div className="lista-vacia">No hay trámites configurados.</div>
+          )}
+
           {tramites.map((t) => (
-            <div key={t._id} className="empresa-card" onClick={() => seleccionarTramite(t)} style={{ cursor: 'pointer' }}>
+            <div
+              key={t._id}
+              className="empresa-card"
+              onClick={() => seleccionarTramite(t)}
+              style={{ cursor: "pointer" }}
+            >
               <span className="empresa-name-text">{t.tipo}</span>
+
               <div className="empresa-action-container">
                 {activeDropdown === t._id ? (
-                  <div className="empresa-action-dropdown fade-in" onClick={e => e.stopPropagation()}>
-                    <button className="action-btn edit-btn" style={{ paddingBottom: '10px' }} onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveDropdown(null);
-                      abrirEditar(t);
-                    }}>
-                      <img src={editarIcon} alt="Editar" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  <div
+                    className="empresa-action-dropdown fade-in"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      className="action-btn edit-btn"
+                      style={{ paddingBottom: "10px" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdown(null);
+                        abrirEditar(t);
+                      }}
+                    >
+                      <img
+                        src={editarIcon}
+                        alt="Editar"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          objectFit: "contain",
+                        }}
+                      />
                       Editar
                     </button>
                   </div>
                 ) : (
-                  <div className="empresa-edit-icon" title="Opciones" onClick={(e) => toggleDropdown(t._id, e)}>
-                    <img src={editarIcon} alt="Editar" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                  <div
+                    className="empresa-edit-icon"
+                    title="Opciones"
+                    onClick={(e) => toggleDropdown(t._id, e)}
+                  >
+                    <img
+                      src={editarIcon}
+                      alt="Editar"
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        objectFit: "contain",
+                      }}
+                    />
                   </div>
                 )}
               </div>
             </div>
           ))}
-          <button className="agregar-empresa-btn" onClick={abrirAgregar} style={{ width: '260px', marginTop: '1rem' }}>
+
+          <button
+            className="agregar-empresa-btn"
+            onClick={abrirAgregar}
+            style={{ width: "260px", marginTop: "1rem" }}
+          >
             + Agregar trámite
           </button>
         </div>
       )}
 
-      {/* Vista lista */}
       {vistaLista && (
         <div className="empresas-grid-wide">
-          {tramites.length === 0 && <div className="lista-vacia">No hay trámites configurados.</div>}
+          {tramites.length === 0 && (
+            <div className="lista-vacia">No hay trámites configurados.</div>
+          )}
+
           {tramites.map((t) => (
-            <div key={t._id} className="empresa-card-wide" onClick={() => seleccionarTramite(t)} style={{ cursor: 'pointer' }}>
-              <span className="empresa-name-text">{t.tipo} — {t.nombre}</span>
+            <div
+              key={t._id}
+              className="empresa-card-wide"
+              onClick={() => seleccionarTramite(t)}
+              style={{ cursor: "pointer" }}
+            >
+              <span className="empresa-name-text">
+                {t.tipo} — {t.nombre}
+              </span>
+
               <div className="empresa-action-container-wide">
                 {activeDropdown === t._id ? (
-                  <div className="empresa-dropdown-expanded fade-in" onClick={e => e.stopPropagation()}>
-                    <button className="btn-edit-half" style={{ height: '100%' }} onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveDropdown(null);
-                      abrirEditar(t);
-                    }}>
+                  <div
+                    className="empresa-dropdown-expanded fade-in"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      className="btn-edit-half"
+                      style={{ height: "100%" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdown(null);
+                        abrirEditar(t);
+                      }}
+                    >
                       Editar
                     </button>
                   </div>
                 ) : (
-                  <div className="empresa-action-square" onClick={(e) => toggleDropdown(t._id, e)}>
-                    <img src={editarIcon} alt="Editar" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                  <div
+                    className="empresa-action-square"
+                    onClick={(e) => toggleDropdown(t._id, e)}
+                  >
+                    <img
+                      src={editarIcon}
+                      alt="Editar"
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        objectFit: "contain",
+                      }}
+                    />
                   </div>
                 )}
               </div>
             </div>
           ))}
+
           <button className="btn-agregar-wide" onClick={abrirAgregar}>
             Agregar trámite
           </button>
         </div>
       )}
 
-      {/* Modal Agregar / Editar */}
       {modalAbierto && (
-        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && cerrarModal()}>
+        <div
+          className="modal-overlay fade-in"
+          onClick={(e) => e.target === e.currentTarget && cerrarModal()}
+        >
           <div className="modal-box">
             <div className="modal-header">
-              <h2>{tramiteEditando ? `Editar trámite — ${tramiteEditando.tipo}` : 'Agregar trámite'}</h2>
-              <button className="modal-close" onClick={cerrarModal}>✕</button>
+              <h2>
+                {tramiteEditando
+                  ? `Editar trámite — ${tramiteEditando.tipo}`
+                  : "Agregar trámite"}
+              </h2>
+
+              <button className="modal-close" onClick={cerrarModal}>
+                ✕
+              </button>
             </div>
 
             <div className="modal-body">
-              {/* Tipo */}
               {!tramiteEditando && (
                 <div className="modal-field">
                   <label>Tipo</label>
-                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}>
+                  <select
+                    value={form.tipo}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, tipo: e.target.value }))
+                    }
+                  >
                     <option value="">Selecciona...</option>
-                    {TIPOS_DISPONIBLES.map(t => <option key={t} value={t}>{t} — {NOMBRES_TRAMITE[t]}</option>)}
+
+                    {TIPOS_DISPONIBLES.map((t) => (
+                      <option key={t} value={t}>
+                        {t} — {NOMBRES_TRAMITE[t]}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
 
-              {/* Nombre */}
               <div className="modal-field">
                 <label>Nombre completo</label>
-                <input type="text" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} placeholder="ej. Licencia Ambiental Única" />
+                <input
+                  type="text"
+                  value={form.nombre}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, nombre: e.target.value }))
+                  }
+                  placeholder="ej. Licencia Ambiental Única"
+                />
               </div>
 
-              {/* Activo */}
               <div className="modal-field modal-field-row">
                 <label>Trámite activo</label>
-                <div className={`custom-toggle ${form.activo ? 'on' : 'off'}`} onClick={() => setForm(f => ({ ...f, activo: !f.activo }))}>
+
+                <div
+                  className={`custom-toggle ${form.activo ? "on" : "off"}`}
+                  onClick={() =>
+                    setForm((f) => ({ ...f, activo: !f.activo }))
+                  }
+                >
                   <div className="toggle-circle"></div>
                 </div>
               </div>
 
-              {/* Fechas */}
               <div className="modal-field-group">
                 <div className="modal-field">
                   <label>Fecha de apertura</label>
-                  <input type="date" value={form.fechaApertura} onChange={e => setForm(f => ({ ...f, fechaApertura: e.target.value }))} />
+                  <input
+                    type="date"
+                    value={form.fechaApertura}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        fechaApertura: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
+
                 <div className="modal-field">
                   <label>Fecha de cierre</label>
-                  <input type="date" value={form.fechaCierre} onChange={e => setForm(f => ({ ...f, fechaCierre: e.target.value }))} />
+                  <input
+                    type="date"
+                    value={form.fechaCierre}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        fechaCierre: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
               </div>
 
-              {/* Días corrección */}
               <div className="modal-field">
                 <label>Días para corrección</label>
-                <input type="number" min="1" max="30" value={form.diasCorreccion} onChange={e => setForm(f => ({ ...f, diasCorreccion: Number(e.target.value) }))} />
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  value={form.diasCorreccion}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      diasCorreccion: Number(e.target.value),
+                    }))
+                  }
+                />
               </div>
 
-              {/* Requisitos */}
               <div className="modal-field">
-                <label>Requisitos documentales ({form.requisitos.length})</label>
+                <label>
+                  Requisitos documentales ({form.requisitos.length})
+                </label>
+
                 <div className="requisitos-lista-modal">
                   {form.requisitos.map((r, i) => (
                     <div key={i} className="requisito-item-modal">
-                      <span className={`req-badge ${r.obligatorio ? 'oblig' : 'opcional'}`}>{r.obligatorio ? 'Req.' : 'Opc.'}</span>
+                      <span
+                        className={`req-badge ${
+                          r.obligatorio ? "oblig" : "opcional"
+                        }`}
+                      >
+                        {r.obligatorio ? "Req." : "Opc."}
+                      </span>
+
                       <span className="requisito-nombre-modal">{r.nombre}</span>
-                      <button className="btn-eliminar-req" onClick={() => eliminarRequisito(i)}>✕</button>
+
+                      <button
+                        className="btn-eliminar-req"
+                        onClick={() => eliminarRequisito(i)}
+                      >
+                        ✕
+                      </button>
                     </div>
                   ))}
                 </div>
+
                 <div className="agregar-requisito-row">
                   <input
                     type="text"
                     placeholder="Nombre del documento..."
                     value={nuevoRequisito}
-                    onChange={e => setNuevoRequisito(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && agregarRequisito()}
+                    onChange={(e) => setNuevoRequisito(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && agregarRequisito()}
                   />
-                  <button className={`btn-oblig-toggle ${requisitoOblig ? 'oblig' : 'opcional'}`} onClick={() => setRequisitoOblig(!requisitoOblig)}>
-                    {requisitoOblig ? 'Requerido' : 'Opcional'}
+
+                  <button
+                    className={`btn-oblig-toggle ${
+                      requisitoOblig ? "oblig" : "opcional"
+                    }`}
+                    onClick={() => setRequisitoOblig(!requisitoOblig)}
+                  >
+                    {requisitoOblig ? "Requerido" : "Opcional"}
                   </button>
-                  <button className="btn-add-req" onClick={agregarRequisito}>+ Agregar</button>
+
+                  <button className="btn-add-req" onClick={agregarRequisito}>
+                    + Agregar
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="modal-footer">
-              <button className="btn-cancelar" onClick={cerrarModal} disabled={loading}>
+              <button
+                className="btn-cancelar"
+                onClick={cerrarModal}
+                disabled={loading}
+              >
                 <span className="btn-icon">✖</span> Cancelar
               </button>
-              <button className="btn-continuar" onClick={guardarTramite} disabled={loading}>
-                {loading ? 'Guardando...' : tramiteEditando ? 'Guardar cambios' : 'Crear trámite'} <span className="btn-icon">✔</span>
+
+              <button
+                className="btn-continuar"
+                onClick={guardarTramite}
+                disabled={loading}
+              >
+                {loading
+                  ? "Guardando..."
+                  : tramiteEditando
+                    ? "Guardar cambios"
+                    : "Crear trámite"}{" "}
+                <span className="btn-icon">✔</span>
               </button>
             </div>
           </div>

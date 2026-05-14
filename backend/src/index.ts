@@ -12,7 +12,7 @@ import path from "path";
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// La carpeta 'uploads' ya no es pública. Se debe usar el endpoint /descargar
 
 app.get("/", (_req: Request, res: Response) => {
   res.json({ ok: true, msg: "Saludos desde el backend de SIGTA" });

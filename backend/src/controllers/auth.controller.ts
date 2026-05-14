@@ -68,6 +68,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Validación de tipos para prevenir ataques de denegación de servicio (TypeError)
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ ok: false, msg: 'Formato de datos inválido' });
+      return;
+    }
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       res.status(400).json({ ok: false, msg: 'Credenciales inválidas' });

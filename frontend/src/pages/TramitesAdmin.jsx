@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import editarIcon from "../assets/editar.png";
+import iconBorrar from "../assets/icon_borrar.png";
+import iconAgregaDoc from "../assets/icon_agrega_doc.png";
 import { useLocation } from "react-router-dom";
+import "./TramitesAdmin.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const token = () => localStorage.getItem("token");
@@ -64,6 +67,33 @@ const TramitesAdmin = () => {
   const [checklist, setChecklist] = useState([]);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
 
+  const getCalendarDays = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const startDay = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    const days = [];
+    for (let i = startDay - 1; i >= 0; i--) {
+      days.push({ day: daysInPrevMonth - i, type: 'prev' });
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({ day: i, type: 'current', isToday: i === today.getDate() });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ day: i, type: 'next' });
+    }
+    return days;
+  };
+
+  const getMonthName = () => {
+    const months = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+    const today = new Date();
+    return `${months[today.getMonth()]} ${today.getFullYear()}`;
+  };
   useEffect(() => {
     cargarTramites();
   }, []);
@@ -345,8 +375,8 @@ const TramitesAdmin = () => {
             <strong>Enviado:</strong>{" "}
             {expedienteDetalle.fechaEnvio
               ? new Date(expedienteDetalle.fechaEnvio).toLocaleDateString(
-                  "es-MX"
-                )
+                "es-MX"
+              )
               : "—"}
           </span>
 
@@ -388,9 +418,8 @@ const TramitesAdmin = () => {
               <div key={i} className="checklist-item">
                 <div className="checklist-nombre">
                   <span
-                    className={`req-badge ${
-                      item.obligatorio ? "oblig" : "opcional"
-                    }`}
+                    className={`req-badge ${item.obligatorio ? "oblig" : "opcional"
+                      }`}
                   >
                     {item.obligatorio ? "Requerido" : "Opcional"}
                   </span>
@@ -544,6 +573,181 @@ const TramitesAdmin = () => {
             ))}
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (modalAbierto) {
+    return (
+      <div className="tramites-admin-container fade-in" style={{ width: '100%' }}>
+        <div className="tramite-form-container">
+          <div className="tramite-form-layout">
+
+            {/* Left Column */}
+            <div className="form-left-col">
+
+              <div className="t-input-group">
+                <label>Nombre del tramite</label>
+                <input
+                  type="text"
+                  value={form.nombre}
+                  onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+                  placeholder="ej. REQUISITOS PARA EL TRÁMITE DE LA CÉDULA DE OPERACIÓN ANUAL"
+                />
+              </div>
+
+              <div className="t-input-group">
+                <label>Abreviación</label>
+                <input
+                  type="text"
+                  value={form.tipo}
+                  onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value.toUpperCase() }))}
+                  readOnly={!!tramiteEditando}
+                  placeholder="ej. COA"
+                  style={{
+                    border: 'none',
+                    borderBottom: '2px solid #4b5563',
+                    fontSize: '1.5rem',
+                    padding: '0.5rem 0',
+                    color: '#374151',
+                    outline: 'none',
+                    background: 'transparent'
+                  }}
+                />
+              </div>
+
+              <div>
+                <div className="t-requisitos-header">Obligatorio</div>
+
+                {form.requisitos.map((r, i) => (
+                  <div key={i} className="t-requisito-row">
+                    <div
+                      className={`t-toggle ${r.obligatorio ? "active" : ""}`}
+                      onClick={() => {
+                        const newReqs = [...form.requisitos];
+                        newReqs[i].obligatorio = !newReqs[i].obligatorio;
+                        setForm((f) => ({ ...f, requisitos: newReqs }));
+                      }}
+                    >
+                      <div className="t-toggle-circle"></div>
+                    </div>
+
+                    <input
+                      type="text"
+                      className={`t-req-input ${i % 2 === 0 ? "white-bg" : "gray-bg"}`}
+                      value={r.nombre}
+                      onChange={(e) => {
+                        const newReqs = [...form.requisitos];
+                        newReqs[i].nombre = e.target.value;
+                        setForm((f) => ({ ...f, requisitos: newReqs }));
+                      }}
+                      placeholder="Escribe el nombre del documento"
+                    />
+
+                    <button
+                      className="btn-borrar-req"
+                      onClick={() => eliminarRequisito(i)}
+                      title="Eliminar requisito"
+                    >
+                      <img src={iconBorrar} alt="Borrar" />
+                    </button>
+                  </div>
+                ))}
+
+                <div className="t-requisito-row" style={{ marginTop: '1rem' }}>
+                  <div
+                    className={`t-toggle ${requisitoOblig ? "active" : ""}`}
+                    onClick={() => setRequisitoOblig(!requisitoOblig)}
+                  >
+                    <div className="t-toggle-circle"></div>
+                  </div>
+
+                  <input
+                    type="text"
+                    className={`t-req-input ${form.requisitos.length % 2 === 0 ? "white-bg" : "gray-bg"}`}
+                    value={nuevoRequisito}
+                    onChange={(e) => setNuevoRequisito(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && agregarRequisito()}
+                    placeholder="**************************************"
+                  />
+                </div>
+
+                <button className="btn-agregar-doc" onClick={agregarRequisito}>
+                  <img src={iconAgregaDoc} alt="Agregar doc" />
+                  Agregar documentacion
+                </button>
+              </div>
+
+            </div>
+
+            {/* Right Column */}
+            <div className="form-right-col">
+
+              <div className="t-rango-fechas">
+                <h3>Rango de fechas disponibles</h3>
+                <div className="t-fechas-inputs">
+                  <span>Del:</span>
+                  <input
+                    type="date"
+                    className="t-date-input"
+                    value={form.fechaApertura}
+                    onChange={(e) => setForm((f) => ({ ...f, fechaApertura: e.target.value }))}
+                  />
+                </div>
+                <div className="t-fechas-inputs">
+                  <span>al:</span>
+                  <input
+                    type="date"
+                    className="t-date-input"
+                    value={form.fechaCierre}
+                    onChange={(e) => setForm((f) => ({ ...f, fechaCierre: e.target.value }))}
+                  />
+                </div>
+                <div className="t-fechas-inputs" style={{ marginTop: '1rem' }}>
+                  <span>Días corrección:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    className="t-date-input"
+                    style={{ width: '80px' }}
+                    value={form.diasCorreccion}
+                    onChange={(e) => setForm((f) => ({ ...f, diasCorreccion: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+
+              <div className="t-calendar-container">
+                <div className="t-calendar-header">
+                  &lt; {getMonthName()} &gt;
+                </div>
+                <div className="t-calendar-body">
+                  <div className="t-calendar-weekdays">
+                    <span>LUN</span><span>MAR</span><span>MIE</span><span>JUE</span><span>VIE</span><span>SAB</span><span>DOM</span>
+                  </div>
+                  <div className="t-calendar-days">
+                    {getCalendarDays().map((d, idx) => (
+                      <span key={idx} className={`t-cal-day ${d.type !== 'current' ? 'gray' : ''} ${d.isToday ? 'red' : ''}`}>
+                        {d.day}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div className="t-acciones-bottom">
+            <button className="btn-t-cancelar" onClick={cerrarModal} disabled={loading}>
+              <div className="btn-t-icon-circle" style={{ color: '#000', backgroundColor: 'transparent', fontWeight: 'bold', border: '2px solid #000', padding: '0', width: '22px', height: '22px' }}>✕</div>
+              Cancelar
+            </button>
+            <button className="btn-t-continuar" onClick={guardarTramite} disabled={loading}>
+              Continuar
+              <span style={{ fontSize: '1.2rem', marginLeft: '0.2rem' }}>✔</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -744,194 +948,6 @@ const TramitesAdmin = () => {
         </div>
       )}
 
-      {modalAbierto && (
-        <div
-          className="modal-overlay fade-in"
-          onClick={(e) => e.target === e.currentTarget && cerrarModal()}
-        >
-          <div className="modal-box">
-            <div className="modal-header">
-              <h2>
-                {tramiteEditando
-                  ? `Editar trámite — ${tramiteEditando.tipo}`
-                  : "Agregar trámite"}
-              </h2>
-
-              <button className="modal-close" onClick={cerrarModal}>
-                ✕
-              </button>
-            </div>
-
-            <div className="modal-body">
-              {!tramiteEditando && (
-                <div className="modal-field">
-                  <label>Tipo</label>
-                  <select
-                    value={form.tipo}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, tipo: e.target.value }))
-                    }
-                  >
-                    <option value="">Selecciona...</option>
-
-                    {TIPOS_DISPONIBLES.map((t) => (
-                      <option key={t} value={t}>
-                        {t} — {NOMBRES_TRAMITE[t]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="modal-field">
-                <label>Nombre completo</label>
-                <input
-                  type="text"
-                  value={form.nombre}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, nombre: e.target.value }))
-                  }
-                  placeholder="ej. Licencia Ambiental Única"
-                />
-              </div>
-
-              <div className="modal-field modal-field-row">
-                <label>Trámite activo</label>
-
-                <div
-                  className={`custom-toggle ${form.activo ? "on" : "off"}`}
-                  onClick={() =>
-                    setForm((f) => ({ ...f, activo: !f.activo }))
-                  }
-                >
-                  <div className="toggle-circle"></div>
-                </div>
-              </div>
-
-              <div className="modal-field-group">
-                <div className="modal-field">
-                  <label>Fecha de apertura</label>
-                  <input
-                    type="date"
-                    value={form.fechaApertura}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        fechaApertura: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="modal-field">
-                  <label>Fecha de cierre</label>
-                  <input
-                    type="date"
-                    value={form.fechaCierre}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        fechaCierre: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="modal-field">
-                <label>Días para corrección</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={form.diasCorreccion}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      diasCorreccion: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="modal-field">
-                <label>
-                  Requisitos documentales ({form.requisitos.length})
-                </label>
-
-                <div className="requisitos-lista-modal">
-                  {form.requisitos.map((r, i) => (
-                    <div key={i} className="requisito-item-modal">
-                      <span
-                        className={`req-badge ${
-                          r.obligatorio ? "oblig" : "opcional"
-                        }`}
-                      >
-                        {r.obligatorio ? "Req." : "Opc."}
-                      </span>
-
-                      <span className="requisito-nombre-modal">{r.nombre}</span>
-
-                      <button
-                        className="btn-eliminar-req"
-                        onClick={() => eliminarRequisito(i)}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="agregar-requisito-row">
-                  <input
-                    type="text"
-                    placeholder="Nombre del documento..."
-                    value={nuevoRequisito}
-                    onChange={(e) => setNuevoRequisito(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && agregarRequisito()}
-                  />
-
-                  <button
-                    className={`btn-oblig-toggle ${
-                      requisitoOblig ? "oblig" : "opcional"
-                    }`}
-                    onClick={() => setRequisitoOblig(!requisitoOblig)}
-                  >
-                    {requisitoOblig ? "Requerido" : "Opcional"}
-                  </button>
-
-                  <button className="btn-add-req" onClick={agregarRequisito}>
-                    + Agregar
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn-cancelar"
-                onClick={cerrarModal}
-                disabled={loading}
-              >
-                <span className="btn-icon">✖</span> Cancelar
-              </button>
-
-              <button
-                className="btn-continuar"
-                onClick={guardarTramite}
-                disabled={loading}
-              >
-                {loading
-                  ? "Guardando..."
-                  : tramiteEditando
-                    ? "Guardar cambios"
-                    : "Crear trámite"}{" "}
-                <span className="btn-icon">✔</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

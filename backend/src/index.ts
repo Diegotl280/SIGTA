@@ -7,10 +7,12 @@ import authRoutes from "./routes/auth.routes";
 import expedienteRoutes from "./routes/expediente.routes";
 import documentoRoutes from "./routes/documento.routes"
 import configTramiteRoutes from './routes/configTramite.routes';
+import path from "path";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/", (_req: Request, res: Response) => {
   res.json({ ok: true, msg: "Saludos desde el backend de SIGTA" });

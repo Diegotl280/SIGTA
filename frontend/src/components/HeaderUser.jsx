@@ -2,28 +2,21 @@ import { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useGetUser } from '../api/UserApi';
+import gobiernoLogo from '../assets/Gobierno.jpeg';
 
 const HeaderUser = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
-  //Obtiene la información del usuario autenticado
   const { data } = useGetUser();
   const userName = data?.user?.nombre || "Usuario";
 
   return (
-    /** Encabezado */
     <header className="top-header">
       <div className="header-left">
         <div className="logo-placeholder">
-          <div className="logo-icon zacatecas-icon"></div>
-          <div className="logo-text">
-            <strong>Zacatecas</strong>
-            <span>GOBIERNO DEL ESTADO</span>
-            <span className="small-text">2021-2027</span>
-          </div>
+          <img src={gobiernoLogo} alt="Gobierno de Zacatecas" className="gobierno-logo-img" />
         </div>
-        {/*Nombre de la secretaría */}
         <div className="secretaria-text">
           <span>SECRETARÍA DEL</span>
           <strong>AGUA Y</strong>
@@ -31,44 +24,26 @@ const HeaderUser = () => {
         </div>
       </div>
 
-      {/*Enlaces de navegación */}
       <div className="header-center">
         <nav className="nav-pill">
-          <NavLink
-            to="/notificaciones"
-            className={({ isActive }) => `nav-link ${isActive ? 'text-red active' : ''}`}
-          >
+          <NavLink to="/notificaciones" className={({ isActive }) => `nav-link ${isActive ? 'text-red active' : ''}`}>
             Notificaciones
           </NavLink>
           <span className="divider"></span>
-          <NavLink
-            to="/tramites"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
+          <NavLink to="/tramites" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             Tramites
           </NavLink>
         </nav>
       </div>
 
-      {/*Información del usuario */}
       <div className="header-right">
         <div className="profile-container" style={{ position: 'relative' }}>
-          <div
-            className="user-pill"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >
+          <div className="user-pill" onClick={() => setShowDropdown(!showDropdown)}>
             {userName}
           </div>
-
-          {showDropdown && (/**Dropdown */
+          {showDropdown && (
             <div className="profile-dropdown fade-in">
-              <button
-                className="logout-btn"
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-              >
+              <button className="logout-btn" onClick={() => { logout(); navigate('/login'); }}>
                 <div className="logout-icon-container">
                   <span className="logout-power-icon"></span>
                 </div>

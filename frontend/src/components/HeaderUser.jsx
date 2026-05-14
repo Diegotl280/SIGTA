@@ -5,11 +5,11 @@ import { useGetUser } from '../api/UserApi';
 import gobiernoLogo from '../assets/Gobierno.jpeg';
 
 const HeaderUser = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const { data } = useGetUser();
-  const userName = data?.user?.nombre || "Usuario";
+  const userName = user?.nombre || data?.usuario?.nombre || data?.user?.nombre || "Usuario";
 
   return (
     <header className="top-header">

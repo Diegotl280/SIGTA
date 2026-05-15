@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmpresas, useGetExpedientesByEmpresa, useGetConfigTramites } from '../api/UserApi';
+import { useCambiarEstadoExpediente } from '../api/ExpedienteApi';
 import { useGetDocumentosByExpediente } from '../api/DocApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
 import iconPdf from '../assets/icon_pdf.png';
+import { toast } from 'sonner';
 import './EmpresaDetalleAdmin.css';
 
 
@@ -22,6 +24,8 @@ const EmpresaDetalleAdmin = () => {
   const [empresa, setEmpresa] = useState(null);
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [observaciones, setObservaciones] = useState('');
+  
+  const cambiarEstadoMutation = useCambiarEstadoExpediente();
 
   const expedienteActual = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
@@ -32,6 +36,17 @@ const EmpresaDetalleAdmin = () => {
       if (emp) setEmpresa(emp);
     }
   }, [dataEmpresas, id]);
+
+  useEffect(() => {
+    if (tramiteSeleccionado) {
+      const exp = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
+      if (exp) {
+        setObservaciones(exp.observacionesGenerales || '');
+      }
+    } else {
+      setObservaciones('');
+    }
+  }, [tramiteSeleccionado, dataExpedientes]);
 
   if (isLoadingEmpresas || isLoadingExpedientes || isLoadingConfig) {
     return <div className="loader">Cargando detalles...</div>;
@@ -58,34 +73,60 @@ const EmpresaDetalleAdmin = () => {
     return colors[index % colors.length];
   };
 
-  const renderStatusBox = (estadoActual) => {
+  const renderStatusBox = (tipoExpediente, estadoActual) => {
+    const handleIconClick = (e, nuevoEstado) => {
+      e.stopPropagation();
+      const exp = expedientes.find(ex => ex.tipo === tipoExpediente);
+      if (!exp) {
+        toast.error("El trámite aún no ha sido iniciado por la empresa");
+        return;
+      }
+      cambiarEstadoMutation.mutate({
+        id: exp._id,
+        estado: nuevoEstado,
+        observacionesGenerales: tramiteSeleccionado === tipoExpediente ? observaciones : exp.observacionesGenerales
+      });
+    };
+
     return (
       <div className="status-box">
         <img 
           src={iconAprobado} 
           alt="Aprobado" 
+          onClick={(e) => handleIconClick(e, 'validado')}
           className={`status-icon ${estadoActual === 'aprobado' ? 'active' : 'inactive'}`} 
+          style={{ cursor: 'pointer' }}
         />
         <img 
           src={iconObs} 
           alt="Observaciones" 
+          onClick={(e) => handleIconClick(e, 'con_observaciones')}
           className={`status-icon ${estadoActual === 'observaciones' ? 'active' : 'inactive'}`} 
+          style={{ cursor: 'pointer' }}
         />
         <img 
           src={iconRevision} 
           alt="Pendiente" 
+          onClick={(e) => handleIconClick(e, 'en_revision')}
           className={`status-icon ${estadoActual === 'pendiente' ? 'active' : 'inactive'}`} 
+          style={{ cursor: 'pointer' }}
         />
       </div>
     );
   };
 
   const handleContinuar = () => {
-    // Si estamos viendo los documentos, volvemos a la lista de trámites
     if (tramiteSeleccionado) {
+      const exp = expedientes.find(e => e.tipo === tramiteSeleccionado);
+      if (exp && exp.observacionesGenerales !== observaciones) {
+         cambiarEstadoMutation.mutate({
+           id: exp._id,
+           estado: exp.estado,
+           observacionesGenerales: observaciones
+         });
+      }
       setTramiteSeleccionado(null);
     } else {
-      // Si estamos en la vista de empresa, regresamos a la lista de empresas
       navigate('/admin/empresas');
     }
   };
@@ -145,7 +186,7 @@ const EmpresaDetalleAdmin = () => {
                        {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
                     </div>
                   </div>
-                  {renderStatusBox(estado)}
+                  {renderStatusBox(tipo, estado)}
                 </div>
               );
             })
@@ -173,7 +214,7 @@ const EmpresaDetalleAdmin = () => {
                      {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
                   </div>
                 </div>
-                {renderStatusBox(estado)}
+                {renderStatusBox(tramiteSeleccionado, estado)}
               </div>
             );
           })()}

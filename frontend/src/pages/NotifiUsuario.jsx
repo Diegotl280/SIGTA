@@ -22,9 +22,38 @@ const NotifiUsuario = () => {
         const res = await axios.get(`${API_BASE_URL}/api/expedientes`, {
           headers: { Authorization: `Bearer ${token()}` },
         });
-        const pendientes = (res.data.expedientes || []).filter(e =>
+        
+        let pendientes = (res.data.expedientes || []).filter(e =>
           ['enviado', 'en_revision', 'con_observaciones'].includes(e.estado)
         );
+
+        // Filtrar aquellos donde ya pasaron los 10 días
+        pendientes = pendientes.filter(exp => {
+          if (exp.estado === 'con_observaciones' && exp.fechaLimiteCorreccion) {
+            if (new Date() > new Date(exp.fechaLimiteCorreccion)) {
+              return false; // Ocultar si ya pasaron los 10 días
+            }
+          }
+          return true;
+        });
+
+        // Cargar los documentos para los que tienen observaciones
+        pendientes = await Promise.all(pendientes.map(async (exp) => {
+          if (exp.estado === 'con_observaciones') {
+            try {
+              const docsRes = await axios.get(`${API_BASE_URL}/api/expedientes/${exp._id}/documentos`, {
+                headers: { Authorization: `Bearer ${token()}` },
+              });
+              const docsObservados = docsRes.data.documentos.filter(d => d.estado === 'con_observaciones');
+              return { ...exp, docsObservados };
+            } catch (error) {
+              console.error("Error al obtener documentos para expediente", exp._id, error);
+              return { ...exp, docsObservados: [] };
+            }
+          }
+          return exp;
+        }));
+
         setExpedientes(pendientes);
       } catch (err) {
         console.error(err);
@@ -81,6 +110,19 @@ const NotifiUsuario = () => {
                 ⏰ Lapso de tiempo permitido: 10 días hábiles.
                 Fecha límite: {new Date(exp.fechaLimiteCorreccion).toLocaleDateString('es-MX')}
               </p>
+            )}
+
+            {exp.estado === 'con_observaciones' && exp.docsObservados && exp.docsObservados.length > 0 && (
+              <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '6px' }}>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#b45309', fontSize: '0.95rem' }}>Documentos con Observaciones:</h4>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#1a1a1a', fontSize: '0.9rem' }}>
+                  {exp.docsObservados.map(doc => (
+                    <li key={doc._id} style={{ marginBottom: '0.25rem' }}>
+                      <strong>{doc.tipoRequisito}:</strong> {doc.observacion || 'Sin observación detallada'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         ))

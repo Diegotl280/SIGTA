@@ -151,7 +151,7 @@ export const expedienteController = {
         return;
       }
 
-      if (expediente.estado !== 'borrador') {
+      if (expediente.estado !== 'borrador' && expediente.estado !== 'con_observaciones') {
         res.status(400).json({ ok: false, msg: `No se puede enviar un expediente en estado: ${expediente.estado}` });
         return;
       }
@@ -181,7 +181,7 @@ export const expedienteController = {
       }
 
       expediente.estado = estado;
-      if (observacionesGenerales) expediente.observacionesGenerales = observacionesGenerales;
+      if (observacionesGenerales !== undefined) expediente.observacionesGenerales = observacionesGenerales;
 
       // Si tiene observaciones, calcular plazo de 10 días para corrección
       if (estado === 'con_observaciones') {

@@ -87,3 +87,37 @@ export function useEnviarExpediente() {
         }
     });
 }
+
+/**
+ * Hook para cambiar el estado de un expediente (Solo Administrador)
+ */
+export function useCambiarEstadoExpediente() {
+    const queryClient = useQueryClient();
+
+    const cambiarEstadoRequest = async ({ id, estado, observacionesGenerales }) => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.patch(`${API_BASE_URL}/api/expedientes/${id}/estado`, 
+        { estado, observacionesGenerales }, 
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: cambiarEstadoRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al cambiar el estado");
+        },
+        onSuccess: (data) => {
+            toast.success("Estado del trámite actualizado");
+            queryClient.invalidateQueries({ queryKey: ['expedientesEmpresa'] });
+            queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
+        }
+    });
+}

@@ -165,6 +165,18 @@ export const documentoController = {
       if (observacion) documento.observacion = observacion;
       await documento.save();
 
+      // Si el documento tiene observaciones, actualizar automáticamente el expediente
+      if (estado === 'con_observaciones') {
+        const expediente = await Expediente.findById(documento.expediente);
+        if (expediente && expediente.estado !== 'con_observaciones') {
+          expediente.estado = 'con_observaciones';
+          const plazo = new Date();
+          plazo.setDate(plazo.getDate() + 10);
+          expediente.fechaLimiteCorreccion = plazo;
+          await expediente.save();
+        }
+      }
+
       res.json({ ok: true, msg: `Documento marcado como: ${estado}`, documento });
     } catch (err) { next(err); }
   },

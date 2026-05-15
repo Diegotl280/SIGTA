@@ -9,7 +9,7 @@ const router = Router();
 // Límite de intentos de inicio de sesión (prevenir ataques de fuerza bruta)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // Limita cada IP a 5 peticiones por ventana de tiempo
+  max: 30, // Limita cada IP a 5 peticiones por ventana de tiempo (Se ajusto el límite a 30)
   message: { ok: false, msg: 'Demasiados intentos fallidos, por favor intenta de nuevo en 15 minutos.' },
   standardHeaders: true, // Retorna los encabezados 'RateLimit-*' en la respuesta
   legacyHeaders: false, // Deshabilita los encabezados 'X-RateLimit-*'

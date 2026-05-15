@@ -63,9 +63,6 @@ const TramitesAdmin = () => {
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [expedientes, setExpedientes] = useState([]);
   const [loadingExp, setLoadingExp] = useState(false);
-  const [expedienteDetalle, setExpedienteDetalle] = useState(null);
-  const [checklist, setChecklist] = useState([]);
-  const [loadingDetalle, setLoadingDetalle] = useState(false);
 
   const getCalendarDays = () => {
     const today = new Date();
@@ -208,7 +205,6 @@ const TramitesAdmin = () => {
 
   const seleccionarTramite = async (t) => {
     setTramiteSeleccionado(t);
-    setExpedienteDetalle(null);
     setLoadingExp(true);
 
     try {
@@ -222,303 +218,12 @@ const TramitesAdmin = () => {
 
       setExpedientes(filtrados);
 
-      if (location.state?.expedienteId) {
-        const expDirecto = filtrados.find(
-          (e) => e._id === location.state.expedienteId
-        );
-
-        if (expDirecto) verDetalle(expDirecto);
-      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoadingExp(false);
     }
   };
-
-  const verDetalle = async (exp) => {
-    setExpedienteDetalle(exp);
-    setLoadingDetalle(true);
-
-    try {
-      const res = await axios.get(
-        `${API_BASE_URL}/api/expedientes/${exp._id}/documentos`,
-        {
-          headers: { Authorization: `Bearer ${token()}` },
-        }
-      );
-
-      setChecklist(res.data.checklist || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingDetalle(false);
-    }
-  };
-
-  const recargarChecklist = async () => {
-    if (!expedienteDetalle?._id) return;
-
-    const res = await axios.get(
-      `${API_BASE_URL}/api/expedientes/${expedienteDetalle._id}/documentos`,
-      {
-        headers: { Authorization: `Bearer ${token()}` },
-      }
-    );
-
-    setChecklist(res.data.checklist || []);
-  };
-
-  const cambiarEstado = async (expId, nuevoEstado, obs = "") => {
-    try {
-      await axios.patch(
-        `${API_BASE_URL}/api/expedientes/${expId}/estado`,
-        { estado: nuevoEstado, observacionesGenerales: obs },
-        { headers: { Authorization: `Bearer ${token()}` } }
-      );
-
-      setExpedientes((prev) =>
-        prev.map((e) => (e._id === expId ? { ...e, estado: nuevoEstado } : e))
-      );
-
-      setExpedienteDetalle((prev) =>
-        prev ? { ...prev, estado: nuevoEstado } : null
-      );
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error al cambiar estado del expediente");
-    }
-  };
-
-  const validarDocumento = async (documentoId, estado) => {
-    let observacion = "";
-
-    if (estado === "con_observaciones") {
-      observacion = prompt("Escribe la observación para este documento:");
-
-      if (observacion === null) return;
-
-      if (!observacion.trim()) {
-        alert("La observación no puede estar vacía.");
-        return;
-      }
-    }
-
-    try {
-      await axios.patch(
-        `${API_BASE_URL}/api/expedientes/${expedienteDetalle._id}/documentos/${documentoId}/validar`,
-        { estado, observacion },
-        { headers: { Authorization: `Bearer ${token()}` } }
-      );
-
-      await recargarChecklist();
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error al validar documento");
-    }
-  };
-
-  const abrirDocumento = async (rutaArchivo) => {
-    const url = `${API_BASE_URL}/${rutaArchivo}`;
-
-    try {
-      const res = await fetch(url, { method: "HEAD" });
-
-      if (!res.ok) {
-        alert(
-          "El archivo no está disponible en este entorno. Probablemente fue subido desde otra computadora o servidor."
-        );
-        return;
-      }
-
-      window.open(url, "_blank");
-    } catch (error) {
-      alert("No se pudo acceder al archivo.");
-    }
-  };
-
-  if (expedienteDetalle) {
-    return (
-      <div className="tramites-detalle-container fade-in">
-        <div className="detalle-header">
-          <button
-            className="btn-volver"
-            onClick={() => setExpedienteDetalle(null)}
-          >
-            ← Volver
-          </button>
-
-          <h2>
-            Expediente: <span>{expedienteDetalle.folio}</span>
-          </h2>
-
-          <span
-            className="estado-badge"
-            style={{
-              backgroundColor: ESTADO_COLORS[expedienteDetalle.estado]?.bg,
-              color: ESTADO_COLORS[expedienteDetalle.estado]?.text,
-            }}
-          >
-            {ESTADO_LABELS[expedienteDetalle.estado]}
-          </span>
-        </div>
-
-        <div className="detalle-info">
-          <span>
-            <strong>Tipo:</strong> {expedienteDetalle.tipo}
-          </span>
-
-          <span>
-            <strong>Usuario:</strong>{" "}
-            {expedienteDetalle.usuario?.email || expedienteDetalle.usuario}
-          </span>
-
-          <span>
-            <strong>Enviado:</strong>{" "}
-            {expedienteDetalle.fechaEnvio
-              ? new Date(expedienteDetalle.fechaEnvio).toLocaleDateString(
-                "es-MX"
-              )
-              : "—"}
-          </span>
-
-          {expedienteDetalle.fechaLimiteCorreccion && (
-            <span style={{ color: "#b91c1c" }}>
-              <strong>Límite corrección:</strong>{" "}
-              {new Date(
-                expedienteDetalle.fechaLimiteCorreccion
-              ).toLocaleDateString("es-MX")}
-            </span>
-          )}
-        </div>
-
-        {expedienteDetalle.observacionesGenerales && (
-          <div className="detalle-obs">
-            <strong>Observaciones generales:</strong>{" "}
-            {expedienteDetalle.observacionesGenerales}
-          </div>
-        )}
-
-        <div className="detalle-acciones">
-          <button
-            className="btn-estado en-revision"
-            onClick={() => cambiarEstado(expedienteDetalle._id, "en_revision")}
-          >
-            Marcar En revisión
-          </button>
-        </div>
-
-        <h3 className="checklist-titulo">
-          Requisitos — {expedienteDetalle.tipo}
-        </h3>
-
-        {loadingDetalle ? (
-          <div className="loader">Cargando...</div>
-        ) : (
-          <div className="checklist-lista">
-            {checklist.map((item, i) => (
-              <div key={i} className="checklist-item">
-                <div className="checklist-nombre">
-                  <span
-                    className={`req-badge ${item.obligatorio ? "oblig" : "opcional"
-                      }`}
-                  >
-                    {item.obligatorio ? "Requerido" : "Opcional"}
-                  </span>
-
-                  {item.requisito}
-                </div>
-
-                <div
-                  className="checklist-estado"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span
-                    className={`doc-estado ${item.estado.replace("_", "-")}`}
-                  >
-                    {item.estado === "no_subido"
-                      ? "No subido"
-                      : item.estado === "pendiente"
-                        ? "Pendiente"
-                        : item.estado === "validado"
-                          ? "✓ Validado"
-                          : "Con observaciones"}
-                  </span>
-
-                  {item.documento && (
-                    <>
-                      <button
-                        className="doc-nombre"
-                        onClick={() =>
-                          abrirDocumento(item.documento.rutaArchivo)
-                        }
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                        }}
-                      >
-                        📄 {item.documento.nombreArchivo}
-                      </button>
-
-                      <button
-                        className="btn-estado validado"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          validarDocumento(item.documento._id, "validado");
-                        }}
-                        style={{
-                          fontSize: "0.75rem",
-                          padding: "0.3rem 0.6rem",
-                        }}
-                      >
-                        ✓ Validar
-                      </button>
-
-                      <button
-                        className="btn-estado con-obs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          validarDocumento(
-                            item.documento._id,
-                            "con_observaciones"
-                          );
-                        }}
-                        style={{
-                          fontSize: "0.75rem",
-                          padding: "0.3rem 0.6rem",
-                        }}
-                      >
-                        ✕ Observación
-                      </button>
-
-                      {item.documento.observacion && (
-                        <div
-                          style={{
-                            width: "100%",
-                            fontSize: "0.78rem",
-                            color: "#b91c1c",
-                            marginTop: "0.25rem",
-                          }}
-                        >
-                          <strong>Observación:</strong>{" "}
-                          {item.documento.observacion}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   if (tramiteSeleccionado) {
     return (
@@ -546,7 +251,7 @@ const TramitesAdmin = () => {
               <div
                 key={exp._id}
                 className="expediente-row"
-                onClick={() => verDetalle(exp)}
+               
               >
                 <span className="exp-folio">{exp.folio}</span>
 
@@ -568,7 +273,7 @@ const TramitesAdmin = () => {
                   {new Date(exp.createdAt).toLocaleDateString("es-MX")}
                 </span>
 
-                <span className="exp-ver">Ver →</span>
+
               </div>
             ))}
           </div>

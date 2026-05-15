@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmpresas, useGetExpedientesByEmpresa, useGetConfigTramites } from '../api/UserApi';
-import { useCambiarEstadoExpediente } from '../api/ExpedienteApi';
-import { useGetDocumentosByExpediente } from '../api/DocApi';
+import { useGetDocumentosByExpediente, useValidarDocumento } from '../api/DocApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
@@ -16,16 +15,15 @@ const EmpresaDetalleAdmin = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const { data: dataEmpresas, isLoading: isLoadingEmpresas } = useGetEmpresas();
   const { data: dataExpedientes, isLoading: isLoadingExpedientes } = useGetExpedientesByEmpresa(id);
   const { data: dataConfig, isLoading: isLoadingConfig } = useGetConfigTramites();
 
   const [empresa, setEmpresa] = useState(null);
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
-  const [observaciones, setObservaciones] = useState('');
-  
-  const cambiarEstadoMutation = useCambiarEstadoExpediente();
+
+  const validarDocMutation = useValidarDocumento();
 
   const expedienteActual = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
@@ -36,17 +34,6 @@ const EmpresaDetalleAdmin = () => {
       if (emp) setEmpresa(emp);
     }
   }, [dataEmpresas, id]);
-
-  useEffect(() => {
-    if (tramiteSeleccionado) {
-      const exp = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
-      if (exp) {
-        setObservaciones(exp.observacionesGenerales || '');
-      }
-    } else {
-      setObservaciones('');
-    }
-  }, [tramiteSeleccionado, dataExpedientes]);
 
   if (isLoadingEmpresas || isLoadingExpedientes || isLoadingConfig) {
     return <div className="loader">Cargando detalles...</div>;
@@ -74,42 +61,22 @@ const EmpresaDetalleAdmin = () => {
   };
 
   const renderStatusBox = (tipoExpediente, estadoActual) => {
-    const handleIconClick = (e, nuevoEstado) => {
-      e.stopPropagation();
-      const exp = expedientes.find(ex => ex.tipo === tipoExpediente);
-      if (!exp) {
-        toast.error("El trámite aún no ha sido iniciado por la empresa");
-        return;
-      }
-      cambiarEstadoMutation.mutate({
-        id: exp._id,
-        estado: nuevoEstado,
-        observacionesGenerales: tramiteSeleccionado === tipoExpediente ? observaciones : exp.observacionesGenerales
-      });
-    };
-
     return (
       <div className="status-box">
-        <img 
-          src={iconAprobado} 
-          alt="Aprobado" 
-          onClick={(e) => handleIconClick(e, 'validado')}
-          className={`status-icon ${estadoActual === 'aprobado' ? 'active' : 'inactive'}`} 
-          style={{ cursor: 'pointer' }}
+        <img
+          src={iconAprobado}
+          alt="Aprobado"
+          className={`status-icon ${estadoActual === 'aprobado' ? 'active' : 'inactive'}`}
         />
-        <img 
-          src={iconObs} 
-          alt="Observaciones" 
-          onClick={(e) => handleIconClick(e, 'con_observaciones')}
-          className={`status-icon ${estadoActual === 'observaciones' ? 'active' : 'inactive'}`} 
-          style={{ cursor: 'pointer' }}
+        <img
+          src={iconObs}
+          alt="Observaciones"
+          className={`status-icon ${estadoActual === 'observaciones' ? 'active' : 'inactive'}`}
         />
-        <img 
-          src={iconRevision} 
-          alt="Pendiente" 
-          onClick={(e) => handleIconClick(e, 'en_revision')}
-          className={`status-icon ${estadoActual === 'pendiente' ? 'active' : 'inactive'}`} 
-          style={{ cursor: 'pointer' }}
+        <img
+          src={iconRevision}
+          alt="Pendiente"
+          className={`status-icon ${estadoActual === 'pendiente' ? 'active' : 'inactive'}`}
         />
       </div>
     );
@@ -117,18 +84,28 @@ const EmpresaDetalleAdmin = () => {
 
   const handleContinuar = () => {
     if (tramiteSeleccionado) {
-      const exp = expedientes.find(e => e.tipo === tramiteSeleccionado);
-      if (exp && exp.observacionesGenerales !== observaciones) {
-         cambiarEstadoMutation.mutate({
-           id: exp._id,
-           estado: exp.estado,
-           observacionesGenerales: observaciones
-         });
-      }
       setTramiteSeleccionado(null);
     } else {
       navigate('/admin/empresas');
     }
+  };
+
+  const validarDocumento = (documentoId, estado) => {
+    let observacion = "";
+    if (estado === "con_observaciones") {
+      observacion = prompt("Escribe la observación para este documento:");
+      if (observacion === null) return;
+      if (!observacion.trim()) {
+        toast.error("La observación no puede estar vacía.");
+        return;
+      }
+    }
+    validarDocMutation.mutate({
+      expedienteId: expedienteActual._id,
+      documentoId,
+      estado,
+      observacion
+    });
   };
 
   const handleDescargarPdf = async (expedienteId, documentoId, nombreArchivo) => {
@@ -140,9 +117,9 @@ const EmpresaDetalleAdmin = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (!response.ok) throw new Error('Error al descargar');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -181,9 +158,9 @@ const EmpresaDetalleAdmin = () => {
                   <div className="tramite-btn" style={{ backgroundColor: bgColor }}>
                     <span className="tramite-nombre">REQUISITOS PARA EL TRÁMITE DE LA {nombreTramite.toUpperCase()} ({tipo})</span>
                     <div className="tramite-icon-right">
-                       {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
-                       {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
-                       {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
+                      {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
+                      {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
+                      {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
                     </div>
                   </div>
                   {renderStatusBox(tipo, estado)}
@@ -203,15 +180,15 @@ const EmpresaDetalleAdmin = () => {
             const nombreTramite = config ? config.nombre : tramiteSeleccionado;
             const estado = getEstadoTramite(tramiteSeleccionado);
             const bgColor = getBackgroundColor(index !== -1 ? index : 0);
-            
+
             return (
               <div className="tramite-row">
                 <div className="tramite-btn" style={{ backgroundColor: bgColor, cursor: 'default' }}>
                   <span className="tramite-nombre">REQUISITOS PARA EL TRÁMITE DE LA {nombreTramite.toUpperCase()} ({tramiteSeleccionado})</span>
                   <div className="tramite-icon-right">
-                     {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
-                     {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
-                     {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
+                    {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
+                    {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
+                    {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
                   </div>
                 </div>
                 {renderStatusBox(tramiteSeleccionado, estado)}
@@ -234,12 +211,38 @@ const EmpresaDetalleAdmin = () => {
                     <div className="req-acciones">
                       <img src={iconPdf} alt="PDF" className="pdf-icon" />
                       {docSubido ? (
-                        <button 
-                          onClick={() => handleDescargarPdf(expedienteActual._id, docSubido._id, docSubido.nombreArchivo)}
-                          className="btn-descargar-pdf"
-                        >
-                          Descargar PDF
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: docSubido.estado === 'validado' ? '#10b981' : docSubido.estado === 'con_observaciones' ? '#ef4444' : '#6b7280' }}>
+                            {docSubido.estado === 'validado' ? '✓ Validado' : docSubido.estado === 'con_observaciones' ? '✕ Observaciones' : 'Pendiente'}
+                          </span>
+
+                          <button
+                            onClick={() => handleDescargarPdf(expedienteActual._id, docSubido._id, docSubido.nombreArchivo)}
+                            className="btn-descargar-pdf"
+                          >
+                            Descargar PDF
+                          </button>
+
+                          <button
+                            onClick={() => validarDocumento(docSubido._id, "validado")}
+                            style={{ fontSize: "0.75rem", padding: "0.3rem 0.6rem", background: "#10b981", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                          >
+                            ✓ Validar
+                          </button>
+
+                          <button
+                            onClick={() => validarDocumento(docSubido._id, "con_observaciones")}
+                            style={{ fontSize: "0.75rem", padding: "0.3rem 0.6rem", background: "#ef4444", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                          >
+                            ✕ Observación
+                          </button>
+
+                          {docSubido.estado === 'con_observaciones' && docSubido.observacion && (
+                            <span style={{ fontSize: "0.75rem", color: "#ef4444", marginLeft: "0.5rem", fontStyle: 'italic' }}>
+                              Ob: {docSubido.observacion}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <button className="btn-descargar-pdf" disabled style={{ backgroundColor: '#d1d5db', color: '#6b7280', cursor: 'not-allowed' }}>
                           No hay pdfs adjuntos
@@ -257,19 +260,10 @@ const EmpresaDetalleAdmin = () => {
         </div>
       )}
 
-      {/* Footer / Observaciones */}
+      {/* Footer */}
       <div className="footer-seccion">
-        <div className="obs-container">
-          <label>Observaciones</label>
-          <textarea 
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-          ></textarea>
-        </div>
-
         <div className="footer-botones">
           <div className="btn-left">
-            <button className="btn-folios">Folios</button>
           </div>
           <div className="btn-right">
             <button className="btn-cancelar" onClick={() => navigate('/admin/empresas')}>

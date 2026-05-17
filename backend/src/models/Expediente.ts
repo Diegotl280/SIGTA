@@ -10,6 +10,7 @@ export interface IExpediente extends Document {
   estado: EstadoExpediente;
   fechaEnvio?: Date;
   fechaLimiteCorreccion?: Date;
+  diasParaCorreccion?: number;
   observacionesGenerales?: string;
 }
 
@@ -40,6 +41,9 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
     fechaLimiteCorreccion: {
       type: Date,
+    },
+    diasParaCorreccion: {
+      type: Number,
     },
     observacionesGenerales: {
       type: String,

@@ -7,8 +7,8 @@ const token = () => localStorage.getItem('token');
 
 const ESTADO_COLORS = {
   con_observaciones: { bg: '#ebd02f', text: '#1a1a1a' },
-  enviado:           { bg: '#dbeafe', text: '#1d4ed8' },
-  en_revision:       { bg: '#fef3c7', text: '#92400e' },
+  enviado: { bg: '#dbeafe', text: '#1d4ed8' },
+  en_revision: { bg: '#fef3c7', text: '#92400e' },
 };
 
 const NotifiUsuario = () => {
@@ -22,7 +22,7 @@ const NotifiUsuario = () => {
         const res = await axios.get(`${API_BASE_URL}/api/expedientes`, {
           headers: { Authorization: `Bearer ${token()}` },
         });
-        
+
         let pendientes = (res.data.expedientes || []).filter(e =>
           ['enviado', 'en_revision', 'con_observaciones'].includes(e.estado)
         );
@@ -97,8 +97,8 @@ const NotifiUsuario = () => {
               {exp.estado === 'con_observaciones'
                 ? ' está incompleta o es errónea, favor de corrección lo antes posible.'
                 : exp.estado === 'enviado'
-                ? ' fue recibida y está pendiente de revisión.'
-                : ' se encuentra en revisión por parte de SAMA.'}
+                  ? ' fue recibida y está pendiente de revisión.'
+                  : ' se encuentra en revisión por parte de SAMA.'}
             </p>
             {exp.observacionesGenerales && (
               <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '0.9rem', fontStyle: 'italic' }}>
@@ -107,7 +107,7 @@ const NotifiUsuario = () => {
             )}
             {exp.fechaLimiteCorreccion && exp.estado === 'con_observaciones' && (
               <p style={{ margin: '0.5rem 0 0', color: '#1a1a1a', fontWeight: 'bold' }}>
-                ⏰ Lapso de tiempo permitido: 10 días hábiles.
+                ⏰ Lapso de tiempo permitido: {exp.diasParaCorreccion} días naturales.
                 Fecha límite: {new Date(exp.fechaLimiteCorreccion).toLocaleDateString('es-MX')}
               </p>
             )}

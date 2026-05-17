@@ -165,7 +165,39 @@ const TramitesAdmin = () => {
     }));
   };
 
+  const maxWords = (str, limit = 500) => !str || str.trim().split(/\s+/).length <= limit;
+
   const guardarTramite = async () => {
+    if (!maxWords(form.nombre)) {
+      alert("El nombre del trámite no puede exceder las 500 palabras.");
+      return;
+    }
+    if (!maxWords(form.tipo)) {
+      alert("La abreviación no puede exceder las 500 palabras.");
+      return;
+    }
+    for (const req of form.requisitos) {
+      if (!maxWords(req.nombre)) {
+        alert("El nombre de un documento/requisito no puede exceder las 500 palabras.");
+        return;
+      }
+    }
+
+    if (form.fechaApertura && form.fechaCierre) {
+      const fInicio = new Date(form.fechaApertura);
+      const fCierre = new Date(form.fechaCierre);
+      if (fCierre < fInicio) {
+         alert("La fecha de cierre no puede ser anterior a la fecha de inicio.");
+         return;
+      }
+      const diffTime = Math.abs(fCierre - fInicio);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      if (form.diasCorreccion > diffDays) {
+         alert("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
+         return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -251,7 +283,7 @@ const TramitesAdmin = () => {
               <div
                 key={exp._id}
                 className="expediente-row"
-               
+
               >
                 <span className="exp-folio">{exp.folio}</span>
 
@@ -373,7 +405,7 @@ const TramitesAdmin = () => {
                     value={nuevoRequisito}
                     onChange={(e) => setNuevoRequisito(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && agregarRequisito()}
-                    placeholder="**************************************"
+                    placeholder="INGRESAR NOMBRE DEL DOCUMENTO"
                   />
                 </div>
 
@@ -409,7 +441,7 @@ const TramitesAdmin = () => {
                   />
                 </div>
                 <div className="t-fechas-inputs" style={{ marginTop: '1rem' }}>
-                  <span>Días corrección:</span>
+                  <span>Días para corrección:</span>
                   <input
                     type="number"
                     min="1"

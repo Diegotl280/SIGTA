@@ -1,3 +1,4 @@
+import { maxWords } from '../utils/validation';
 import { Response, NextFunction } from 'express';
 import { Documento } from '../models/Documento';
 import { Expediente } from '../models/Expediente';
@@ -56,7 +57,7 @@ export const documentoController = {
           fs.unlinkSync(req.file.path);
           res.status(400).json({
             ok: false,
-            msg: 'El plazo de corrección de 10 días ha vencido',
+            msg: `El plazo de corrección de ${expediente.diasParaCorreccion || 10} días ha vencido`,
             fechaLimite: expediente.fechaLimiteCorreccion,
           });
           return;
@@ -155,6 +156,11 @@ export const documentoController = {
         return;
       }
 
+      if (observacion && !maxWords(observacion)) {
+        res.status(400).json({ ok: false, msg: 'La observación excede las 500 palabras' });
+        return;
+      }
+
       const documento = await Documento.findById(req.params.documentoId);
       if (!documento) {
         res.status(404).json({ ok: false, msg: 'Documento no encontrado' });
@@ -170,9 +176,15 @@ export const documentoController = {
         const expediente = await Expediente.findById(documento.expediente);
         if (expediente && expediente.estado !== 'con_observaciones') {
           expediente.estado = 'con_observaciones';
+          
+          const configTramite = await ConfigTramite.findOne({ tipo: expediente.tipo });
+          const dias = configTramite?.diasCorreccion || 10;
+          
           const plazo = new Date();
-          plazo.setDate(plazo.getDate() + 10);
+          plazo.setDate(plazo.getDate() + dias);
           expediente.fechaLimiteCorreccion = plazo;
+          expediente.diasParaCorreccion = dias;
+          
           await expediente.save();
         }
       }

@@ -99,6 +99,10 @@ const EmpresaDetalleAdmin = () => {
         toast.error("La observación no puede estar vacía.");
         return;
       }
+      if (observacion.trim().split(/\s+/).length > 500) {
+        toast.error("La observación no puede exceder las 500 palabras.");
+        return;
+      }
     }
     validarDocMutation.mutate({
       expedienteId: expedienteActual._id,

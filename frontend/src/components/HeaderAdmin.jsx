@@ -29,7 +29,14 @@ const HeaderAdmin = () => {
       <div className="header-center">
 
         <nav className="nav-pill">
-           <NavLink
+          <NavLink
+            to="/admin/notificaciones"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Notificaciones
+          </NavLink>
+          <span className="divider"></span>
+          <NavLink
             to="/admin"
             end
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
@@ -42,7 +49,7 @@ const HeaderAdmin = () => {
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
           >
             Empresas
-          </NavLink>         
+          </NavLink>
           <span className="divider"></span>
           <NavLink
             to="/admin/tramites"
@@ -51,13 +58,7 @@ const HeaderAdmin = () => {
             Trámites
           </NavLink>
           <span className="divider"></span>
-          <NavLink
-            to="/admin/notificaciones"
-            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
-          >
-            Notificaciones
-          </NavLink>
-          <span className="divider"></span>
+
           <NavLink
             to="/admin/configuracion"
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}

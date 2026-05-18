@@ -1,5 +1,5 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import "dotenv/config";

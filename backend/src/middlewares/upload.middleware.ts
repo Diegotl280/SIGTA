@@ -15,16 +15,20 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const timestamp = Date.now();
-    const nombre = `${timestamp}-${file.originalname.replace(/\s+/g, '_')}`;
+    // Limpiar el nombre del archivo para evitar path traversal y caracteres extraños
+    const extension = path.extname(file.originalname).toLowerCase();
+    const nombreLimpio = path.basename(file.originalname, extension).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const nombre = `${timestamp}-${nombreLimpio}${extension}`;
     cb(null, nombre);
   },
 });
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  if (file.mimetype === 'application/pdf') {
+  const extension = path.extname(file.originalname).toLowerCase();
+  if (file.mimetype === 'application/pdf' && extension === '.pdf') {
     cb(null, true);
   } else {
-    cb(new Error('Solo se permiten archivos PDF'));
+    cb(new Error('Solo se permiten archivos con extensión .pdf válidos'));
   }
 };
 

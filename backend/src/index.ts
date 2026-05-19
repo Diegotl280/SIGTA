@@ -1,5 +1,5 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import "dotenv/config";
@@ -7,10 +7,12 @@ import authRoutes from "./routes/auth.routes";
 import expedienteRoutes from "./routes/expediente.routes";
 import documentoRoutes from "./routes/documento.routes"
 import configTramiteRoutes from './routes/configTramite.routes';
+import path from "path";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// La carpeta 'uploads' ya no es pública. Se debe usar el endpoint /descargar
 
 app.get("/", (_req: Request, res: Response) => {
   res.json({ ok: true, msg: "Saludos desde el backend de SIGTA" });

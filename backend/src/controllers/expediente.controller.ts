@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import { maxWords } from '../utils/validation';
 import { Expediente } from '../models/Expediente';
 import { ConfigTramite } from '../models/ConfigTramite';
 import { AuthRequest } from '../middlewares/auth.middleware';
@@ -151,7 +152,7 @@ export const expedienteController = {
         return;
       }
 
-      if (expediente.estado !== 'borrador') {
+      if (expediente.estado !== 'borrador' && expediente.estado !== 'con_observaciones') {
         res.status(400).json({ ok: false, msg: `No se puede enviar un expediente en estado: ${expediente.estado}` });
         return;
       }
@@ -173,6 +174,12 @@ export const expedienteController = {
       }
 
       const { estado, observacionesGenerales } = req.body;
+
+      if (observacionesGenerales !== undefined && !maxWords(observacionesGenerales)) {
+        res.status(400).json({ ok: false, msg: 'Las observaciones generales exceden las 500 palabras' });
+        return;
+      }
+
       const expediente = await Expediente.findById(req.params.id);
 
       if (!expediente) {
@@ -181,13 +188,18 @@ export const expedienteController = {
       }
 
       expediente.estado = estado;
-      if (observacionesGenerales) expediente.observacionesGenerales = observacionesGenerales;
+      if (observacionesGenerales !== undefined) expediente.observacionesGenerales = observacionesGenerales;
 
-      // Si tiene observaciones, calcular plazo de 10 días para corrección
+      // Si tiene observaciones, calcular plazo para corrección basado en la configuración del trámite
       if (estado === 'con_observaciones') {
+        const configTramite = await ConfigTramite.findOne({ tipo: expediente.tipo });
+        const dias = configTramite?.diasCorreccion || 10;
+        
         const plazo = new Date();
-        plazo.setDate(plazo.getDate() + 10);
+        plazo.setDate(plazo.getDate() + dias);
+        
         expediente.fechaLimiteCorreccion = plazo;
+        expediente.diasParaCorreccion = dias;
       }
 
       await expediente.save();

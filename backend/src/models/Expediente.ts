@@ -1,6 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-export type TipoTramite = 'LAU' | 'COA' | 'MIA' | 'PSE' | 'RRME';
+export type TipoTramite = string;
 export type EstadoExpediente = 'borrador' | 'enviado' | 'en_revision' | 'con_observaciones' | 'validado' | 'cerrado';
 
 export interface IExpediente extends Document {
@@ -10,6 +10,7 @@ export interface IExpediente extends Document {
   estado: EstadoExpediente;
   fechaEnvio?: Date;
   fechaLimiteCorreccion?: Date;
+  diasParaCorreccion?: number;
   observacionesGenerales?: string;
 }
 
@@ -22,7 +23,7 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
     tipo: {
       type: String,
-      enum: ['LAU', 'COA', 'MIA', 'PSE', 'RRME'],
+
       required: true,
     },
     usuario: {
@@ -40,6 +41,9 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
     fechaLimiteCorreccion: {
       type: Date,
+    },
+    diasParaCorreccion: {
+      type: Number,
     },
     observacionesGenerales: {
       type: String,

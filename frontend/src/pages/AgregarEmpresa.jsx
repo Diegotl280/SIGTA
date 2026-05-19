@@ -53,6 +53,11 @@ const AgregarEmpresa = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (formData.nombre && formData.nombre.trim().split(/\s+/).length > 500) {
+      alert("El nombre de la empresa no puede exceder las 500 palabras.");
+      return;
+    }
+
     const payload = {
       ...formData,
       role: 'usuario',

@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 
+import { maxWords } from '../utils/validation';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sigta_2026';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -11,6 +13,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     if (!nombre || !email || !password) {
       res.status(400).json({ ok: false, msg: 'Nombre, email y contraseña son requeridos' });
+      return;
+    }
+
+    if (!maxWords(nombre) || !maxWords(rfc)) {
+      res.status(400).json({ ok: false, msg: 'Los textos ingresados exceden las 500 palabras' });
       return;
     }
 
@@ -44,13 +51,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       ok: true,
       msg: 'Usuario registrado con éxito',
-      /*user: {
-        uid: newUser._id,
-        nombre: newUser.nombre,
-        email: newUser.email,
-        role: newUser.role
-      },*/
-      user : newUser,  // Línea optimizada
+      user : newUser,
       token
     });
   } catch (error) {
@@ -68,13 +69,18 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ ok: false, msg: 'Formato de datos inválido' });
+      return;
+    }
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       res.status(400).json({ ok: false, msg: 'Credenciales inválidas' });
       return;
     }
 
-    // @ts-ignore - status exists in our model now
+    // @ts-ignore
     if (user.status === 'deshabilitado') {
       res.status(403).json({ ok: false, msg: 'Esta cuenta ha sido deshabilitada' });
       return;
@@ -116,7 +122,6 @@ export const getMe = async (req: any, res: Response): Promise<void> => {
       return;
     }
     
-    // Devolver un objeto 'usuario' con los datos completos
     res.json({ ok: true, usuario: user });
   } catch (error) {
     console.error('Error en getMe:', error);
@@ -159,6 +164,11 @@ export const updateEmpresa = async (req: Request, res: Response): Promise<void> 
   try {
     const { id } = req.params;
     const { nombre, email, password, rfc, telefono, tramitesPermitidos } = req.body;
+
+    if ((nombre && !maxWords(nombre)) || (rfc && !maxWords(rfc))) {
+      res.status(400).json({ ok: false, msg: 'Los textos ingresados exceden las 500 palabras' });
+      return;
+    }
 
     const user = await User.findById(id);
     if (!user) {

@@ -60,8 +60,42 @@ export function useSubirDocumento() {
         },
         onSuccess: (data, variables) => {
             toast.success("Documento subido exitosamente");
-            // Invalidar la caché de los documentos para ese expediente, provocando un refetch
             queryClient.invalidateQueries({ queryKey: ['documentosExpediente', variables.expedienteId] });
+        }
+    });
+}
+
+/**
+ * Hook para validar o rechazar un documento específico (Administrador)
+ */
+export function useValidarDocumento() {
+    const queryClient = useQueryClient();
+
+    const validarDocumentoRequest = async ({ expedienteId, documentoId, estado, observacion }) => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.patch(`${API_BASE_URL}/api/expedientes/${expedienteId}/documentos/${documentoId}/validar`, 
+        { estado, observacion },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: validarDocumentoRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al validar el documento");
+        },
+        onSuccess: (data, variables) => {
+            toast.success("Estado del documento actualizado");
+            queryClient.invalidateQueries({ queryKey: ['documentosExpediente', variables.expedienteId] });
+            // Al validar un documento, puede cambiar el estado del expediente general
+            queryClient.invalidateQueries({ queryKey: ['expedientesEmpresa'] });
         }
     });
 }

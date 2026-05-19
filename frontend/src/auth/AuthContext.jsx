@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         });
         if (res.data.ok) {
           setIsAuthenticated(true);
-          setUser(res.data.user);
+          setUser(res.data.usuario || res.data.user);
         } else {
           setIsAuthenticated(false);
         }

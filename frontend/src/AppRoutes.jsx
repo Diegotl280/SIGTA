@@ -11,6 +11,7 @@ import NotifiUsuario from './pages/NotifiUsuario';
 import TramitesUser from './pages/TramitesUser';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Layout from './layouts/Layout';
+import ConfiguracionAdmin from './pages/ConfiguracionAdmin';
 
 const HomeRedirect = () => {
   const { user, loading } = useAuth();
@@ -70,6 +71,11 @@ const AppRoutes = () => {
             <TramitesUser />
           </ProtectedRoute>
         } />
+        <Route path="admin/configuracion" element={
+          <ProtectedRoute allowedRole="administrador">
+            <ConfiguracionAdmin />
+          </ProtectedRoute>} />
+
 
         {/* Ruta para capturar cualquier URL no reconocida y redirigir al inicio correspondiente */}
         <Route path="*" element={<HomeRedirect />} />

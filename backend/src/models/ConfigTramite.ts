@@ -27,7 +27,7 @@ const ConfigTramiteSchema = new Schema<IConfigTramite>(
   {
     tipo: {
       type: String,
-      enum: ['LAU', 'COA', 'MIA', 'PSE', 'RRME'],
+
       required: true,
       unique: true,
     },

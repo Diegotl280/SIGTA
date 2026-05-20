@@ -187,6 +187,29 @@ export const documentoController = {
           
           await expediente.save();
         }
+      } else if (estado === 'validado') {
+        // Verificar si todos los documentos requeridos están validados
+        const expediente = await Expediente.findById(documento.expediente);
+        if (expediente) {
+          const configTramite = await ConfigTramite.findOne({ tipo: expediente.tipo });
+          if (configTramite) {
+            const requisitosObligatorios = configTramite.requisitos.filter(r => r.obligatorio).map(r => r.nombre);
+            const todosDocs = await Documento.find({ expediente: expediente._id });
+            
+            // Verificar que todos los documentos subidos estén validados
+            const todosSubidosValidados = todosDocs.length > 0 && todosDocs.every(d => d.estado === 'validado');
+            
+            // Verificar que estén todos los obligatorios
+            const tieneTodosObligatorios = requisitosObligatorios.every(reqNombre => 
+              todosDocs.some(d => d.tipoRequisito === reqNombre)
+            );
+
+            if (todosSubidosValidados && tieneTodosObligatorios && expediente.estado !== 'validado') {
+              expediente.estado = 'validado';
+              await expediente.save();
+            }
+          }
+        }
       }
 
       res.json({ ok: true, msg: `Documento marcado como: ${estado}`, documento });

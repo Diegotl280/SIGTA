@@ -34,10 +34,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       nombre,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: role && ['administrador', 'usuario'].includes(role) ? role : 'usuario',
+      role: 'usuario', // Forzado por seguridad (escalada de privilegios evitada)
       rfc: rfc || '',
       telefono: telefono || '',
-      tramitesPermitidos: Array.isArray(tramitesPermitidos) ? tramitesPermitidos : []
+      tramitesPermitidos: [] // Un usuario nuevo no debe tener trámites asignados automáticamente
     });
 
     await newUser.save();
@@ -129,8 +129,12 @@ export const getMe = async (req: any, res: Response): Promise<void> => {
   }
 };
 
-export const getEmpresas = async (req: Request, res: Response): Promise<void> => {
+export const getEmpresas = async (req: any, res: Response): Promise<void> => {
   try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'No tienes permiso para ver esta información' });
+      return;
+    }
     const empresas = await User.find({ role: 'usuario', status: { $ne: 'deshabilitado' } }, 'nombre email rfc telefono tramitesPermitidos _id').sort({ nombre: 1 });
     res.json({ ok: true, empresas });
   } catch (error) {
@@ -139,8 +143,12 @@ export const getEmpresas = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const deshabilitarEmpresa = async (req: Request, res: Response): Promise<void> => {
+export const deshabilitarEmpresa = async (req: any, res: Response): Promise<void> => {
   try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'Solo el administrador puede deshabilitar empresas' });
+      return;
+    }
     const { id } = req.params;
     const user = await User.findById(id);
 
@@ -160,9 +168,15 @@ export const deshabilitarEmpresa = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updateEmpresa = async (req: Request, res: Response): Promise<void> => {
+export const updateEmpresa = async (req: any, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+
+    if (req.user.role !== 'administrador' && req.user.uid !== id) {
+      res.status(403).json({ ok: false, msg: 'No tienes permiso para modificar esta empresa' });
+      return;
+    }
+
     const { nombre, email, password, rfc, telefono, tramitesPermitidos } = req.body;
 
     if ((nombre && !maxWords(nombre)) || (rfc && !maxWords(rfc))) {
@@ -190,8 +204,12 @@ export const updateEmpresa = async (req: Request, res: Response): Promise<void> 
     if (rfc !== undefined) user.rfc = rfc;
     // @ts-ignore
     if (telefono !== undefined) user.telefono = telefono;
-    // @ts-ignore
-    if (tramitesPermitidos !== undefined) user.tramitesPermitidos = Array.isArray(tramitesPermitidos) ? tramitesPermitidos : [];
+    
+    // Solo el administrador puede modificar los trámites permitidos de una empresa
+    if (tramitesPermitidos !== undefined && req.user.role === 'administrador') {
+      // @ts-ignore
+      user.tramitesPermitidos = Array.isArray(tramitesPermitidos) ? tramitesPermitidos : [];
+    }
 
     if (password && password.trim() !== '') {
       const salt = await bcrypt.genSalt(10);

@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useGetUser } from '../api/UserApi';
 import gobiernoLogo from '../assets/Gobierno.jpeg';
+import MobileNav from './MobileNav';
 
 const HeaderUser = () => {
   const { logout, user } = useAuth();
@@ -10,6 +11,11 @@ const HeaderUser = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { data } = useGetUser();
   const userName = user?.nombre || data?.usuario?.nombre || data?.user?.nombre || "Usuario";
+
+  const userLinks = [
+    { to: "/notificaciones", label: "Notificaciones" },
+    { to: "/tramites", label: "Tramites" },
+  ];
 
   return (
     <header className="top-header">
@@ -53,6 +59,15 @@ const HeaderUser = () => {
           )}
         </div>
       </div>
+
+      <MobileNav 
+        links={userLinks} 
+        userName={userName} 
+        onLogout={() => {
+          logout();
+          navigate('/login');
+        }} 
+      />
     </header>
   );
 };

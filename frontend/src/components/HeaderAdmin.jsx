@@ -2,11 +2,20 @@ import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate, NavLink } from "react-router-dom";
 import gobiernoLogo from "../assets/Gobierno.jpeg";
+import MobileNav from "./MobileNav";
 
 const HeaderAdmin = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const adminLinks = [
+    { to: "/admin", label: "Inicio", end: true },
+    { to: "/admin/empresas", label: "Empresas" },
+    { to: "/admin/tramites", label: "Trámites" },
+    { to: "/admin/notificaciones", label: "Notificaciones" },
+    { to: "/admin/configuracion", label: "Configuración" },
+  ];
 
   return (
     <header className="top-header">
@@ -97,6 +106,15 @@ const HeaderAdmin = () => {
           )}
         </div>
       </div>
+
+      <MobileNav 
+        links={adminLinks} 
+        userName="Admin" 
+        onLogout={() => {
+          logout();
+          navigate("/login");
+        }} 
+      />
     </header>
   );
 };

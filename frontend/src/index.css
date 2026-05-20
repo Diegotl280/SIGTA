@@ -38,6 +38,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 3rem;
+  position: relative;
 }
 
 .header-left {
@@ -95,7 +96,9 @@ body {
 
 /* Nav Pill */
 .header-center {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
 }
@@ -118,6 +121,7 @@ body {
   cursor: pointer;
   padding: 0.5rem 0.8rem;
   font-weight: 500;
+  text-decoration: none;
 }
 
 .nav-link.active {
@@ -236,6 +240,99 @@ body {
   background: #fff;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
 }
+
+.login-background {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.9) 100%);
+}
+
+/* --- Mobile Navigation Styles --- */
+.mobile-nav-container {
+  display: none;
+}
+
+@media (max-width: 1150px) {
+  .header-center, .header-right {
+    display: none !important;
+  }
+  
+  .mobile-nav-container {
+    display: block;
+    position: relative;
+  }
+  
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-menu-btn img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .mobile-menu-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 200px;
+    border: 1px solid #ddd;
+  }
+  
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+  }
+  
+  .mobile-nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .mobile-nav-link.active {
+    color: var(--red-accent);
+    background: #f9f9f9;
+  }
+  
+  .mobile-user-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .mobile-user-name {
+    font-weight: 600;
+    color: #111;
+    padding: 0 0.5rem;
+  }
+  
+  .mobile-logout-btn {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
 
 /* LABSOL Widget */
 .labsol-widget {

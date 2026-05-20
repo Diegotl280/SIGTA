@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useGetUser, useGetConfigTramites } from '../api/UserApi';
-import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente } from '../api/ExpedienteApi';
+import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
 import { useGetDocumentosByExpediente, useSubirDocumento } from '../api/DocApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
@@ -26,7 +26,6 @@ const TramitesUser = () => {
   const expedientes = dataExpedientes?.expedientes || [];
   const configs = dataConfig?.tramites || [];
   const tramitesPermitidos = userData?.usuario?.tramitesPermitidos || [];
-  const nombreEmpresa = userData?.usuario?.nombre || userData?.usuario?.email || 'Empresa';
 
   const expedienteActual = expedientes.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
@@ -128,6 +127,25 @@ const TramitesUser = () => {
     }
   };
 
+  const handleDescargarAcuse = async () => {
+    if (!expedienteActual?.acuseRecepcion) return;
+
+    try {
+      const blob = await descargarAcuseExpediente(expedienteActual._id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = expedienteActual.acuseRecepcion.nombreArchivo || `acuse-${expedienteActual.folio}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      alert(err.message || "Error al descargar el acuse");
+    }
+  };
+
   return (
     <div className="tramites-user-container fade-in">
 
@@ -184,6 +202,25 @@ const TramitesUser = () => {
           })()}
 
           <div className="requisitos-container">
+            {expedienteActual?.acuseRecepcion && (
+              <div className="acuse-user-panel">
+                <div className="acuse-user-info">
+                  <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                  <div>
+                    <strong>Acuse de recepción disponible</strong>
+                    <span>{expedienteActual.acuseRecepcion.nombreArchivo}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-descargar-pdf"
+                  onClick={handleDescargarAcuse}
+                >
+                  Descargar acuse
+                </button>
+              </div>
+            )}
+
             {isLoadingDocumentos ? (
               <div className="loader">Cargando requisitos...</div>
             ) : (

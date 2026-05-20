@@ -12,7 +12,37 @@ export interface IExpediente extends Document {
   fechaLimiteCorreccion?: Date;
   diasParaCorreccion?: number;
   observacionesGenerales?: string;
+  acuseRecepcion?: {
+    nombreArchivo: string;
+    rutaArchivo: string;
+    fechaCarga: Date;
+    subidoPor: Types.ObjectId;
+  };
 }
+
+const AcuseRecepcionSchema = new Schema(
+  {
+    nombreArchivo: {
+      type: String,
+      required: true,
+    },
+    rutaArchivo: {
+      type: String,
+      required: true,
+    },
+    fechaCarga: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+    subidoPor: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+  },
+  { _id: false }
+);
 
 const ExpedienteSchema = new Schema<IExpediente>(
   {
@@ -47,6 +77,10 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
     observacionesGenerales: {
       type: String,
+    },
+    acuseRecepcion: {
+      type: AcuseRecepcionSchema,
+      required: false,
     },
   },
   { timestamps: true }

@@ -9,10 +9,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sigta_2026';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nombre, email, password, role, rfc, telefono, tramitesPermitidos } = req.body;
+    const { nombre, email, password, rfc, telefono } = req.body;
 
     if (!nombre || !email || !password) {
       res.status(400).json({ ok: false, msg: 'Nombre, email y contraseña son requeridos' });
+      return;
+    }
+
+    if (typeof nombre !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ ok: false, msg: 'Formato de datos inválido' });
       return;
     }
 
@@ -21,7 +26,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       res.status(400).json({ ok: false, msg: 'ese correo ya existe' });
       return;
@@ -32,7 +37,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const newUser = new User({
       nombre,
-      email: email.toLowerCase(),
+      email,
       password: hashedPassword,
       role: 'usuario', // Forzado por seguridad (escalada de privilegios evitada)
       rfc: rfc || '',
@@ -74,7 +79,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email });
     if (!user) {
       res.status(400).json({ ok: false, msg: 'Credenciales inválidas' });
       return;
@@ -190,13 +195,18 @@ export const updateEmpresa = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
-    if (email && email.toLowerCase() !== user.email) {
-      const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (email && email !== user.email) {
+      if (typeof email !== 'string') {
+        res.status(400).json({ ok: false, msg: 'Formato de correo inválido' });
+        return;
+      }
+
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         res.status(400).json({ ok: false, msg: 'Ese correo ya está en uso por otra empresa' });
         return;
       }
-      user.email = email.toLowerCase();
+      user.email = email;
     }
 
     if (nombre) user.nombre = nombre;

@@ -62,6 +62,12 @@ const NotificacionesAdmin = () => {
     con_observaciones: expedientes.filter(e => e.estado === 'con_observaciones').length,
   };
 
+  const irADetalleExpediente = (exp) => {
+    const empresaId = exp.usuario?._id || exp.usuario;
+    if (!empresaId) return;
+    navigate(`/admin/empresas/detalle/${empresaId}`, { state: { tipoAuto: exp.tipo, expedienteId: exp._id } });
+  };
+
   return (
     <div className="notif-admin-container fade-in">
 
@@ -116,7 +122,7 @@ const NotificacionesAdmin = () => {
             <div
               key={exp._id}
               className="notif-card"
-              onClick={() => navigate('/admin/tramites', { state: { tipoAuto: exp.tipo, expedienteId: exp._id } })}
+              onClick={() => irADetalleExpediente(exp)}
             >
               <div className="notif-card-icono">
                 {ESTADO_ICONOS[exp.estado]}
@@ -139,6 +145,16 @@ const NotificacionesAdmin = () => {
                     {exp.usuario?.email || exp.usuario || '—'}
                   </span>
                   <span className="notif-tipo">Trámite: {exp.tipo}</span>
+                  {exp.estado === 'enviado' && !exp.acuseRecepcion && (
+                    <span className="notif-plazo">
+                      Acuse pendiente
+                    </span>
+                  )}
+                  {exp.acuseRecepcion && (
+                    <span className="notif-plazo">
+                      Acuse cargado
+                    </span>
+                  )}
                   {exp.fechaLimiteCorreccion && (
                     <span className="notif-plazo">
                       ⏰ Plazo: {new Date(exp.fechaLimiteCorreccion).toLocaleDateString('es-MX')}

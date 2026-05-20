@@ -50,7 +50,7 @@ export function useCrearExpediente() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al crear el expediente");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Trámite iniciado");
             queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
         }
@@ -81,7 +81,7 @@ export function useEnviarExpediente() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al enviar el expediente");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Trámite enviado a revisión exitosamente");
             queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
         }
@@ -114,10 +114,65 @@ export function useCambiarEstadoExpediente() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al cambiar el estado");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Estado del trámite actualizado");
             queryClient.invalidateQueries({ queryKey: ['expedientesEmpresa'] });
             queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
         }
     });
+}
+
+/**
+ * Hook para subir o reemplazar el acuse de recepción de un expediente (Solo Administrador)
+ */
+export function useSubirAcuseExpediente() {
+    const queryClient = useQueryClient();
+
+    const subirAcuseRequest = async ({ expedienteId, archivo }) => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+
+        const res = await axios.post(`${API_BASE_URL}/api/expedientes/${expedienteId}/acuse`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: subirAcuseRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al subir el acuse");
+        },
+        onSuccess: (_data, variables) => {
+            toast.success("Acuse cargado exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['expedientesEmpresa'] });
+            queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
+            queryClient.invalidateQueries({ queryKey: ['expediente', variables.expedienteId] });
+        }
+    });
+}
+
+export async function descargarAcuseExpediente(expedienteId) {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error("No token available");
+
+    const response = await fetch(`${API_BASE_URL}/api/expedientes/${expedienteId}/acuse/descargar`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.msg || 'Error al descargar el acuse');
+    }
+
+    return response.blob();
 }

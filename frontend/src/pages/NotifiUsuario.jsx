@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'sonner';
+import { descargarAcuseExpediente } from '../api/ExpedienteApi';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const token = () => localStorage.getItem('token');
@@ -9,6 +11,7 @@ const ESTADO_COLORS = {
   con_observaciones: { bg: '#ebd02f', text: '#1a1a1a' },
   enviado: { bg: '#dbeafe', text: '#1d4ed8' },
   en_revision: { bg: '#fef3c7', text: '#92400e' },
+  acuse: { bg: '#dcfce7', text: '#14532d' },
 };
 
 const NotifiUsuario = () => {
@@ -24,7 +27,7 @@ const NotifiUsuario = () => {
         });
 
         let pendientes = (res.data.expedientes || []).filter(e =>
-          ['enviado', 'en_revision', 'con_observaciones'].includes(e.estado)
+          ['enviado', 'en_revision', 'con_observaciones'].includes(e.estado) || e.acuseRecepcion
         );
 
         // Filtrar aquellos donde ya pasaron los 10 días
@@ -64,6 +67,25 @@ const NotifiUsuario = () => {
     cargar();
   }, []);
 
+  const handleDescargarAcuse = async (e, expediente) => {
+    e.stopPropagation();
+
+    try {
+      const blob = await descargarAcuseExpediente(expediente._id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = expediente.acuseRecepcion?.nombreArchivo || `acuse-${expediente.folio}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      toast.error(err.message || 'Error al descargar el acuse');
+    }
+  };
+
   if (loading) return <div className="loader">Cargando notificaciones...</div>;
 
   return (
@@ -79,7 +101,7 @@ const NotifiUsuario = () => {
             key={exp._id}
             onClick={() => navigate('/tramites')}
             style={{
-              backgroundColor: ESTADO_COLORS[exp.estado]?.bg || '#f5f5f5',
+              backgroundColor: ESTADO_COLORS[exp.estado]?.bg || (exp.acuseRecepcion ? ESTADO_COLORS.acuse.bg : '#f5f5f5'),
               padding: '1.5rem',
               borderRadius: '8px',
               width: '100%',
@@ -96,10 +118,35 @@ const NotifiUsuario = () => {
               La documentación del trámite <strong>{exp.tipo}</strong>
               {exp.estado === 'con_observaciones'
                 ? ' está incompleta o es errónea, favor de corrección lo antes posible.'
+                : exp.acuseRecepcion
+                  ? ' cuenta con un acuse de recepción disponible para descarga.'
                 : exp.estado === 'enviado'
                   ? ' fue recibida y está pendiente de revisión.'
                   : ' se encuentra en revisión por parte de SAMA.'}
             </p>
+            {exp.acuseRecepcion && (
+              <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: '6px' }}>
+                <span style={{ color: '#14532d', fontSize: '0.9rem', fontWeight: 600 }}>
+                  {exp.acuseRecepcion.nombreArchivo}
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => handleDescargarAcuse(event, exp)}
+                  style={{
+                    backgroundColor: '#16a34a',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.5rem 0.9rem',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Descargar acuse
+                </button>
+              </div>
+            )}
             {exp.observacionesGenerales && (
               <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '0.9rem', fontStyle: 'italic' }}>
                 💬 {exp.observacionesGenerales}

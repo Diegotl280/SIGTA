@@ -3,6 +3,8 @@ import { maxWords } from '../utils/validation';
 import { Expediente } from '../models/Expediente';
 import { ConfigTramite } from '../models/ConfigTramite';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import fs from 'fs';
+import path from 'path';
 
 // Generar folio único: SIGTA-LAU-2026-0001
 async function generarFolio(tipo: string): Promise<string> {
@@ -204,6 +206,85 @@ export const expedienteController = {
 
       await expediente.save();
       res.json({ ok: true, msg: 'Estado actualizado', expediente });
+    } catch (err) { next(err); }
+  },
+
+  // Subir o reemplazar acuse de recepción (solo administrador)
+  subirAcuse: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        if (req.file) fs.unlinkSync(req.file.path);
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede subir acuses' });
+        return;
+      }
+
+      if (!req.file) {
+        res.status(400).json({ ok: false, msg: 'No se recibió ningún archivo PDF de acuse' });
+        return;
+      }
+
+      const expediente = await Expediente.findById(req.params.id);
+
+      if (!expediente) {
+        fs.unlinkSync(req.file.path);
+        res.status(404).json({ ok: false, msg: 'Expediente no encontrado' });
+        return;
+      }
+
+      if (expediente.acuseRecepcion?.rutaArchivo) {
+        const rutaAnterior = path.join(process.cwd(), expediente.acuseRecepcion.rutaArchivo);
+        if (fs.existsSync(rutaAnterior)) fs.unlinkSync(rutaAnterior);
+      }
+
+      expediente.acuseRecepcion = {
+        nombreArchivo: req.file.originalname,
+        rutaArchivo: `uploads/${req.file.filename}`,
+        fechaCarga: new Date(),
+        subidoPor: req.user.uid,
+      };
+
+      await expediente.save();
+
+      res.status(201).json({
+        ok: true,
+        msg: 'Acuse de recepción cargado correctamente',
+        acuseRecepcion: expediente.acuseRecepcion,
+        expediente,
+      });
+    } catch (err) { next(err); }
+  },
+
+  // Descargar acuse de recepción (administrador o dueño del expediente)
+  descargarAcuse: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const expediente = await Expediente.findById(req.params.id);
+
+      if (!expediente) {
+        res.status(404).json({ ok: false, msg: 'Expediente no encontrado' });
+        return;
+      }
+
+      if (
+        req.user.role !== 'administrador' &&
+        expediente.usuario.toString() !== req.user.uid
+      ) {
+        res.status(403).json({ ok: false, msg: 'No tienes permiso para descargar este acuse' });
+        return;
+      }
+
+      if (!expediente.acuseRecepcion) {
+        res.status(404).json({ ok: false, msg: 'Este expediente aún no tiene acuse de recepción' });
+        return;
+      }
+
+      const fileRuta = path.join(process.cwd(), expediente.acuseRecepcion.rutaArchivo);
+
+      if (!fs.existsSync(fileRuta)) {
+        res.status(404).json({ ok: false, msg: 'El archivo físico del acuse no existe en el servidor' });
+        return;
+      }
+
+      res.download(fileRuta, expediente.acuseRecepcion.nombreArchivo);
     } catch (err) { next(err); }
   },
 };

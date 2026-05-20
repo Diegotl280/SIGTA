@@ -30,13 +30,6 @@ const HeaderAdmin = () => {
 
         <nav className="nav-pill">
           <NavLink
-            to="/admin/notificaciones"
-            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
-          >
-            Notificaciones
-          </NavLink>
-          <span className="divider"></span>
-          <NavLink
             to="/admin"
             end
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
@@ -56,6 +49,13 @@ const HeaderAdmin = () => {
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
           >
             Trámites
+          </NavLink>
+          <span className="divider"></span>
+          <NavLink
+            to="/admin/notificaciones"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Notificaciones
           </NavLink>
           <span className="divider"></span>
 

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmpresas, useGetExpedientesByEmpresa, useGetConfigTramites } from '../api/UserApi';
 import { useGetDocumentosByExpediente, useValidarDocumento } from '../api/DocApi';
+import { useSubirAcuseExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
@@ -22,8 +23,10 @@ const EmpresaDetalleAdmin = () => {
 
   const [empresa, setEmpresa] = useState(null);
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
+  const acuseInputRef = useRef(null);
 
   const validarDocMutation = useValidarDocumento();
+  const subirAcuseMutation = useSubirAcuseExpediente();
 
   const expedienteActual = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
@@ -34,6 +37,12 @@ const EmpresaDetalleAdmin = () => {
       if (emp) setEmpresa(emp);
     }
   }, [dataEmpresas, id]);
+
+  useEffect(() => {
+    if (location.state?.tipoAuto) {
+      setTramiteSeleccionado(location.state.tipoAuto);
+    }
+  }, [location.state]);
 
   if (isLoadingEmpresas || isLoadingExpedientes || isLoadingConfig) {
     return <div className="loader">Cargando detalles...</div>;
@@ -140,6 +149,47 @@ const EmpresaDetalleAdmin = () => {
     }
   };
 
+  const handleAcuseUpload = (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+
+    if (!file || !expedienteActual) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error("Solo se permiten archivos PDF.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("El acuse no puede exceder 10MB.");
+      return;
+    }
+
+    subirAcuseMutation.mutate({
+      expedienteId: expedienteActual._id,
+      archivo: file,
+    });
+  };
+
+  const handleDescargarAcuse = async () => {
+    if (!expedienteActual?.acuseRecepcion) return;
+
+    try {
+      const blob = await descargarAcuseExpediente(expedienteActual._id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = expedienteActual.acuseRecepcion.nombreArchivo || `acuse-${expedienteActual.folio}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      toast.error(err.message || "Error al descargar el acuse");
+    }
+  };
+
   return (
     <div className="empresa-detalle-container fade-in">
       <div className="detalle-header-top">
@@ -201,6 +251,54 @@ const EmpresaDetalleAdmin = () => {
           })()}
 
           <div className="requisitos-container">
+            {expedienteActual && (
+              <div className="acuse-admin-panel">
+                <div className="acuse-admin-info">
+                  <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                  <div>
+                    <strong>Acuse de recepción</strong>
+                    <span>
+                      {expedienteActual.acuseRecepcion
+                        ? `Archivo cargado: ${expedienteActual.acuseRecepcion.nombreArchivo}`
+                        : 'Sin acuse cargado'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="acuse-admin-actions">
+                  {expedienteActual.acuseRecepcion && (
+                    <button
+                      type="button"
+                      className="btn-descargar-pdf"
+                      onClick={handleDescargarAcuse}
+                    >
+                      Descargar acuse
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="btn-reemplazar"
+                    onClick={() => acuseInputRef.current?.click()}
+                    disabled={subirAcuseMutation.isPending}
+                  >
+                    {subirAcuseMutation.isPending
+                      ? 'Subiendo...'
+                      : expedienteActual.acuseRecepcion
+                        ? 'Reemplazar acuse'
+                        : 'Subir acuse'}
+                  </button>
+                  <input
+                    type="file"
+                    ref={acuseInputRef}
+                    accept="application/pdf"
+                    style={{ display: 'none' }}
+                    onChange={handleAcuseUpload}
+                  />
+                </div>
+              </div>
+            )}
+
             {isLoadingDocumentos ? (
               <div className="loader">Cargando documentos...</div>
             ) : (

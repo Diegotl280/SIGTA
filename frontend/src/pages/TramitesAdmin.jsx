@@ -4,6 +4,7 @@ import editarIcon from "../assets/editar.png";
 import iconBorrar from "../assets/icon_borrar.png";
 import iconAgregaDoc from "../assets/icon_agrega_doc.png";
 import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import "./TramitesAdmin.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -59,6 +60,8 @@ const TramitesAdmin = () => {
   const [nuevoRequisito, setNuevoRequisito] = useState("");
   const [requisitoOblig, setRequisitoOblig] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [modalEliminar, setModalEliminar] = useState(null);
+  const [inputConfirm, setInputConfirm] = useState('');
 
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [expedientes, setExpedientes] = useState([]);
@@ -108,7 +111,8 @@ const TramitesAdmin = () => {
         headers: { Authorization: `Bearer ${token()}` },
       });
 
-      setTramites(res.data.tramites || []);
+      const activas = (res.data.tramites || []).filter(t => t.activo !== false);
+      setTramites(activas);
     } catch (err) {
       console.error(err);
     }
@@ -169,16 +173,16 @@ const TramitesAdmin = () => {
 
   const guardarTramite = async () => {
     if (!maxWords(form.nombre)) {
-      alert("El nombre del trámite no puede exceder las 500 palabras.");
+      toast.error("El nombre del trámite no puede exceder las 500 palabras.");
       return;
     }
     if (!maxWords(form.tipo)) {
-      alert("La abreviación no puede exceder las 500 palabras.");
+      toast.error("La abreviación no puede exceder las 500 palabras.");
       return;
     }
     for (const req of form.requisitos) {
       if (!maxWords(req.nombre)) {
-        alert("El nombre de un documento/requisito no puede exceder las 500 palabras.");
+        toast.error("El nombre de un documento/requisito no puede exceder las 500 palabras.");
         return;
       }
     }
@@ -187,13 +191,13 @@ const TramitesAdmin = () => {
       const fInicio = new Date(form.fechaApertura);
       const fCierre = new Date(form.fechaCierre);
       if (fCierre < fInicio) {
-         alert("La fecha de cierre no puede ser anterior a la fecha de inicio.");
+         toast.error("La fecha de cierre no puede ser anterior a la fecha de inicio.");
          return;
       }
       const diffTime = Math.abs(fCierre - fInicio);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
       if (form.diasCorreccion > diffDays) {
-         alert("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
+         toast.error("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
          return;
       }
     }
@@ -224,7 +228,7 @@ const TramitesAdmin = () => {
       await cargarTramites();
       cerrarModal();
     } catch (err) {
-      alert(err.response?.data?.msg || "Error al guardar");
+      toast.error(err.response?.data?.msg || "Error al guardar");
     } finally {
       setLoading(false);
     }
@@ -233,6 +237,30 @@ const TramitesAdmin = () => {
   const toggleDropdown = (id, e) => {
     e.stopPropagation();
     setActiveDropdown(activeDropdown === id ? null : id);
+  };
+
+  const handleDelete = (id, nombre) => {
+    setInputConfirm('');
+    setModalEliminar({ id, nombre: nombre || 'Sin nombre' });
+    setActiveDropdown(null);
+  };
+
+  const confirmarEliminar = async () => {
+    if (inputConfirm === modalEliminar.nombre) {
+      setLoading(true);
+      try {
+        await axios.put(`${API_BASE_URL}/api/config-tramites/${modalEliminar.id}/deshabilitar`, {}, {
+          headers: { Authorization: `Bearer ${token()}` }
+        });
+        toast.success("Trámite inhabilitado exitosamente");
+        setModalEliminar(null);
+        cargarTramites();
+      } catch (err) {
+        toast.error(err.response?.data?.msg || "Error al inhabilitar trámite");
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const seleccionarTramite = async (t) => {
@@ -592,6 +620,15 @@ const TramitesAdmin = () => {
                       />
                       Editar
                     </button>
+                    <button 
+                      className="action-btn delete-btn" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(t._id, t.nombre);
+                      }}
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 ) : (
                   <div
@@ -649,7 +686,6 @@ const TramitesAdmin = () => {
                   >
                     <button
                       className="btn-edit-half"
-                      style={{ height: "100%" }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveDropdown(null);
@@ -657,6 +693,15 @@ const TramitesAdmin = () => {
                       }}
                     >
                       Editar
+                    </button>
+                    <button 
+                      className="btn-delete-half" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(t._id, t.nombre);
+                      }}
+                    >
+                      Eliminar
                     </button>
                   </div>
                 ) : (
@@ -682,6 +727,68 @@ const TramitesAdmin = () => {
           <button className="btn-agregar-wide" onClick={abrirAgregar}>
             Agregar trámite
           </button>
+        </div>
+      )}
+
+      {/* Modal confirmación eliminar */}
+      {modalEliminar && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalEliminar(null)}>
+          <div className="modal-box" style={{ maxWidth: '420px' }}>
+            <div className="modal-header">
+              <h2>Eliminar trámite</h2>
+              <button className="modal-close" onClick={() => setModalEliminar(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '1rem' }}>
+                Esta acción deshabilitará el trámite permanentemente. Para confirmar, escribe el nombre exacto:
+              </p>
+              <div style={{ background: '#fee2e2', borderRadius: '8px', padding: '0.6rem 1rem', marginBottom: '1.2rem' }}>
+                <strong style={{ color: '#b91c1c' }}>{modalEliminar.nombre}</strong>
+              </div>
+              <input
+                type="text"
+                value={inputConfirm}
+                onChange={e => setInputConfirm(e.target.value)}
+                placeholder="Escribe el nombre del trámite..."
+                onKeyDown={e => e.key === 'Enter' && confirmarEliminar()}
+                style={{
+                  width: '100%',
+                  border: `1px solid ${inputConfirm === modalEliminar.nombre ? '#10b981' : '#ddd'}`,
+                  borderRadius: '8px',
+                  padding: '0.6rem 0.8rem',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s',
+                }}
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancelar" onClick={() => setModalEliminar(null)}>
+                <span className="btn-icon">✖</span> Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminar}
+                disabled={inputConfirm !== modalEliminar.nombre}
+                style={{
+                  background: inputConfirm === modalEliminar.nombre ? '#ef4444' : '#fca5a5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '0.6rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: inputConfirm === modalEliminar.nombre ? 'pointer' : 'not-allowed',
+                  transition: 'background 0.2s',
+                }}
+              >
+                <span className="btn-icon">✔</span> Confirmar eliminación
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

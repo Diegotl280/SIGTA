@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCreateUser, useUpdateEmpresaAdmin } from '../api/UserApi';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const AgregarEmpresa = () => {
   const location = useLocation();
@@ -54,7 +55,7 @@ const AgregarEmpresa = () => {
     e.preventDefault();
 
     if (formData.nombre && formData.nombre.trim().split(/\s+/).length > 500) {
-      alert("El nombre de la empresa no puede exceder las 500 palabras.");
+      toast.error("El nombre de la empresa no puede exceder las 500 palabras.");
       return;
     }
 

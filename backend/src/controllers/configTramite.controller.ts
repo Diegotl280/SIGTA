@@ -122,7 +122,56 @@ export const configTramiteController = {
         }
       }
 
+      // Si se actualizaron los requisitos (ej. se agregaron nuevos obligatorios)
+      if (req.body.requisitos) {
+        const { Expediente } = await import('../models/Expediente');
+        const { Documento } = await import('../models/Documento');
+        
+        // Buscar expedientes validados o en revisión
+        const expedientes = await Expediente.find({ 
+          tipo: tramite.tipo, 
+          estado: { $in: ['validado', 'en_revision'] } 
+        });
+
+        for (const exp of expedientes) {
+          let incompleto = false;
+          for (const reqItem of tramite.requisitos) {
+            if (reqItem.obligatorio) {
+              const doc = await Documento.findOne({ expediente: exp._id, tipoRequisito: reqItem.nombre });
+              if (!doc) {
+                incompleto = true;
+                break;
+              }
+            }
+          }
+
+          if (incompleto && exp.estado === 'validado') {
+            exp.estado = 'con_observaciones';
+            exp.observacionesGenerales = 'Se han agregado o modificado requisitos obligatorios para este trámite. Por favor, suba la documentación faltante.';
+            exp.acuseRecepcion = undefined;
+            await exp.save();
+          }
+        }
+      }
+
       res.json({ ok: true, tramite });
     } catch (err) { next(err); }
   },
+
+  deshabilitar: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede deshabilitar trámites' });
+        return;
+      }
+      const tramite = await ConfigTramite.findById(req.params.id);
+      if (!tramite) {
+        res.status(404).json({ ok: false, msg: 'Trámite no encontrado' });
+        return;
+      }
+      tramite.activo = false;
+      await tramite.save();
+      res.json({ ok: true, msg: 'Trámite deshabilitado exitosamente', tramite });
+    } catch (err) { next(err); }
+  }
 };

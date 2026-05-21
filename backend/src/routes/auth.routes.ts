@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { register, login, getEmpresas, deshabilitarEmpresa, updateEmpresa, getMe } from '../controllers/auth.controller';
-import { requireAuth, AuthRequest } from '../middlewares/auth.middleware';
-import configTramiteRoutes from './configTramite.routes';
+import { register, login, getEmpresas, deshabilitarEmpresa, updateEmpresa, getMe, createEmpresa } from '../controllers/auth.controller';
+import { requireAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
@@ -23,6 +22,9 @@ router.get('/me', requireAuth, getMe);
 
 // Ruta para listar empresas
 router.get('/empresas', requireAuth, getEmpresas);
+
+// Ruta para crear empresas desde el panel administrativo
+router.post('/empresas', requireAuth, createEmpresa);
 
 // Ruta para deshabilitar una empresa (eliminación lógica)
 router.put('/empresas/:id/deshabilitar', requireAuth, deshabilitarEmpresa);

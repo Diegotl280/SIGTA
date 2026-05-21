@@ -38,7 +38,8 @@ const TramitesUser = () => {
 
   const getEstadoTramite = (tipo) => {
     const exp = expedientes.find(e => e.tipo === tipo);
-    if (!exp) return 'pendiente';
+    if (!exp) return 'nuevo';
+    if (exp.estado === 'borrador') return 'nuevo';
     if (exp.estado === 'validado' || exp.estado === 'cerrado') return 'aprobado';
     if (exp.estado === 'con_observaciones') return 'observaciones';
     return 'pendiente';
@@ -232,7 +233,7 @@ const TramitesUser = () => {
                     <div className="req-info">
                       <span className="req-texto">
                         {req.nombre}
-                        {req.obligatorio ? <span className="text-red-500 ml-1">*</span> : <span className="text-gray-500 ml-1">(Opcional)</span>}
+                        {req.obligatorio ? <span className="text-red-500 ml-1">*</span> : <span className="text-gray-500 ml-1"> (Opcional)</span>}
                       </span>
                     </div>
 

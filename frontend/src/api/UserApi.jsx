@@ -12,7 +12,7 @@ export function useCreateUser() {
     //Funcion para crear un usuario en el backend
     const createUserRequest = async (user) => {
         const token = localStorage.getItem('token');
-        const res = await axios.post(`${API_BASE_URL}/api/auth/register`, user, {
+        const res = await axios.post(`${API_BASE_URL}/api/auth/empresas`, user, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -26,44 +26,12 @@ export function useCreateUser() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al crear el usuario");
         },
-        onSuccess: (data) => {
-            console.log(data); //al hacer el despliege, se debe eliminar esta linea
+        onSuccess: () => {
             toast.success("Empresa registrada exitosamente");
-            queryClient.invalidateQueries({ queryKey: ['users'] }); // envia este usuario a la cache
+            queryClient.invalidateQueries({ queryKey: ['empresas'] });
         },
     }); //Fin de return
 }//Fin de useCreateUser
-
-/**
- * Hook para actualizar la información del perfil del usuario 
- */
-export function useUpdateUser() {
-    const queryClient = useQueryClient();
-
-    //Funcion para actualizar un usuario
-    const updateUserRequest = async (formData) => {
-        const token = localStorage.getItem('token');
-        const res = await axios.put(`${API_BASE_URL}/api/user`, formData, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return res.data;
-    }//Fin de updateUserRequest
-
-    return useMutation({
-        mutationFn: updateUserRequest,
-        onError: (err) => {
-            console.error(err);
-            toast.error(err.response?.data?.msg || err.toString() || "Error al actualizar el usuario");
-        }, 
-        onSuccess: (data) => {
-            console.log(data);
-            toast.success("Perfil actualizado exitosamente");
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-        }
-    }); //Fin de return
-}//Fin de useUpdateUser
 
 /**
  * Hook para obtener la información de perfil existente del usuario autenticado.
@@ -133,7 +101,7 @@ export function useDeshabilitarEmpresa() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al eliminar la empresa");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Empresa eliminada exitosamente");
             queryClient.invalidateQueries({ queryKey: ['empresas'] });
         }
@@ -162,7 +130,7 @@ export function useUpdateEmpresaAdmin() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al actualizar la empresa");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Empresa actualizada exitosamente");
             queryClient.invalidateQueries({ queryKey: ['empresas'] });
         }

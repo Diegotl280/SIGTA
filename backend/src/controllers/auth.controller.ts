@@ -5,7 +5,11 @@ import { User } from '../models/User';
 
 import { maxWords } from '../utils/validation';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sigta_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('Falta JWT_SECRET en variables de entorno');
+}
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -61,6 +65,62 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Error en register:', error);
+    res.status(500).json({ ok: false, msg: 'Error de servidor' });
+  }
+};
+
+export const createEmpresa = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'Solo el administrador puede crear empresas' });
+      return;
+    }
+
+    const { nombre, email, password, rfc, telefono, tramitesPermitidos } = req.body;
+
+    if (!nombre || !email || !password) {
+      res.status(400).json({ ok: false, msg: 'Nombre, email y contraseña son requeridos' });
+      return;
+    }
+
+    if (typeof nombre !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ ok: false, msg: 'Formato de datos inválido' });
+      return;
+    }
+
+    if (!maxWords(nombre) || !maxWords(rfc)) {
+      res.status(400).json({ ok: false, msg: 'Los textos ingresados exceden las 500 palabras' });
+      return;
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(400).json({ ok: false, msg: 'Ese correo ya está en uso por otra empresa' });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      nombre,
+      email,
+      password: hashedPassword,
+      role: 'usuario',
+      rfc: rfc || '',
+      telefono: telefono || '',
+      tramitesPermitidos: Array.isArray(tramitesPermitidos) ? tramitesPermitidos : [],
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+      ok: true,
+      msg: 'Empresa registrada con éxito',
+      user: newUser,
+    });
+  } catch (error) {
+    console.error('Error en createEmpresa:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor' });
   }
 };

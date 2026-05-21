@@ -120,7 +120,7 @@ const Dashboard = () => {
                   <div
                     key={e._id}
                     className="search-result-row"
-                    onClick={() => navigate('/admin/empresas')}
+                    onClick={() => navigate(`/admin/empresas/detalle/${e._id}`)}
                   >
                     <div className="search-result-icon">🏢</div>
                     <div className="search-result-info">
@@ -145,7 +145,13 @@ const Dashboard = () => {
                   <div
                     key={e._id}
                     className="search-result-row"
-                    onClick={() => navigate('/admin/tramites')}
+                    onClick={() => {
+                      if (e.usuario?._id) {
+                        navigate(`/admin/empresas/detalle/${e.usuario._id}`, { state: { tipoAuto: e.tipo } });
+                      } else {
+                        navigate('/admin/empresas');
+                      }
+                    }}
                   >
                     <div className="search-result-icon">📄</div>
                     <div className="search-result-info">

@@ -148,6 +148,7 @@ export const configTramiteController = {
           if (incompleto && exp.estado === 'validado') {
             exp.estado = 'con_observaciones';
             exp.observacionesGenerales = 'Se han agregado o modificado requisitos obligatorios para este trámite. Por favor, suba la documentación faltante.';
+            exp.acuseRecepcion = undefined;
             await exp.save();
           }
         }

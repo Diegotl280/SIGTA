@@ -185,6 +185,9 @@ export const documentoController = {
           expediente.fechaLimiteCorreccion = plazo;
           expediente.diasParaCorreccion = dias;
           
+          // Borramos el acuse para que el usuario no lo vea y el admin deba subir uno nuevo
+          expediente.acuseRecepcion = undefined;
+          
           await expediente.save();
         }
       } else if (estado === 'validado') {

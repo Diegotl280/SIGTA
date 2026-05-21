@@ -318,16 +318,18 @@ const TramitesUser = () => {
                 ← Volver a trámites
               </button>
             </div>
-            <div className="btn-right">
-              <button
-                className={`btn-completar ${!isTrámiteCompleto() ? 'disabled' : ''}`}
-                onClick={handleEnviarTramite}
-                disabled={!isTrámiteCompleto()}
-                title={!isTrámiteCompleto() ? 'Sube todos los documentos obligatorios para continuar' : ''}
-              >
-                Completar Trámite <span className="btn-icon">✔</span>
-              </button>
-            </div>
+            {(!expedienteActual || expedienteActual.estado === 'borrador' || expedienteActual.estado === 'con_observaciones') && (
+              <div className="btn-right">
+                <button
+                  className={`btn-completar ${!isTrámiteCompleto() ? 'disabled' : ''}`}
+                  onClick={handleEnviarTramite}
+                  disabled={!isTrámiteCompleto()}
+                  title={!isTrámiteCompleto() ? 'Sube todos los documentos obligatorios para continuar' : ''}
+                >
+                  Completar Trámite <span className="btn-icon">✔</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

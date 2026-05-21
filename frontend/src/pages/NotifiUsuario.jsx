@@ -68,9 +68,8 @@ const NotifiUsuario = () => {
         for (const tipo of tramitesPermitidos) {
           const config = configs.find(c => c.tipo === tipo);
           
-          // Solo mostrar notificación si hay al menos un requisito obligatorio
-          const tieneObligatorios = config?.requisitos?.some(r => r.obligatorio);
-          if (!tieneObligatorios) continue;
+          // Removemos la restricción de que deba tener requisitos obligatorios
+          // para que siempre aparezca la notificación cuando se asigna un trámite.
 
           // Tomamos el expediente más reciente de este tipo (vienen ordenados desc por el backend)
           const exp = todosExpedientes.find(e => e.tipo === tipo);

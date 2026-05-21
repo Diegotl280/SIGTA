@@ -16,7 +16,7 @@ const Login = () => {
     if (!res.ok) {
       toast.error(res.msg || 'Error al iniciar sesión');
     } else {
-      toast.success('Sesión iniciada correctamente');
+
       navigate('/');
     }
   };

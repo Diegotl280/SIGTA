@@ -4,6 +4,7 @@ import editarIcon from "../assets/editar.png";
 import iconBorrar from "../assets/icon_borrar.png";
 import iconAgregaDoc from "../assets/icon_agrega_doc.png";
 import { useLocation } from "react-router-dom";
+import { useArchivarConfigTramite } from "../api/UserApi";
 import { toast } from "sonner";
 import "./TramitesAdmin.css";
 
@@ -60,12 +61,12 @@ const TramitesAdmin = () => {
   const [nuevoRequisito, setNuevoRequisito] = useState("");
   const [requisitoOblig, setRequisitoOblig] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState(null);
-  const [inputConfirm, setInputConfirm] = useState('');
 
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [expedientes, setExpedientes] = useState([]);
   const [loadingExp, setLoadingExp] = useState(false);
+  const [modalArchivar, setModalArchivar] = useState(null);
+  const { mutate: archivarTramite } = useArchivarConfigTramite();
 
   const getCalendarDays = () => {
     const today = new Date();
@@ -239,30 +240,6 @@ const TramitesAdmin = () => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
 
-  const handleDelete = (id, nombre) => {
-    setInputConfirm('');
-    setModalEliminar({ id, nombre: nombre || 'Sin nombre' });
-    setActiveDropdown(null);
-  };
-
-  const confirmarEliminar = async () => {
-    if (inputConfirm === modalEliminar.nombre) {
-      setLoading(true);
-      try {
-        await axios.put(`${API_BASE_URL}/api/config-tramites/${modalEliminar.id}/deshabilitar`, {}, {
-          headers: { Authorization: `Bearer ${token()}` }
-        });
-        toast.success("Trámite inhabilitado exitosamente");
-        setModalEliminar(null);
-        cargarTramites();
-      } catch (err) {
-        toast.error(err.response?.data?.msg || "Error al inhabilitar trámite");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   const seleccionarTramite = async (t) => {
     setTramiteSeleccionado(t);
     setLoadingExp(true);
@@ -283,6 +260,21 @@ const TramitesAdmin = () => {
     } finally {
       setLoadingExp(false);
     }
+  };
+
+  const handleArchivarTramite = (t) => {
+    setModalArchivar(t);
+  };
+
+  const confirmarArchivarTramite = () => {
+    if (!modalArchivar) return;
+    archivarTramite(modalArchivar._id, {
+      onSuccess: () => {
+        setActiveDropdown(null);
+        setModalArchivar(null);
+        cargarTramites();
+      }
+    });
   };
 
   if (tramiteSeleccionado) {
@@ -620,11 +612,11 @@ const TramitesAdmin = () => {
                       />
                       Editar
                     </button>
-                    <button 
-                      className="action-btn delete-btn" 
+                    <button
+                      className="action-btn delete-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(t._id, t.nombre);
+                        handleArchivarTramite(t);
                       }}
                     >
                       Eliminar
@@ -686,6 +678,7 @@ const TramitesAdmin = () => {
                   >
                     <button
                       className="btn-edit-half"
+                      style={{ height: "50%" }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveDropdown(null);
@@ -694,11 +687,12 @@ const TramitesAdmin = () => {
                     >
                       Editar
                     </button>
-                    <button 
-                      className="btn-delete-half" 
+                    <button
+                      className="btn-delete-half"
+                      style={{ height: "50%" }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(t._id, t.nombre);
+                        handleArchivarTramite(t);
                       }}
                     >
                       Eliminar
@@ -730,62 +724,24 @@ const TramitesAdmin = () => {
         </div>
       )}
 
-      {/* Modal confirmación eliminar */}
-      {modalEliminar && (
-        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalEliminar(null)}>
-          <div className="modal-box" style={{ maxWidth: '420px' }}>
+      {modalArchivar && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalArchivar(null)}>
+          <div className="modal-box" style={{ maxWidth: '430px' }}>
             <div className="modal-header">
-              <h2>Eliminar trámite</h2>
-              <button className="modal-close" onClick={() => setModalEliminar(null)}>✕</button>
+              <h2>Archivar trámite</h2>
+              <button className="modal-close" onClick={() => setModalArchivar(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '1rem' }}>
-                Esta acción deshabilitará el trámite permanentemente. Para confirmar, escribe el nombre exacto:
+              <p style={{ color: '#444', margin: 0 }}>
+                El trámite <strong>{modalArchivar.tipo} — {modalArchivar.nombre}</strong> se enviará a la papelera.
               </p>
-              <div style={{ background: '#fee2e2', borderRadius: '8px', padding: '0.6rem 1rem', marginBottom: '1.2rem' }}>
-                <strong style={{ color: '#b91c1c' }}>{modalEliminar.nombre}</strong>
-              </div>
-              <input
-                type="text"
-                value={inputConfirm}
-                onChange={e => setInputConfirm(e.target.value)}
-                placeholder="Escribe el nombre del trámite..."
-                onKeyDown={e => e.key === 'Enter' && confirmarEliminar()}
-                style={{
-                  width: '100%',
-                  border: `1px solid ${inputConfirm === modalEliminar.nombre ? '#10b981' : '#ddd'}`,
-                  borderRadius: '8px',
-                  padding: '0.6rem 0.8rem',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'border-color 0.2s',
-                }}
-              />
             </div>
             <div className="modal-footer">
-              <button className="btn-cancelar" onClick={() => setModalEliminar(null)}>
-                <span className="btn-icon">✖</span> Cancelar
+              <button className="btn-cancelar" onClick={() => setModalArchivar(null)}>
+                Cancelar
               </button>
-              <button
-                onClick={confirmarEliminar}
-                disabled={inputConfirm !== modalEliminar.nombre}
-                style={{
-                  background: inputConfirm === modalEliminar.nombre ? '#ef4444' : '#fca5a5',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '20px',
-                  padding: '0.6rem 1.5rem',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: inputConfirm === modalEliminar.nombre ? 'pointer' : 'not-allowed',
-                  transition: 'background 0.2s',
-                }}
-              >
-                <span className="btn-icon">✔</span> Confirmar eliminación
+              <button className="btn-continuar" onClick={confirmarArchivarTramite}>
+                Archivar <span className="btn-icon">✔</span>
               </button>
             </div>
           </div>

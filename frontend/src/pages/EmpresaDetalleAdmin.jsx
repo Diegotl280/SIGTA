@@ -23,6 +23,7 @@ const EmpresaDetalleAdmin = () => {
 
   const [empresa, setEmpresa] = useState(null);
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
+  const [modalObservacion, setModalObservacion] = useState(null);
   const acuseInputRef = useRef(null);
 
   const validarDocMutation = useValidarDocumento();
@@ -100,24 +101,39 @@ const EmpresaDetalleAdmin = () => {
   };
 
   const validarDocumento = (documentoId, estado) => {
-    let observacion = "";
     if (estado === "con_observaciones") {
-      observacion = prompt("Escribe la observación para este documento:");
-      if (observacion === null) return;
-      if (!observacion.trim()) {
-        toast.error("La observación no puede estar vacía.");
-        return;
-      }
-      if (observacion.trim().split(/\s+/).length > 500) {
-        toast.error("La observación no puede exceder las 500 palabras.");
-        return;
-      }
+      setModalObservacion({ documentoId, texto: '' });
+      return;
     }
+
     validarDocMutation.mutate({
       expedienteId: expedienteActual._id,
       documentoId,
       estado,
+      observacion: ''
+    });
+  };
+
+  const confirmarObservacion = () => {
+    const observacion = modalObservacion?.texto?.trim() || '';
+
+    if (!observacion) {
+      toast.error("La observación no puede estar vacía.");
+      return;
+    }
+
+    if (observacion.split(/\s+/).length > 500) {
+      toast.error("La observación no puede exceder las 500 palabras.");
+      return;
+    }
+
+    validarDocMutation.mutate({
+      expedienteId: expedienteActual._id,
+      documentoId: modalObservacion.documentoId,
+      estado: 'con_observaciones',
       observacion
+    }, {
+      onSuccess: () => setModalObservacion(null)
     });
   };
 
@@ -254,7 +270,12 @@ const EmpresaDetalleAdmin = () => {
             {expedienteActual && (
               <div className="acuse-admin-panel">
                 <div className="acuse-admin-info">
-                  <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                  <span className="pdf-hover-wrapper">
+                    <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                    {expedienteActual.acuseRecepcion && (
+                      <span className="pdf-name-tooltip">{expedienteActual.acuseRecepcion.nombreArchivo}</span>
+                    )}
+                  </span>
                   <div>
                     <strong>Acuse de recepción</strong>
                     <span>
@@ -311,7 +332,12 @@ const EmpresaDetalleAdmin = () => {
                   <div key={idx} className="requisito-card">
                     <span className="req-texto">{req.nombre}</span>
                     <div className="req-acciones">
-                      <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                      <span className="pdf-hover-wrapper">
+                        <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                        {docSubido && (
+                          <span className="pdf-name-tooltip">{docSubido.nombreArchivo}</span>
+                        )}
+                      </span>
                       {docSubido ? (
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: docSubido.estado === 'validado' ? '#10b981' : docSubido.estado === 'con_observaciones' ? '#ef4444' : '#6b7280' }}>
@@ -377,6 +403,45 @@ const EmpresaDetalleAdmin = () => {
           </div>
         </div>
       </div>
+
+      {modalObservacion && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalObservacion(null)}>
+          <div className="modal-box" style={{ maxWidth: '520px' }}>
+            <div className="modal-header">
+              <h2>Observación del documento</h2>
+              <button className="modal-close" onClick={() => setModalObservacion(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <textarea
+                value={modalObservacion.texto}
+                onChange={(e) => setModalObservacion((actual) => ({ ...actual, texto: e.target.value }))}
+                placeholder="Escribe la observación para la empresa..."
+                style={{
+                  width: '100%',
+                  minHeight: '140px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  padding: '0.8rem',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <p style={{ margin: '0.5rem 0 0', color: '#6b7280', fontSize: '0.85rem' }}>
+                Máximo 500 palabras.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancelar" onClick={() => setModalObservacion(null)}>
+                Cancelar
+              </button>
+              <button className="btn-continuar" onClick={confirmarObservacion}>
+                Guardar observación <span className="btn-icon">✔</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

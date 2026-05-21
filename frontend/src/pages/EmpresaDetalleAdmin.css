@@ -210,6 +210,52 @@
   object-fit: contain;
 }
 
+.pdf-hover-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pdf-name-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: 320px;
+  min-width: 160px;
+  background: #1f2937;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  transition-delay: 0s;
+  z-index: 20;
+}
+
+.pdf-name-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #1f2937 transparent transparent;
+}
+
+.pdf-hover-wrapper:hover .pdf-name-tooltip {
+  opacity: 1;
+  transition-delay: 1s;
+}
+
 /* Footer form */
 .footer-seccion {
   margin-top: 3rem;

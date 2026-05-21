@@ -145,7 +145,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // @ts-ignore
     if (user.status === 'deshabilitado') {
       res.status(403).json({ ok: false, msg: 'Esta cuenta ha sido deshabilitada' });
       return;
@@ -208,6 +207,25 @@ export const getEmpresas = async (req: any, res: Response): Promise<void> => {
   }
 };
 
+export const getEmpresasArchivadas = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'No tienes permiso para ver esta información' });
+      return;
+    }
+
+    const empresas = await User.find(
+      { role: 'usuario', status: 'deshabilitado' },
+      'nombre email rfc telefono tramitesPermitidos _id updatedAt'
+    ).sort({ updatedAt: -1 });
+
+    res.json({ ok: true, empresas });
+  } catch (error) {
+    console.error('Error in getEmpresasArchivadas:', error);
+    res.status(500).json({ ok: false, msg: 'Error al obtener empresas archivadas' });
+  }
+};
+
 export const deshabilitarEmpresa = async (req: any, res: Response): Promise<void> => {
   try {
     if (req.user.role !== 'administrador') {
@@ -222,14 +240,60 @@ export const deshabilitarEmpresa = async (req: any, res: Response): Promise<void
       return;
     }
 
-    // @ts-ignore
     user.status = 'deshabilitado';
     await user.save();
 
-    res.json({ ok: true, msg: 'Empresa eliminada (deshabilitada) correctamente' });
+    res.json({ ok: true, msg: 'Empresa archivada correctamente' });
   } catch (error) {
     console.error('Error en deshabilitarEmpresa:', error);
     res.status(500).json({ ok: false, msg: 'Error de servidor al deshabilitar empresa' });
+  }
+};
+
+export const restaurarEmpresa = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'Solo el administrador puede restaurar empresas' });
+      return;
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      res.status(404).json({ ok: false, msg: 'Empresa no encontrada' });
+      return;
+    }
+
+    user.status = 'activo';
+    await user.save();
+
+    res.json({ ok: true, msg: 'Empresa restaurada correctamente', user });
+  } catch (error) {
+    console.error('Error en restaurarEmpresa:', error);
+    res.status(500).json({ ok: false, msg: 'Error de servidor al restaurar empresa' });
+  }
+};
+
+export const eliminarEmpresaDefinitivamente = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (req.user.role !== 'administrador') {
+      res.status(403).json({ ok: false, msg: 'Solo el administrador puede eliminar empresas definitivamente' });
+      return;
+    }
+
+    const user = await User.findOne({ _id: req.params.id, role: 'usuario', status: 'deshabilitado' });
+
+    if (!user) {
+      res.status(404).json({ ok: false, msg: 'Empresa archivada no encontrada' });
+      return;
+    }
+
+    await user.deleteOne();
+
+    res.json({ ok: true, msg: 'Empresa eliminada definitivamente' });
+  } catch (error) {
+    console.error('Error en eliminarEmpresaDefinitivamente:', error);
+    res.status(500).json({ ok: false, msg: 'Error de servidor al eliminar empresa definitivamente' });
   }
 };
 
@@ -270,14 +334,11 @@ export const updateEmpresa = async (req: any, res: Response): Promise<void> => {
     }
 
     if (nombre) user.nombre = nombre;
-    // @ts-ignore
     if (rfc !== undefined) user.rfc = rfc;
-    // @ts-ignore
     if (telefono !== undefined) user.telefono = telefono;
     
     // Solo el administrador puede modificar los trámites permitidos de una empresa
     if (tramitesPermitidos !== undefined && req.user.role === 'administrador') {
-      // @ts-ignore
       user.tramitesPermitidos = Array.isArray(tramitesPermitidos) ? tramitesPermitidos : [];
     }
 

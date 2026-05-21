@@ -1,6 +1,17 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-const UserSchema = new Schema({
+export interface IUser extends Document {
+  nombre: string;
+  email: string;
+  password: string;
+  rfc?: string;
+  telefono?: string;
+  status: 'activo' | 'deshabilitado';
+  tramitesPermitidos: string[];
+  role: 'administrador' | 'usuario';
+}
+
+const UserSchema = new Schema<IUser>({
   nombre: {
     type: String,
     required: true,
@@ -38,4 +49,4 @@ const UserSchema = new Schema({
   }
 }, { timestamps: true });
 
-export const User = mongoose.model('User', UserSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);

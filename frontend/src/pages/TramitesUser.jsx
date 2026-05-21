@@ -222,7 +222,10 @@ const TramitesUser = () => {
             {expedienteActual?.acuseRecepcion && (
               <div className="acuse-user-panel">
                 <div className="acuse-user-info">
-                  <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                  <span className="pdf-hover-wrapper">
+                    <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                    <span className="pdf-name-tooltip">{expedienteActual.acuseRecepcion.nombreArchivo}</span>
+                  </span>
                   <div>
                     <strong>Acuse de recepción disponible</strong>
                     <span>{expedienteActual.acuseRecepcion.nombreArchivo}</span>
@@ -256,7 +259,10 @@ const TramitesUser = () => {
                     <div className="req-acciones user-req-acciones">
                       {docSubido ? (
                         <>
-                          <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                          <span className="pdf-hover-wrapper">
+                            <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                            <span className="pdf-name-tooltip">{docSubido.nombreArchivo}</span>
+                          </span>
                           <button
                             onClick={() => handleDescargarPdf(expedienteActual._id, docSubido._id, docSubido.nombreArchivo)}
                             className="btn-descargar-pdf"

@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useGetUser, useGetConfigTramites } from '../api/UserApi';
 import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
 import { useGetDocumentosByExpediente, useSubirDocumento } from '../api/DocApi';
+import { toast } from 'sonner';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
@@ -62,16 +63,16 @@ const TramitesUser = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-      alert("Solo se permiten archivos PDF.");
+      toast.error("Solo se permiten archivos PDF.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("El archivo excede el límite de 5MB.");
+      toast.error("El archivo excede el límite de 5MB.");
       return;
     }
 
     if (!expedienteActual) {
-      alert("Hubo un problema al cargar el expediente. Por favor, intenta de nuevo.");
+      toast.error("Hubo un problema al cargar el expediente. Por favor, intenta de nuevo.");
       return;
     }
 
@@ -91,7 +92,7 @@ const TramitesUser = () => {
 
   const handleEnviarTramite = () => {
     if (!isTrámiteCompleto()) {
-      alert("Faltan documentos obligatorios por subir.");
+      toast.error("Faltan documentos obligatorios por subir.");
       return;
     }
     enviarExpediente(expedienteActual._id, {
@@ -122,7 +123,7 @@ const TramitesUser = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err) {
-      alert("Error al descargar el archivo");
+      toast.error("Error al descargar el archivo");
       console.error(err);
     }
   };
@@ -142,7 +143,7 @@ const TramitesUser = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err) {
-      alert(err.message || "Error al descargar el acuse");
+      toast.error(err.message || "Error al descargar el acuse");
     }
   };
 
@@ -205,7 +206,10 @@ const TramitesUser = () => {
             {expedienteActual?.acuseRecepcion && (
               <div className="acuse-user-panel">
                 <div className="acuse-user-info">
-                  <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                  <span className="pdf-hover-wrapper">
+                    <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                    <span className="pdf-name-tooltip">{expedienteActual.acuseRecepcion.nombreArchivo}</span>
+                  </span>
                   <div>
                     <strong>Acuse de recepción disponible</strong>
                     <span>{expedienteActual.acuseRecepcion.nombreArchivo}</span>
@@ -239,7 +243,10 @@ const TramitesUser = () => {
                     <div className="req-acciones user-req-acciones">
                       {docSubido ? (
                         <>
-                          <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                          <span className="pdf-hover-wrapper">
+                            <img src={iconPdf} alt="PDF" className="pdf-icon" />
+                            <span className="pdf-name-tooltip">{docSubido.nombreArchivo}</span>
+                          </span>
                           <button
                             onClick={() => handleDescargarPdf(expedienteActual._id, docSubido._id, docSubido.nombreArchivo)}
                             className="btn-descargar-pdf"

@@ -7,7 +7,19 @@ export const configTramiteController = {
 
   listar: async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const tramites = await ConfigTramite.find().sort({ tipo: 1 });
+      const tramites = await ConfigTramite.find({ activo: { $ne: false } }).sort({ tipo: 1 });
+      res.json({ ok: true, tramites });
+    } catch (err) { next(err); }
+  },
+
+  listarArchivados: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede ver trámites archivados' });
+        return;
+      }
+
+      const tramites = await ConfigTramite.find({ activo: false }).sort({ updatedAt: -1 });
       res.json({ ok: true, tramites });
     } catch (err) { next(err); }
   },
@@ -123,6 +135,69 @@ export const configTramiteController = {
       }
 
       res.json({ ok: true, tramite });
+    } catch (err) { next(err); }
+  },
+
+  archivar: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede archivar trámites' });
+        return;
+      }
+
+      const tramite = await ConfigTramite.findByIdAndUpdate(
+        req.params.id,
+        { activo: false },
+        { new: true, runValidators: true }
+      );
+
+      if (!tramite) {
+        res.status(404).json({ ok: false, msg: 'Trámite no encontrado' });
+        return;
+      }
+
+      res.json({ ok: true, msg: 'Trámite archivado correctamente', tramite });
+    } catch (err) { next(err); }
+  },
+
+  restaurar: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede restaurar trámites' });
+        return;
+      }
+
+      const tramite = await ConfigTramite.findByIdAndUpdate(
+        req.params.id,
+        { activo: true },
+        { new: true, runValidators: true }
+      );
+
+      if (!tramite) {
+        res.status(404).json({ ok: false, msg: 'Trámite no encontrado' });
+        return;
+      }
+
+      res.json({ ok: true, msg: 'Trámite restaurado correctamente', tramite });
+    } catch (err) { next(err); }
+  },
+
+  eliminarDefinitivamente: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede eliminar trámites definitivamente' });
+        return;
+      }
+
+      const tramite = await ConfigTramite.findOne({ _id: req.params.id, activo: false });
+
+      if (!tramite) {
+        res.status(404).json({ ok: false, msg: 'Trámite archivado no encontrado' });
+        return;
+      }
+
+      await tramite.deleteOne();
+      res.json({ ok: true, msg: 'Trámite eliminado definitivamente' });
     } catch (err) { next(err); }
   },
 };

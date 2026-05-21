@@ -4,6 +4,8 @@ import editarIcon from "../assets/editar.png";
 import iconBorrar from "../assets/icon_borrar.png";
 import iconAgregaDoc from "../assets/icon_agrega_doc.png";
 import { useLocation } from "react-router-dom";
+import { useArchivarConfigTramite } from "../api/UserApi";
+import { toast } from "sonner";
 import "./TramitesAdmin.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -63,6 +65,8 @@ const TramitesAdmin = () => {
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [expedientes, setExpedientes] = useState([]);
   const [loadingExp, setLoadingExp] = useState(false);
+  const [modalArchivar, setModalArchivar] = useState(null);
+  const { mutate: archivarTramite } = useArchivarConfigTramite();
 
   const getCalendarDays = () => {
     const today = new Date();
@@ -169,16 +173,16 @@ const TramitesAdmin = () => {
 
   const guardarTramite = async () => {
     if (!maxWords(form.nombre)) {
-      alert("El nombre del trámite no puede exceder las 500 palabras.");
+      toast.error("El nombre del trámite no puede exceder las 500 palabras.");
       return;
     }
     if (!maxWords(form.tipo)) {
-      alert("La abreviación no puede exceder las 500 palabras.");
+      toast.error("La abreviación no puede exceder las 500 palabras.");
       return;
     }
     for (const req of form.requisitos) {
       if (!maxWords(req.nombre)) {
-        alert("El nombre de un documento/requisito no puede exceder las 500 palabras.");
+        toast.error("El nombre de un documento/requisito no puede exceder las 500 palabras.");
         return;
       }
     }
@@ -187,13 +191,13 @@ const TramitesAdmin = () => {
       const fInicio = new Date(form.fechaApertura);
       const fCierre = new Date(form.fechaCierre);
       if (fCierre < fInicio) {
-         alert("La fecha de cierre no puede ser anterior a la fecha de inicio.");
+         toast.error("La fecha de cierre no puede ser anterior a la fecha de inicio.");
          return;
       }
       const diffTime = Math.abs(fCierre - fInicio);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
       if (form.diasCorreccion > diffDays) {
-         alert("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
+         toast.error("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
          return;
       }
     }
@@ -224,7 +228,7 @@ const TramitesAdmin = () => {
       await cargarTramites();
       cerrarModal();
     } catch (err) {
-      alert(err.response?.data?.msg || "Error al guardar");
+      toast.error(err.response?.data?.msg || "Error al guardar");
     } finally {
       setLoading(false);
     }
@@ -255,6 +259,21 @@ const TramitesAdmin = () => {
     } finally {
       setLoadingExp(false);
     }
+  };
+
+  const handleArchivarTramite = (t) => {
+    setModalArchivar(t);
+  };
+
+  const confirmarArchivarTramite = () => {
+    if (!modalArchivar) return;
+    archivarTramite(modalArchivar._id, {
+      onSuccess: () => {
+        setActiveDropdown(null);
+        setModalArchivar(null);
+        cargarTramites();
+      }
+    });
   };
 
   if (tramiteSeleccionado) {
@@ -592,6 +611,15 @@ const TramitesAdmin = () => {
                       />
                       Editar
                     </button>
+                    <button
+                      className="action-btn delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleArchivarTramite(t);
+                      }}
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 ) : (
                   <div
@@ -649,7 +677,7 @@ const TramitesAdmin = () => {
                   >
                     <button
                       className="btn-edit-half"
-                      style={{ height: "100%" }}
+                      style={{ height: "50%" }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveDropdown(null);
@@ -657,6 +685,16 @@ const TramitesAdmin = () => {
                       }}
                     >
                       Editar
+                    </button>
+                    <button
+                      className="btn-delete-half"
+                      style={{ height: "50%" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleArchivarTramite(t);
+                      }}
+                    >
+                      Eliminar
                     </button>
                   </div>
                 ) : (
@@ -682,6 +720,30 @@ const TramitesAdmin = () => {
           <button className="btn-agregar-wide" onClick={abrirAgregar}>
             Agregar trámite
           </button>
+        </div>
+      )}
+
+      {modalArchivar && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalArchivar(null)}>
+          <div className="modal-box" style={{ maxWidth: '430px' }}>
+            <div className="modal-header">
+              <h2>Archivar trámite</h2>
+              <button className="modal-close" onClick={() => setModalArchivar(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ color: '#444', margin: 0 }}>
+                El trámite <strong>{modalArchivar.tipo} — {modalArchivar.nombre}</strong> se enviará a la papelera.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancelar" onClick={() => setModalArchivar(null)}>
+                Cancelar
+              </button>
+              <button className="btn-continuar" onClick={confirmarArchivarTramite}>
+                Archivar <span className="btn-icon">✔</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

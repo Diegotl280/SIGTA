@@ -263,15 +263,26 @@ const TramitesUser = () => {
                           >
                             Descargar
                           </button>
-                          <label className="btn-reemplazar">
-                            Reemplazar
-                            <input
-                              type="file"
-                              accept="application/pdf"
-                              style={{ display: 'none' }}
-                              onChange={(e) => handleFileUpload(e, req.nombre)}
-                            />
-                          </label>
+                          {docSubido.estado === 'con_observaciones' ? (
+                            <label className="btn-reemplazar">
+                              Reemplazar
+                              <input
+                                type="file"
+                                accept="application/pdf"
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileUpload(e, req.nombre)}
+                              />
+                            </label>
+                          ) : (
+                            <button
+                              className="btn-reemplazar"
+                              disabled
+                              style={{ opacity: 0.5, cursor: 'not-allowed', border: 'none', background: '#ccc', color: '#666' }}
+                              title="Solo se puede reemplazar cuando hay observaciones del administrador"
+                            >
+                              Reemplazar
+                            </button>
+                          )}
                         </>
                       ) : (
                         <div className="upload-btn-wrapper">

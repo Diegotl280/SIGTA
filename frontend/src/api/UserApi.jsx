@@ -79,6 +79,25 @@ export function useGetEmpresas() {
     });
 }
 
+export function useGetEmpresasArchivadas() {
+    const getEmpresasArchivadasRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/auth/empresas/archivadas`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['empresasArchivadas'],
+        queryFn: getEmpresasArchivadasRequest,
+    });
+}
+
 /**
  * Hook para deshabilitar una empresa (eliminación lógica)
  */
@@ -99,11 +118,65 @@ export function useDeshabilitarEmpresa() {
         mutationFn: deshabilitarRequest,
         onError: (err) => {
             console.error(err);
-            toast.error(err.response?.data?.msg || err.toString() || "Error al eliminar la empresa");
+            toast.error(err.response?.data?.msg || err.toString() || "Error al archivar la empresa");
         },
         onSuccess: () => {
-            toast.success("Empresa eliminada exitosamente");
+            toast.success("Empresa archivada exitosamente");
             queryClient.invalidateQueries({ queryKey: ['empresas'] });
+            queryClient.invalidateQueries({ queryKey: ['empresasArchivadas'] });
+        }
+    });
+}
+
+export function useRestaurarEmpresa() {
+    const queryClient = useQueryClient();
+
+    const restaurarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.put(`${API_BASE_URL}/api/auth/empresas/${id}/restaurar`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: restaurarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al restaurar la empresa");
+        },
+        onSuccess: () => {
+            toast.success("Empresa restaurada exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['empresas'] });
+            queryClient.invalidateQueries({ queryKey: ['empresasArchivadas'] });
+        }
+    });
+}
+
+export function useEliminarEmpresaDefinitivamente() {
+    const queryClient = useQueryClient();
+
+    const eliminarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.delete(`${API_BASE_URL}/api/auth/empresas/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: eliminarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al eliminar definitivamente la empresa");
+        },
+        onSuccess: () => {
+            toast.success("Empresa eliminada definitivamente");
+            queryClient.invalidateQueries({ queryKey: ['empresasArchivadas'] });
         }
     });
 }
@@ -179,5 +252,104 @@ export function useGetConfigTramites() {
     return useQuery({
         queryKey: ['configTramites'],
         queryFn: getConfigRequest,
+    });
+}
+
+export function useGetConfigTramitesArchivados() {
+    const getConfigArchivadosRequest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token available");
+
+        const res = await axios.get(`${API_BASE_URL}/api/config-tramites/archivados`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useQuery({
+        queryKey: ['configTramitesArchivados'],
+        queryFn: getConfigArchivadosRequest,
+    });
+}
+
+export function useArchivarConfigTramite() {
+    const queryClient = useQueryClient();
+
+    const archivarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.put(`${API_BASE_URL}/api/config-tramites/${id}/archivar`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: archivarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al archivar el trámite");
+        },
+        onSuccess: () => {
+            toast.success("Trámite archivado exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['configTramites'] });
+            queryClient.invalidateQueries({ queryKey: ['configTramitesArchivados'] });
+        }
+    });
+}
+
+export function useRestaurarConfigTramite() {
+    const queryClient = useQueryClient();
+
+    const restaurarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.put(`${API_BASE_URL}/api/config-tramites/${id}/restaurar`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: restaurarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al restaurar el trámite");
+        },
+        onSuccess: () => {
+            toast.success("Trámite restaurado exitosamente");
+            queryClient.invalidateQueries({ queryKey: ['configTramites'] });
+            queryClient.invalidateQueries({ queryKey: ['configTramitesArchivados'] });
+        }
+    });
+}
+
+export function useEliminarConfigTramiteDefinitivamente() {
+    const queryClient = useQueryClient();
+
+    const eliminarRequest = async (id) => {
+        const token = localStorage.getItem('token');
+        const res = await axios.delete(`${API_BASE_URL}/api/config-tramites/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    }
+
+    return useMutation({
+        mutationFn: eliminarRequest,
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.msg || err.toString() || "Error al eliminar definitivamente el trámite");
+        },
+        onSuccess: () => {
+            toast.success("Trámite eliminado definitivamente");
+            queryClient.invalidateQueries({ queryKey: ['configTramitesArchivados'] });
+        }
     });
 }

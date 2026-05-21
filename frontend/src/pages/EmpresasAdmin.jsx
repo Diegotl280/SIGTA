@@ -160,12 +160,12 @@ const EmpresasAdmin = () => {
         <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setModalEliminar(null)}>
           <div className="modal-box" style={{ maxWidth: '420px' }}>
             <div className="modal-header">
-              <h2>Eliminar empresa</h2>
+              <h2>Archivar empresa</h2>
               <button className="modal-close" onClick={() => setModalEliminar(null)}>✕</button>
             </div>
             <div className="modal-body">
               <p style={{ fontSize: '0.95rem', color: '#444', marginBottom: '1rem' }}>
-                Esta acción deshabilitará la empresa permanentemente. Para confirmar, escribe el nombre exacto:
+                Esta acción enviará la empresa a la papelera. Para confirmar, escribe el nombre exacto:
               </p>
               <div style={{ background: '#fee2e2', borderRadius: '8px', padding: '0.6rem 1rem', marginBottom: '1.2rem' }}>
                 <strong style={{ color: '#b91c1c' }}>{modalEliminar.nombre}</strong>
@@ -210,7 +210,7 @@ const EmpresasAdmin = () => {
                   transition: 'background 0.2s',
                 }}
               >
-                <span className="btn-icon">✔</span> Confirmar eliminación
+                <span className="btn-icon">✔</span> Confirmar archivado
               </button>
             </div>
           </div>

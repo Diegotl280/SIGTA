@@ -1,6 +1,17 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { register, login, getEmpresas, deshabilitarEmpresa, updateEmpresa, getMe, createEmpresa } from '../controllers/auth.controller';
+import {
+  register,
+  login,
+  getEmpresas,
+  getEmpresasArchivadas,
+  deshabilitarEmpresa,
+  restaurarEmpresa,
+  eliminarEmpresaDefinitivamente,
+  updateEmpresa,
+  getMe,
+  createEmpresa
+} from '../controllers/auth.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -23,11 +34,20 @@ router.get('/me', requireAuth, getMe);
 // Ruta para listar empresas
 router.get('/empresas', requireAuth, getEmpresas);
 
+// Ruta para listar empresas archivadas
+router.get('/empresas/archivadas', requireAuth, getEmpresasArchivadas);
+
 // Ruta para crear empresas desde el panel administrativo
 router.post('/empresas', requireAuth, createEmpresa);
 
 // Ruta para deshabilitar una empresa (eliminación lógica)
 router.put('/empresas/:id/deshabilitar', requireAuth, deshabilitarEmpresa);
+
+// Ruta para restaurar una empresa archivada
+router.put('/empresas/:id/restaurar', requireAuth, restaurarEmpresa);
+
+// Ruta para eliminar definitivamente una empresa archivada
+router.delete('/empresas/:id', requireAuth, eliminarEmpresaDefinitivamente);
 
 // Ruta para actualizar una empresa
 router.put('/empresas/:id', requireAuth, updateEmpresa);

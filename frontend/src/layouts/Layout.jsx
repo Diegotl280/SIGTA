@@ -1,4 +1,4 @@
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../auth/useAuth';
 import HeaderAdmin from '../components/HeaderAdmin';
 import HeaderUser from '../components/HeaderUser';
 import Footer from '../components/Footer';

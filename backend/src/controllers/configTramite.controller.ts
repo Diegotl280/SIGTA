@@ -125,4 +125,21 @@ export const configTramiteController = {
       res.json({ ok: true, tramite });
     } catch (err) { next(err); }
   },
+
+  deshabilitar: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (req.user.role !== 'administrador') {
+        res.status(403).json({ ok: false, msg: 'Solo el administrador puede deshabilitar trámites' });
+        return;
+      }
+      const tramite = await ConfigTramite.findById(req.params.id);
+      if (!tramite) {
+        res.status(404).json({ ok: false, msg: 'Trámite no encontrado' });
+        return;
+      }
+      tramite.activo = false;
+      await tramite.save();
+      res.json({ ok: true, msg: 'Trámite deshabilitado exitosamente', tramite });
+    } catch (err) { next(err); }
+  }
 };

@@ -1,22 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     const res = await login(email, password);
     if (!res.ok) {
-      setError(res.msg || 'Error al iniciar sesión');
+      toast.error(res.msg || 'Error al iniciar sesión');
     } else {
+      toast.success('Sesión iniciada correctamente');
       navigate('/');
     }
   };
@@ -28,8 +28,6 @@ const Login = () => {
       <div className="login-right-pane">
         <div className="login-form-container fade-in">
           <h1 className="login-title">LOGIN</h1>
-
-          {error && <div className="login-error-alert">{error}</div>}
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-input-group">

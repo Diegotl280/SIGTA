@@ -4,6 +4,7 @@ import editarIcon from "../assets/editar.png";
 import iconBorrar from "../assets/icon_borrar.png";
 import iconAgregaDoc from "../assets/icon_agrega_doc.png";
 import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import "./TramitesAdmin.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -169,16 +170,16 @@ const TramitesAdmin = () => {
 
   const guardarTramite = async () => {
     if (!maxWords(form.nombre)) {
-      alert("El nombre del trámite no puede exceder las 500 palabras.");
+      toast.error("El nombre del trámite no puede exceder las 500 palabras.");
       return;
     }
     if (!maxWords(form.tipo)) {
-      alert("La abreviación no puede exceder las 500 palabras.");
+      toast.error("La abreviación no puede exceder las 500 palabras.");
       return;
     }
     for (const req of form.requisitos) {
       if (!maxWords(req.nombre)) {
-        alert("El nombre de un documento/requisito no puede exceder las 500 palabras.");
+        toast.error("El nombre de un documento/requisito no puede exceder las 500 palabras.");
         return;
       }
     }
@@ -187,13 +188,13 @@ const TramitesAdmin = () => {
       const fInicio = new Date(form.fechaApertura);
       const fCierre = new Date(form.fechaCierre);
       if (fCierre < fInicio) {
-         alert("La fecha de cierre no puede ser anterior a la fecha de inicio.");
+         toast.error("La fecha de cierre no puede ser anterior a la fecha de inicio.");
          return;
       }
       const diffTime = Math.abs(fCierre - fInicio);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
       if (form.diasCorreccion > diffDays) {
-         alert("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
+         toast.error("Los días de corrección no pueden ser mayores al lapso entre la fecha de inicio y cierre.");
          return;
       }
     }
@@ -224,7 +225,7 @@ const TramitesAdmin = () => {
       await cargarTramites();
       cerrarModal();
     } catch (err) {
-      alert(err.response?.data?.msg || "Error al guardar");
+      toast.error(err.response?.data?.msg || "Error al guardar");
     } finally {
       setLoading(false);
     }

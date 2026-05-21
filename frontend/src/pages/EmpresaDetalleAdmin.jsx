@@ -144,7 +144,7 @@ const EmpresaDetalleAdmin = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err) {
-      alert("Error al descargar el archivo");
+      toast.error("Error al descargar el archivo");
       console.error(err);
     }
   };

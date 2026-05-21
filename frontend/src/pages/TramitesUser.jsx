@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGetUser, useGetConfigTramites } from '../api/UserApi';
 import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
 import { useGetDocumentosByExpediente, useSubirDocumento } from '../api/DocApi';
+import { toast } from 'sonner';
 import iconAprobado from '../assets/icono_aprovado.png';
 import iconObs from '../assets/icon_con_observaciones.png';
 import iconRevision from '../assets/icon_revision.png';
@@ -22,10 +24,24 @@ const TramitesUser = () => {
   const { mutate: enviarExpediente } = useEnviarExpediente();
 
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
+  const location = useLocation();
 
   const expedientes = dataExpedientes?.expedientes || [];
   const configs = dataConfig?.tramites || [];
   const tramitesPermitidos = userData?.usuario?.tramitesPermitidos || [];
+
+  useEffect(() => {
+    if (location.state?.tramite && tramitesPermitidos.length > 0 && !isLoadingExpedientes) {
+      const tipo = location.state.tramite;
+      setTramiteSeleccionado(tipo);
+      
+      if (!expedientes.find(e => e.tipo === tipo)) {
+        crearExpediente(tipo);
+      }
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, tramitesPermitidos.length, isLoadingExpedientes, expedientes, crearExpediente]);
 
   const expedienteActual = expedientes.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
@@ -63,16 +79,16 @@ const TramitesUser = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-      alert("Solo se permiten archivos PDF.");
+      toast.error("Solo se permiten archivos PDF.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("El archivo excede el límite de 5MB.");
+      toast.error("El archivo excede el límite de 5MB.");
       return;
     }
 
     if (!expedienteActual) {
-      alert("Hubo un problema al cargar el expediente. Por favor, intenta de nuevo.");
+      toast.error("Hubo un problema al cargar el expediente. Por favor, intenta de nuevo.");
       return;
     }
 
@@ -92,7 +108,7 @@ const TramitesUser = () => {
 
   const handleEnviarTramite = () => {
     if (!isTrámiteCompleto()) {
-      alert("Faltan documentos obligatorios por subir.");
+      toast.error("Faltan documentos obligatorios por subir.");
       return;
     }
     enviarExpediente(expedienteActual._id, {
@@ -123,7 +139,7 @@ const TramitesUser = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err) {
-      alert("Error al descargar el archivo");
+      toast.error("Error al descargar el archivo");
       console.error(err);
     }
   };
@@ -143,7 +159,7 @@ const TramitesUser = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (err) {
-      alert(err.message || "Error al descargar el acuse");
+      toast.error(err.message || "Error al descargar el acuse");
     }
   };
 

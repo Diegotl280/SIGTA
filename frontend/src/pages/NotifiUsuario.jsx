@@ -131,7 +131,7 @@ const NotifiUsuario = () => {
         expedientes.map(exp => (
           <div
             key={exp._id}
-            onClick={() => navigate('/tramites')}
+            onClick={() => navigate('/tramites', { state: { tramite: exp.tipo } })}
             style={{
               backgroundColor: ESTADO_COLORS[exp.estado]?.bg || (exp.acuseRecepcion ? ESTADO_COLORS.acuse.bg : '#f5f5f5'),
               padding: '1.5rem',

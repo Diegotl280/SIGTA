@@ -208,9 +208,12 @@ const EmpresaDetalleAdmin = () => {
 
   return (
     <div className="empresa-detalle-container fade-in">
-      <div className="detalle-header-top">
-        <h1 className="empresa-titulo">{empresa.nombre}</h1>
-        <div className="estado-label">ESTADO</div>
+      <div className="detalle-header-top" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <button type="button" className="btn-volver" onClick={() => navigate('/admin/empresas')}>
+          ← Volver
+        </button>
+        <h1 className="empresa-titulo" style={{ margin: 0 }}>{empresa.nombre}</h1>
+        <div className="estado-label" style={{ marginLeft: 'auto' }}>ESTADO</div>
       </div>
 
       {!tramiteSeleccionado ? (
@@ -394,9 +397,7 @@ const EmpresaDetalleAdmin = () => {
           <div className="btn-left">
           </div>
           <div className="btn-right">
-            <button className="btn-cancelar" onClick={() => navigate('/admin/empresas')}>
-              <span className="btn-icon">✖</span> Cancelar
-            </button>
+
             <button className="btn-continuar" onClick={handleContinuar}>
               Continuar <span className="btn-icon">✔</span>
             </button>
@@ -432,9 +433,7 @@ const EmpresaDetalleAdmin = () => {
               </p>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancelar" onClick={() => setModalObservacion(null)}>
-                Cancelar
-              </button>
+
               <button className="btn-continuar" onClick={confirmarObservacion}>
                 Guardar observación <span className="btn-icon">✔</span>
               </button>

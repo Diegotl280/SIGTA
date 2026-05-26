@@ -189,9 +189,7 @@ const EmpresasAdmin = () => {
               />
             </div>
             <div className="modal-footer">
-              <button className="btn-cancelar" onClick={() => setModalEliminar(null)}>
-                <span className="btn-icon">✖</span> Cancelar
-              </button>
+
               <button
                 onClick={confirmarEliminar}
                 disabled={inputConfirm !== modalEliminar.nombre}

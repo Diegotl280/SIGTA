@@ -337,6 +337,12 @@ const TramitesAdmin = () => {
   if (modalAbierto) {
     return (
       <div className="tramites-admin-container fade-in" style={{ width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <button className="btn-volver" onClick={cerrarModal} disabled={loading}>
+            ← Volver
+          </button>
+          <h2 style={{ color: '#9f2241', margin: 0 }}>{tramiteEditando ? 'Editar trámite' : 'Agregar trámite'}</h2>
+        </div>
         <div className="tramite-form-container">
           <div className="tramite-form-layout">
 
@@ -495,10 +501,7 @@ const TramitesAdmin = () => {
           </div>
 
           <div className="t-acciones-bottom">
-            <button className="btn-t-cancelar" onClick={cerrarModal} disabled={loading}>
-              <div className="btn-t-icon-circle" style={{ color: '#000', backgroundColor: 'transparent', fontWeight: 'bold', border: '2px solid #000', padding: '0', width: '22px', height: '22px' }}>✕</div>
-              Cancelar
-            </button>
+
             <button className="btn-t-continuar" onClick={guardarTramite} disabled={loading}>
               Continuar
               <span style={{ fontSize: '1.2rem', marginLeft: '0.2rem' }}>✔</span>
@@ -737,9 +740,7 @@ const TramitesAdmin = () => {
               </p>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancelar" onClick={() => setModalArchivar(null)}>
-                Cancelar
-              </button>
+
               <button className="btn-continuar" onClick={confirmarArchivarTramite}>
                 Archivar <span className="btn-icon">✔</span>
               </button>

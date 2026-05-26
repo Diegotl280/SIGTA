@@ -82,8 +82,11 @@ const AgregarEmpresa = () => {
 
   return (
     <div className="agregar-empresa-page fade-in">
-      <div className="agregar-empresa-header">
-        <h2 style={{ color: '#9f2241' }}>{empresaToEdit ? 'Editar empresa' : 'Agregar empresa'}</h2>
+      <div className="agregar-empresa-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <button type="button" className="btn-volver" onClick={() => navigate('/admin/empresas')} disabled={loading}>
+          ← Volver
+        </button>
+        <h2 style={{ color: '#9f2241', margin: 0 }}>{empresaToEdit ? 'Editar empresa' : 'Agregar empresa'}</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="agregar-empresa-form">
@@ -176,14 +179,7 @@ const AgregarEmpresa = () => {
         </div>
 
         <div className="form-actions-bottom">
-          <button
-            type="button"
-            className="btn-cancelar"
-            onClick={() => navigate('/admin/empresas')}
-            disabled={loading}
-          >
-            <span className="btn-icon">✖</span> Cancelar
-          </button>
+
 
           <button
             type="submit"

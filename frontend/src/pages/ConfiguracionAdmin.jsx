@@ -52,13 +52,13 @@ const ConfiguracionAdmin = () => {
 
     return (
       <div className="empresas-container fade-in">
-        <div className="config-header">
-          <button className="config-back-btn" onClick={() => setVista('menu')}>
-            Volver
+        <div className="config-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <button className="btn-volver" onClick={() => setVista('menu')}>
+            ← Volver
           </button>
           <div>
-            <h2>Papelera</h2>
-            <p>Elementos archivados. Restaura uno para volver a consultarlo.</p>
+            <h2 style={{ margin: 0 }}>Papelera</h2>
+            <p style={{ margin: 0 }}>Elementos archivados. Restaura uno para volver a consultarlo.</p>
           </div>
         </div>
 
@@ -121,9 +121,7 @@ const ConfiguracionAdmin = () => {
                 </p>
               </div>
               <div className="modal-footer">
-                <button className="btn-cancelar" onClick={() => setConfirmacionBorrado(null)}>
-                  Cancelar
-                </button>
+
                 <button className="trash-action remove" onClick={confirmarEliminacion}>
                   Borrar definitivo
                 </button>

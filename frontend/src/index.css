@@ -1197,7 +1197,8 @@ body {
 }
 
 .custom-toggle.on {
-  background-color: #e5e7eb; /* same background as requested */
+  background-color: #10b981;
+  border-color: #10b981;
 }
 
 .toggle-circle {
@@ -1208,12 +1209,12 @@ body {
   height: 20px;
   background-color: #000;
   border-radius: 50%;
-  transition: transform 0.3s;
+  transition: transform 0.3s, background-color 0.3s;
 }
 
 .custom-toggle.on .toggle-circle {
   transform: translateX(20px);
-  background-color: #000;
+  background-color: #fff;
 }
 
 .form-actions-bottom {

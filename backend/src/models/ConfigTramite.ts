@@ -9,6 +9,7 @@ export interface IRequisito {
 
 export interface IConfigTramite extends Document {
   tipo: TipoTramite;
+  historialTipos: TipoTramite[];
   nombre: string;             // nombre legible, ej. "Licencia Ambiental Única"
   activo: boolean;
   fechaApertura?: Date;       // para trámites con periodo (ej. COA enero–abril)
@@ -30,6 +31,10 @@ const ConfigTramiteSchema = new Schema<IConfigTramite>(
 
       required: true,
       unique: true,
+    },
+    historialTipos: {
+      type: [String],
+      default: [],
     },
     nombre: {
       type: String,

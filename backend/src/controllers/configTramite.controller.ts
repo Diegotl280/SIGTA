@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ConfigTramite } from '../models/ConfigTramite';
+import { User } from '../models/User';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { maxWords } from '../utils/validation';
 
@@ -60,6 +61,26 @@ export const configTramiteController = {
         }
       }
 
+      const duplicado = await ConfigTramite.findOne({
+        $or: [
+          { tipo: req.body.tipo },
+          { nombre: req.body.nombre },
+        ],
+      });
+
+      if (duplicado) {
+        if (duplicado.activo === false) {
+          res.status(400).json({
+            ok: false,
+            msg: 'Ya existe un trámite archivado con ese nombre o abreviación. Restáuralo o elimínalo definitivamente para volver a usar esos datos.',
+          });
+          return;
+        }
+
+        res.status(400).json({ ok: false, msg: 'Ya existe un trámite con ese nombre o abreviación' });
+        return;
+      }
+
       const tramite = await ConfigTramite.create(req.body);
       res.status(201).json({ ok: true, tramite });
     } catch (err) { next(err); }
@@ -69,6 +90,11 @@ export const configTramiteController = {
     try {
       if (req.user.role !== 'administrador') {
         res.status(403).json({ ok: false, msg: 'Solo el administrador puede editar trámites' });
+        return;
+      }
+
+      if (req.body.tipo !== undefined && !maxWords(req.body.tipo)) {
+        res.status(400).json({ ok: false, msg: 'La abreviación excede las 500 palabras' });
         return;
       }
 
@@ -100,14 +126,82 @@ export const configTramiteController = {
           return;
         }
       }
-      const tramite = await ConfigTramite.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!tramite) {
+
+      if (req.body.historialTipos !== undefined && !Array.isArray(req.body.historialTipos)) {
+        res.status(400).json({ ok: false, msg: 'El historial de abreviaciones debe ser una lista' });
+        return;
+      }
+
+      const tramiteId = String(req.params.id);
+      const tramiteActual = await ConfigTramite.findById(tramiteId);
+      if (!tramiteActual) {
         res.status(404).json({ ok: false, msg: 'Trámite no encontrado' });
         return;
+      }
+
+      const condicionesDuplicado: Array<Record<string, string>> = [];
+      if (req.body.tipo !== undefined && req.body.tipo !== tramiteActual.tipo) {
+        condicionesDuplicado.push({ tipo: req.body.tipo });
+      }
+      if (req.body.nombre !== undefined && req.body.nombre !== tramiteActual.nombre) {
+        condicionesDuplicado.push({ nombre: req.body.nombre });
+      }
+
+      if (condicionesDuplicado.length > 0) {
+        const duplicado = await ConfigTramite.findOne({
+          _id: { $ne: tramiteId },
+          $or: condicionesDuplicado,
+        });
+
+        if (duplicado) {
+          if (duplicado.activo === false) {
+            res.status(400).json({
+              ok: false,
+              msg: 'Ya existe un trámite archivado con ese nombre o abreviación. Restáuralo o elimínalo definitivamente para volver a usar esos datos.',
+            });
+            return;
+          }
+
+          res.status(400).json({ ok: false, msg: 'Ya existe un trámite con ese nombre o abreviación' });
+          return;
+        }
+      }
+
+      const tipoAnterior = tramiteActual.tipo;
+      const tiposHistoricosActuales = Array.isArray(tramiteActual.historialTipos)
+        ? tramiteActual.historialTipos
+        : [];
+      if (req.body.historialTipos !== undefined) {
+        req.body.historialTipos = Array.from(
+          new Set(
+            req.body.historialTipos
+              .map((tipo: string) => tipo.trim().toUpperCase())
+              .filter((tipo: string) => tipo && tipo !== req.body.tipo && tipo !== tramiteActual.tipo)
+          )
+        );
+      }
+      Object.assign(tramiteActual, req.body);
+
+      if (req.body.tipo !== undefined && req.body.tipo !== tipoAnterior) {
+        tramiteActual.historialTipos = Array.from(
+          new Set([
+            ...tiposHistoricosActuales,
+            tipoAnterior,
+          ].filter((tipo) => tipo && tipo !== req.body.tipo))
+        );
+      }
+
+      const tramite = await tramiteActual.save();
+
+      if (req.body.tipo !== undefined && req.body.tipo !== tipoAnterior) {
+        await User.updateMany(
+          { tramitesPermitidos: tipoAnterior },
+          { $addToSet: { tramitesPermitidos: req.body.tipo } }
+        );
+        await User.updateMany(
+          { tramitesPermitidos: tipoAnterior },
+          { $pull: { tramitesPermitidos: tipoAnterior } }
+        );
       }
 
       // Si se actualizaron los días de corrección, actualizar los expedientes afectados

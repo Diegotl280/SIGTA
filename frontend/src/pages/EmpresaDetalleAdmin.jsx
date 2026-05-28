@@ -29,7 +29,8 @@ const EmpresaDetalleAdmin = () => {
   const validarDocMutation = useValidarDocumento();
   const subirAcuseMutation = useSubirAcuseExpediente();
 
-  const expedienteActual = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado);
+  const periodoActual = new Date().getFullYear();
+  const expedienteActual = dataExpedientes?.expedientes?.find(e => e.tipo === tramiteSeleccionado && (e.periodo || periodoActual) === periodoActual);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
 
   useEffect(() => {
@@ -54,11 +55,19 @@ const EmpresaDetalleAdmin = () => {
   }
 
   const expedientes = dataExpedientes?.expedientes || [];
+  const expedientesVigentes = expedientes.filter((e) => (e.periodo || periodoActual) === periodoActual);
+  const expedientesHistoricos = expedientes.filter((e) => (e.periodo || periodoActual) !== periodoActual);
   const configs = dataConfig?.tramites || [];
+
+  const getTiposRelacionados = (tipo) => {
+    const config = configs.find(c => c.tipo === tipo);
+    return [tipo, ...(config?.historialTipos || [])];
+  };
 
   // Función para determinar el estado general de un trámite
   const getEstadoTramite = (tipo) => {
-    const exp = expedientes.find(e => e.tipo === tipo);
+    const tiposRelacionados = getTiposRelacionados(tipo);
+    const exp = expedientesVigentes.find(e => tiposRelacionados.includes(e.tipo));
     if (!exp) return 'pendiente'; // No ha subido nada o no ha iniciado
     if (exp.estado === 'validado' || exp.estado === 'cerrado') return 'aprobado';
     if (exp.estado === 'con_observaciones') return 'observaciones';
@@ -66,7 +75,11 @@ const EmpresaDetalleAdmin = () => {
   };
 
   const getBackgroundColor = (index) => {
-    const colors = ['#cffafe', '#dcfce7', '#ffedd5', '#f3e8ff', '#fce7f3'];
+    const colors = [
+      'var(--sigta-card-tramite)',
+      'color-mix(in srgb, var(--sigta-card-tramite) 82%, #ffffff)',
+      'color-mix(in srgb, var(--sigta-card-tramite) 74%, #f5adab)',
+    ];
     return colors[index % colors.length];
   };
 
@@ -243,6 +256,34 @@ const EmpresaDetalleAdmin = () => {
           ) : (
             <div className="lista-vacia">Esta empresa no tiene trámites asignados.</div>
           )}
+
+          {expedientesHistoricos.length > 0 && (
+            <div className="historial-expedientes" style={{ marginTop: '2rem', width: '100%' }}>
+              <h3 style={{ color: 'var(--sigta-header-active)', marginBottom: '0.8rem' }}>Historial de trámites anteriores</h3>
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                {expedientesHistoricos.map((exp) => (
+                  <div
+                    key={exp._id}
+                    className="requisito-card"
+                    style={{ background: '#f8fafc', justifyContent: 'space-between' }}
+                  >
+                    <span className="req-texto">
+                      {exp.folio} · {exp.tipo} · Periodo {exp.periodo || 'sin periodo'}
+                    </span>
+                    <span
+                      style={{
+                        color: '#4b5563',
+                        fontWeight: 700,
+                        textTransform: 'capitalize',
+                      }}
+                    >
+                      {exp.estado.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         // VISTA 2: Documentos de un Trámite
@@ -253,19 +294,45 @@ const EmpresaDetalleAdmin = () => {
             const nombreTramite = config ? config.nombre : tramiteSeleccionado;
             const estado = getEstadoTramite(tramiteSeleccionado);
             const bgColor = getBackgroundColor(index !== -1 ? index : 0);
+            const expedientesAbreviaturasAnteriores = expedientes
+              .filter((exp) => (config?.historialTipos || []).includes(exp.tipo));
 
             return (
-              <div className="tramite-row">
-                <div className="tramite-btn" style={{ backgroundColor: bgColor, cursor: 'default' }}>
-                  <span className="tramite-nombre">REQUISITOS PARA EL TRÁMITE DE LA {nombreTramite.toUpperCase()} ({tramiteSeleccionado})</span>
-                  <div className="tramite-icon-right">
-                    {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
-                    {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
-                    {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
+              <>
+                <div className="tramite-row">
+                  <div className="tramite-btn" style={{ backgroundColor: bgColor, cursor: 'default' }}>
+                    <span className="tramite-nombre">REQUISITOS PARA EL TRÁMITE DE LA {nombreTramite.toUpperCase()} ({tramiteSeleccionado})</span>
+                    <div className="tramite-icon-right">
+                      {estado === 'aprobado' && <img src={iconAprobado} alt="OK" className="tramite-main-icon" />}
+                      {estado === 'observaciones' && <img src={iconObs} alt="Obs" className="tramite-main-icon" />}
+                      {estado === 'pendiente' && <img src={iconRevision} alt="Pend" className="tramite-main-icon" />}
+                    </div>
                   </div>
+                  {renderStatusBox(tramiteSeleccionado, estado)}
                 </div>
-                {renderStatusBox(tramiteSeleccionado, estado)}
-              </div>
+
+                {expedientesAbreviaturasAnteriores.length > 0 && (
+                  <div className="historial-expedientes" style={{ width: '100%' }}>
+                    <h3 style={{ color: 'var(--sigta-header-active)', marginBottom: '0.8rem' }}>Expedientes con abreviaturas anteriores</h3>
+                    <div style={{ display: 'grid', gap: '0.75rem' }}>
+                      {expedientesAbreviaturasAnteriores.map((exp) => (
+                        <div
+                          key={exp._id}
+                          className="requisito-card"
+                          style={{ background: '#f8fafc', justifyContent: 'space-between' }}
+                        >
+                          <span className="req-texto">
+                            {exp.folio} · Antes: {exp.tipo} · Periodo {exp.periodo || 'sin periodo'}
+                          </span>
+                          <span style={{ color: '#4b5563', fontWeight: 700, textTransform: 'capitalize' }}>
+                            {exp.estado.replace('_', ' ')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             );
           })()}
 

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useGetUser } from '../api/UserApi';
-import gobiernoLogo from '../assets/Gobierno.jpeg';
+import samaLogo from '../assets/LogoSAMA.png';
 import MobileNav from './MobileNav';
+import { useAppearance } from '../appearance/useAppearance';
 
 const HeaderUser = () => {
   const { logout, user } = useAuth();
+  const { logoInstitucionalUrl } = useAppearance();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const { data } = useGetUser();
@@ -21,12 +23,7 @@ const HeaderUser = () => {
     <header className="top-header">
       <div className="header-left">
         <div className="logo-placeholder">
-          <img src={gobiernoLogo} alt="Gobierno de Zacatecas" className="gobierno-logo-img" />
-        </div>
-        <div className="secretaria-text">
-          <span>SECRETARÍA DEL</span>
-          <strong>AGUA Y</strong>
-          <strong>MEDIO AMBIENTE</strong>
+          <img src={logoInstitucionalUrl || samaLogo} alt="Secretaría del Agua y Medio Ambiente" className="gobierno-logo-img" />
         </div>
       </div>
 

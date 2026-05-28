@@ -30,9 +30,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { nombre }] });
     if (existingUser) {
-      res.status(400).json({ ok: false, msg: 'ese correo ya existe' });
+      if (existingUser.status === 'deshabilitado') {
+        res.status(400).json({
+          ok: false,
+          msg: 'Ya existe una empresa archivada con ese nombre o correo. Restaúrala o elimínala definitivamente para volver a usar esos datos.',
+        });
+        return;
+      }
+
+      res.status(400).json({ ok: false, msg: 'Ya existe una empresa con ese nombre o correo' });
       return;
     }
 
@@ -93,9 +101,17 @@ export const createEmpresa = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { nombre }] });
     if (existingUser) {
-      res.status(400).json({ ok: false, msg: 'Ese correo ya está en uso por otra empresa' });
+      if (existingUser.status === 'deshabilitado') {
+        res.status(400).json({
+          ok: false,
+          msg: 'Ya existe una empresa archivada con ese nombre o correo. Restaúrala o elimínala definitivamente para volver a usar esos datos.',
+        });
+        return;
+      }
+
+      res.status(400).json({ ok: false, msg: 'Ya existe una empresa con ese nombre o correo' });
       return;
     }
 
@@ -319,19 +335,38 @@ export const updateEmpresa = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
+    const datosDuplicados: Array<Record<string, string>> = [];
     if (email && email !== user.email) {
       if (typeof email !== 'string') {
         res.status(400).json({ ok: false, msg: 'Formato de correo inválido' });
         return;
       }
+      datosDuplicados.push({ email });
+    }
+    if (nombre && nombre !== user.nombre) datosDuplicados.push({ nombre });
 
-      const existingUser = await User.findOne({ email });
+    if (datosDuplicados.length > 0) {
+      const existingUser = await User.findOne({
+        _id: { $ne: id },
+        role: 'usuario',
+        $or: datosDuplicados,
+      });
+
       if (existingUser) {
-        res.status(400).json({ ok: false, msg: 'Ese correo ya está en uso por otra empresa' });
+        if (existingUser.status === 'deshabilitado') {
+          res.status(400).json({
+            ok: false,
+            msg: 'Ya existe una empresa archivada con ese nombre o correo. Restaúrala o elimínala definitivamente para volver a usar esos datos.',
+          });
+          return;
+        }
+
+        res.status(400).json({ ok: false, msg: 'Ya existe una empresa con ese nombre o correo' });
         return;
       }
-      user.email = email;
     }
+
+    if (email && email !== user.email) user.email = email;
 
     if (nombre) user.nombre = nombre;
     if (rfc !== undefined) user.rfc = rfc;

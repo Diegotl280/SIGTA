@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import samaLogo from '../assets/LogoSAMA.png';
+import { useAppearance } from '../appearance/useAppearance';
 import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
+  const { logoInstitucionalUrl } = useAppearance();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,33 +26,49 @@ const Login = () => {
 
   return (
     <div className="login-split-container">
-      <div className="login-left-pane"></div>
+      <div className="login-left-pane">
+        <div className="login-brand-mark">
+          <span>SIGTA</span>
+          <strong>Trámites ambientales</strong>
+        </div>
+      </div>
 
       <div className="login-right-pane">
         <div className="login-form-container fade-in">
-          <h1 className="login-title">LOGIN</h1>
+          <img
+            src={logoInstitucionalUrl || samaLogo}
+            alt="Secretaría del Agua y Medio Ambiente"
+            className="login-logo"
+          />
+
+          <div className="login-heading">
+            <h1 className="login-title">Acceso SIGTA</h1>
+            <p>Sistema de Gestión de Trámites Ambientales</p>
+          </div>
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-input-group">
+              <label htmlFor="email">Correo electrónico</label>
               <input
                 id="email"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="USUARIO O ID"
+                placeholder="correo@institucion.gob.mx"
                 autoComplete="username"
               />
             </div>
 
             <div className="login-input-group">
+              <label htmlFor="password">Contraseña</label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="CONTRASEÑA"
+                placeholder="Ingresa tu contraseña"
                 autoComplete="current-password"
               />
             </div>

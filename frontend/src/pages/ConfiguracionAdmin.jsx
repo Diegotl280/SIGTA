@@ -1,4 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import samaLogo from '../assets/LogoSAMA.png';
+import {
+  COLORES_OFICIALES,
+  getLogoInstitucionalUrl,
+  useActualizarApariencia,
+  useGetApariencia,
+  useRestaurarAparienciaOficial,
+  useSubirLogoInstitucional,
+} from '../api/AparienciaApi';
 import {
   useEliminarConfigTramiteDefinitivamente,
   useEliminarEmpresaDefinitivamente,
@@ -12,13 +21,26 @@ const ConfiguracionAdmin = () => {
   const [vista, setVista] = useState('menu');
   const [seccionPapelera, setSeccionPapelera] = useState('empresas');
   const [confirmacionBorrado, setConfirmacionBorrado] = useState(null);
+  const [coloresForm, setColoresForm] = useState(null);
+  const logoInputRef = useRef(null);
 
   const { data: empresasData, isLoading: loadingEmpresas } = useGetEmpresasArchivadas();
   const { data: tramitesData, isLoading: loadingTramites } = useGetConfigTramitesArchivados();
+  const { data: aparienciaData } = useGetApariencia();
   const { mutate: restaurarEmpresa } = useRestaurarEmpresa();
   const { mutate: eliminarEmpresa } = useEliminarEmpresaDefinitivamente();
   const { mutate: restaurarTramite } = useRestaurarConfigTramite();
   const { mutate: eliminarTramite } = useEliminarConfigTramiteDefinitivamente();
+  const actualizarApariencia = useActualizarApariencia();
+  const subirLogo = useSubirLogoInstitucional();
+  const restaurarApariencia = useRestaurarAparienciaOficial();
+
+  const apariencia = aparienciaData?.apariencia;
+  const logoActual = getLogoInstitucionalUrl(apariencia) || samaLogo;
+  const coloresActuales = coloresForm || {
+    ...COLORES_OFICIALES,
+    ...(apariencia?.colores || {}),
+  };
 
   const empresasArchivadas = empresasData?.empresas || [];
   const tramitesArchivados = tramitesData?.tramites || [];
@@ -44,7 +66,27 @@ const ConfiguracionAdmin = () => {
       descripcion: `${totalArchivados} elemento${totalArchivados !== 1 ? 's' : ''} archivado${totalArchivados !== 1 ? 's' : ''}.`,
       accion: () => setVista('papelera'),
     },
+    {
+      titulo: 'Apariencia',
+      descripcion: 'Personaliza logo institucional y colores oficiales del sistema.',
+      accion: () => setVista('apariencia'),
+    },
   ];
+
+  const cambiarColor = (key, value) => {
+    setColoresForm((actual) => ({ ...(actual || coloresActuales), [key]: value }));
+  };
+
+  const guardarApariencia = () => {
+    actualizarApariencia.mutate(coloresActuales);
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    subirLogo.mutate(file);
+  };
 
   if (vista === 'papelera') {
     const elementos = seccionPapelera === 'empresas' ? empresasArchivadas : tramitesArchivados;
@@ -133,9 +175,112 @@ const ConfiguracionAdmin = () => {
     );
   }
 
+  if (vista === 'apariencia') {
+    const camposColor = [
+      ['headerActivo', 'Click activo del header'],
+      ['footerFondo', 'Color del footer'],
+      ['tarjetaEmpresa', 'Tarjetas de empresas'],
+      ['tarjetaTramite', 'Tarjetas de trámites'],
+      ['loginFondo', 'Fondo del login'],
+      ['loginBoton', 'Botón del login'],
+      ['loginAcento', 'Acento del login'],
+    ];
+
+    return (
+      <div className="empresas-container fade-in">
+        <div className="config-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <button className="btn-volver" onClick={() => setVista('menu')}>
+            ← Volver
+          </button>
+          <div>
+            <h2 style={{ margin: 0 }}>Apariencia</h2>
+            <p style={{ margin: 0 }}>Logo institucional y paleta oficial del sistema.</p>
+          </div>
+        </div>
+
+        <div className="appearance-panel">
+          <section className="appearance-section">
+            <div>
+              <h3>Logo institucional</h3>
+              <p>El logo LABSOL del footer se mantiene fijo y no es editable.</p>
+            </div>
+            <div className="appearance-logo-row">
+              <div className="appearance-logo-preview">
+                <img src={logoActual} alt="Logo institucional actual" />
+              </div>
+              <div className="appearance-actions">
+                <button className="btn-continuar" type="button" onClick={() => logoInputRef.current?.click()}>
+                  Cambiar logo
+                </button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  style={{ display: 'none' }}
+                  onChange={handleLogoUpload}
+                />
+                <small>Formatos permitidos: PNG, JPG, JPEG o WEBP. Máximo 5MB.</small>
+              </div>
+            </div>
+          </section>
+
+          <section className="appearance-section">
+            <div>
+              <h3>Colores</h3>
+              <p>Valores iniciales tomados de la paleta oficial de Gobierno.</p>
+            </div>
+
+            <div className="appearance-color-grid">
+              {camposColor.map(([key, label]) => (
+                <label key={key} className="appearance-color-field">
+                  <span>{label}</span>
+                  <div>
+                    <input
+                      type="color"
+                      value={coloresActuales[key]}
+                      onChange={(e) => cambiarColor(key, e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      value={coloresActuales[key]}
+                      onChange={(e) => cambiarColor(key, e.target.value)}
+                    />
+                  </div>
+                </label>
+              ))}
+            </div>
+
+          </section>
+
+          <div className="appearance-footer">
+            <button
+              className="btn-cancelar"
+              type="button"
+              onClick={() => {
+                setColoresForm(null);
+                restaurarApariencia.mutate();
+              }}
+              disabled={restaurarApariencia.isPending}
+            >
+              Restaurar oficiales
+            </button>
+            <button
+              className="btn-continuar"
+              type="button"
+              onClick={guardarApariencia}
+              disabled={actualizarApariencia.isPending || subirLogo.isPending}
+            >
+              Guardar cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="empresas-container fade-in">
-      <h2 style={{ color: '#9f2241', marginBottom: '2rem' }}>
+      <h2 style={{ color: 'var(--sigta-header-active)', marginBottom: '2rem' }}>
         Configuración
       </h2>
 

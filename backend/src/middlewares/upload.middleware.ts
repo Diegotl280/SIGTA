@@ -30,10 +30,30 @@ const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterC
   }
 };
 
+const imageFileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const extension = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+  const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
+
+  if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(extension)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Solo se permiten imágenes PNG, JPG, JPEG o WEBP válidas'));
+  }
+};
+
 export const upload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10 MB máximo por archivo
+  },
+});
+
+export const uploadImage = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
   },
 });

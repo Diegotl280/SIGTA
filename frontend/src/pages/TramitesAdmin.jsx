@@ -46,6 +46,7 @@ const modalBase = {
   fechaApertura: "",
   fechaCierre: "",
   diasCorreccion: 10,
+  historialTipos: [],
   requisitos: [],
 };
 
@@ -134,6 +135,7 @@ const TramitesAdmin = () => {
       fechaApertura: t.fechaApertura ? t.fechaApertura.slice(0, 10) : "",
       fechaCierre: t.fechaCierre ? t.fechaCierre.slice(0, 10) : "",
       diasCorreccion: t.diasCorreccion,
+      historialTipos: t.historialTipos || [],
       requisitos: t.requisitos || [],
     });
     setModalAbierto(true);
@@ -208,6 +210,9 @@ const TramitesAdmin = () => {
     try {
       const payload = {
         ...form,
+        historialTipos: (form.historialTipos || [])
+          .map((tipo) => tipo.trim().toUpperCase())
+          .filter((tipo, index, arr) => tipo && tipo !== form.tipo && arr.indexOf(tipo) === index),
         fechaApertura: form.fechaApertura || undefined,
         fechaCierre: form.fechaCierre || undefined,
       };
@@ -220,10 +225,12 @@ const TramitesAdmin = () => {
             headers: { Authorization: `Bearer ${token()}` },
           }
         );
+        toast.success("Trámite actualizado correctamente");
       } else {
         await axios.post(`${API_BASE_URL}/api/config-tramites`, payload, {
           headers: { Authorization: `Bearer ${token()}` },
         });
+        toast.success("Trámite creado correctamente");
       }
 
       await cargarTramites();
@@ -249,8 +256,9 @@ const TramitesAdmin = () => {
         headers: { Authorization: `Bearer ${token()}` },
       });
 
+      const tiposRelacionados = [t.tipo, ...(t.historialTipos || [])];
       const filtrados = (res.data.expedientes || []).filter(
-        (e) => e.tipo === t.tipo
+        (e) => tiposRelacionados.includes(e.tipo)
       );
 
       setExpedientes(filtrados);
@@ -311,6 +319,12 @@ const TramitesAdmin = () => {
                   {exp.usuario?.email || "—"}
                 </span>
 
+                {exp.tipo !== tramiteSeleccionado.tipo && (
+                  <span className="exp-estado" style={{ backgroundColor: '#f3f4f6', color: '#4b5563' }}>
+                    Antes: {exp.tipo}
+                  </span>
+                )}
+
                 <span
                   className="exp-estado"
                   style={{
@@ -341,7 +355,7 @@ const TramitesAdmin = () => {
           <button className="btn-volver" onClick={cerrarModal} disabled={loading}>
             ← Volver
           </button>
-          <h2 style={{ color: '#9f2241', margin: 0 }}>{tramiteEditando ? 'Editar trámite' : 'Agregar trámite'}</h2>
+          <h2 style={{ color: 'var(--sigta-header-active)', margin: 0 }}>{tramiteEditando ? 'Editar trámite' : 'Agregar trámite'}</h2>
         </div>
         <div className="tramite-form-container">
           <div className="tramite-form-layout">
@@ -365,7 +379,6 @@ const TramitesAdmin = () => {
                   type="text"
                   value={form.tipo}
                   onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value.toUpperCase() }))}
-                  readOnly={!!tramiteEditando}
                   placeholder="ej. COA"
                   style={{
                     border: 'none',
@@ -562,7 +575,7 @@ const TramitesAdmin = () => {
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#9f2241"
+            stroke="var(--sigta-header-active)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"

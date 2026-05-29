@@ -7,11 +7,10 @@ import fs from 'fs';
 import path from 'path';
 
 // Generar folio único: SIGTA-LAU-2026-0001
-async function generarFolio(tipo: string): Promise<string> {
-  const anio = new Date().getFullYear();
-  const count = await Expediente.countDocuments({ tipo });
+async function generarFolio(tipo: string, periodo: number): Promise<string> {
+  const count = await Expediente.countDocuments({ tipo, periodo });
   const numero = String(count + 1).padStart(4, '0');
-  return `SIGTA-${tipo}-${anio}-${numero}`;
+  return `SIGTA-${tipo}-${periodo}-${numero}`;
 }
 
 export const expedienteController = {
@@ -20,6 +19,7 @@ export const expedienteController = {
   crear: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const { tipo } = req.body;
+      const periodoActual = new Date().getFullYear();
 
       // Verificar que el trámite existe y está activo
       const config = await ConfigTramite.findOne({ tipo, activo: true });
@@ -28,16 +28,16 @@ export const expedienteController = {
         return;
       }
 
-      // Prevenir múltiples expedientes activos del mismo tipo para el mismo usuario
+      // Prevenir múltiples expedientes del mismo trámite para el mismo usuario y periodo.
       const existente = await Expediente.findOne({ 
         tipo, 
         usuario: req.user.uid, 
-        estado: { $nin: ['aprobado', 'cerrado'] } 
+        periodo: periodoActual,
       });
       
       if (existente) {
-        // Si ya existe uno activo, lo devolvemos en lugar de crear otro
-        res.status(200).json({ ok: true, expediente: existente });
+        // Si ya existe uno del periodo actual, lo devolvemos en lugar de crear otro.
+        res.status(200).json({ ok: true, msg: `Ya existe un expediente de ${tipo} para el periodo ${periodoActual}`, expediente: existente });
         return;
       }
 
@@ -61,11 +61,12 @@ export const expedienteController = {
 
       while (retries < 3) {
         try {
-          folio = await generarFolio(tipo);
+          folio = await generarFolio(tipo, periodoActual);
           expediente = await Expediente.create({
             folio,
             tipo,
             usuario: req.user.uid,
+            periodo: periodoActual,
             estado: 'borrador',
           });
           break; // Si se crea exitosamente, salimos del bucle
@@ -88,7 +89,7 @@ export const expedienteController = {
     try {
       const filtro = req.user.role === 'administrador'
         ? {}
-        : { usuario: req.user.uid };
+        : { usuario: req.user.uid, periodo: new Date().getFullYear() };
 
       const expedientes = await Expediente.find(filtro)
         .populate('usuario', 'email')

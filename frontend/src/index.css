@@ -6,7 +6,14 @@
   --bg-color: #ffffff;
   --pill-bg: #f5f5f5;
   --pill-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  --red-accent: #e11d48;
+  --red-accent: var(--sigta-header-active);
+  --sigta-header-active: #bb4433;
+  --sigta-footer-bg: #525252;
+  --sigta-card-empresa: #f5adab;
+  --sigta-card-tramite: #fce2e4;
+  --sigta-login-bg: #f5adab;
+  --sigta-login-button: #bb4433;
+  --sigta-login-accent: #781005;
 }
 
 body {
@@ -56,10 +63,10 @@ body {
 .zacatecas-icon {
   width: 45px;
   height: 50px;
-  background-color: #9f2241;
+  background-color: var(--sigta-header-active);
   border-radius: 4px;
   border: 2px solid #fff;
-  box-shadow: 0 0 0 1px #9f2241;
+  box-shadow: 0 0 0 1px var(--sigta-header-active);
 }
 
 .logo-text {
@@ -125,11 +132,11 @@ body {
 }
 
 .nav-link.active {
-  color: var(--red-accent);
+  color: var(--sigta-header-active);
 }
 
 .nav-link.text-red {
-  color: var(--red-accent);
+  color: var(--sigta-header-active);
 }
 
 .divider {
@@ -305,8 +312,8 @@ body {
     border-radius: 4px;
   }
   
-  .mobile-nav-link.active {
-    color: var(--red-accent);
+.mobile-nav-link.active {
+    color: var(--sigta-header-active);
     background: #f9f9f9;
   }
   
@@ -337,7 +344,7 @@ body {
 /* LABSOL Widget */
 .labsol-widget {
   width: 100%;
-  background: #a3a3a3;
+  background: var(--sigta-footer-bg);
   padding: 0.5rem 1.5rem;
   display: flex;
   align-items: center;
@@ -426,13 +433,13 @@ body {
 }
 
 .input-group input:focus {
-  border-color: #9f2241;
+  border-color: var(--sigta-header-active);
 }
 
 .auth-button {
   width: 100%;
   padding: 0.9rem;
-  background-color: #9f2241;
+  background-color: var(--sigta-login-button);
   color: white;
   border: none;
   border-radius: 8px;
@@ -443,7 +450,7 @@ body {
 }
 
 .auth-button:hover {
-  background-color: #7a1831;
+  background-color: var(--sigta-login-accent);
 }
 
 .auth-alert {
@@ -554,7 +561,7 @@ body {
 }
 
 .empresa-card-wide {
-  background-color: #d4d4d4;
+  background-color: var(--sigta-card-empresa);
   width: 100%;
   height: 60px;
   border-radius: 8px;
@@ -645,7 +652,7 @@ body {
 }
 
 .btn-agregar-wide {
-  background-color: #a3a3a3;
+  background-color: var(--sigta-card-empresa);
   width: 300px;
   max-width: 100%;
   height: 60px;
@@ -665,7 +672,7 @@ body {
 }
 
 .btn-agregar-wide:hover {
-  background-color: #8f8f8f;
+  background-color: color-mix(in srgb, var(--sigta-card-empresa) 82%, #000000);
 }
 
 .toggle-bottom-right {
@@ -715,7 +722,7 @@ body {
 }
 
 .empresa-card {
-  background-color: #b3b3b3;
+  background-color: var(--sigta-card-empresa);
   width: 260px;
   height: 100px;
   border-radius: 8px;
@@ -740,7 +747,7 @@ body {
 
 .config-card:hover {
   transform: translateY(-2px);
-  background-color: #bebebe;
+  background-color: color-mix(in srgb, var(--sigta-card-empresa) 82%, #ffffff);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
@@ -761,7 +768,7 @@ body {
 }
 
 .config-header h2 {
-  color: #9f2241;
+  color: var(--sigta-header-active);
   margin: 0;
   text-align: center;
   font-size: 1.8rem;
@@ -827,8 +834,8 @@ body {
 }
 
 .trash-tab.active {
-  background: #9f2241;
-  border-color: #9f2241;
+  background: var(--sigta-header-active);
+  border-color: var(--sigta-header-active);
   color: white;
 }
 
@@ -897,7 +904,7 @@ body {
 .trash-action.remove {
   background: #f8ecee;
   border-color: #ebc6cd;
-  color: #9f2241;
+  color: #b91c1c;
 }
 
 .trash-action.remove:hover {
@@ -913,6 +920,128 @@ body {
   padding: 2rem;
   text-align: center;
   font-weight: 600;
+}
+
+.appearance-panel {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.appearance-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.appearance-section h3 {
+  margin: 0;
+  color: var(--sigta-header-active);
+  font-size: 1.2rem;
+}
+
+.appearance-section p {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.appearance-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.appearance-logo-preview {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  width: 280px;
+  max-width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appearance-logo-preview img {
+  max-width: 100%;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.appearance-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-start;
+}
+
+.appearance-actions small {
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.appearance-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.appearance-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  color: #374151;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.appearance-color-field div {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.appearance-color-field input[type="color"] {
+  width: 48px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 2px;
+  background: white;
+}
+
+.appearance-color-field input[type="text"] {
+  min-width: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #374151;
+}
+
+.appearance-color-field input[type="text"]:focus {
+  outline: none;
+  border-color: var(--sigta-header-active);
+}
+
+.appearance-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .empresa-action-container {
@@ -988,7 +1117,7 @@ body {
 }
 
 .agregar-empresa-btn {
-  background-color: #b3b3b3;
+  background-color: var(--sigta-card-empresa);
   border: none;
   border-radius: 8px;
   padding: 1.2rem 2.5rem;
@@ -1001,7 +1130,7 @@ body {
 }
 
 .agregar-empresa-btn:hover {
-  background-color: #a3a3a3;
+  background-color: color-mix(in srgb, var(--sigta-card-empresa) 82%, #000000);
 }
 
 .agregar-empresa-btn:active {
@@ -1282,7 +1411,7 @@ body {
 }
 
 .tramite-tipo-btn {
-  background-color: #b3b3b3;
+  background-color: var(--sigta-card-tramite);
   border: none;
   border-radius: 8px;
   padding: 1.2rem 2.5rem;
@@ -1296,7 +1425,7 @@ body {
 }
 
 .tramite-tipo-btn:hover {
-  background-color: #9f2241;
+  background-color: var(--sigta-header-active);
   color: white;
   transform: translateY(-2px);
 }
@@ -1408,7 +1537,7 @@ body {
 }
 
 .exp-ver {
-  color: #9f2241;
+  color: var(--sigta-header-active);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -1435,7 +1564,7 @@ body {
 }
 
 .detalle-header h2 span {
-  color: #9f2241;
+  color: var(--sigta-header-active);
 }
 
 .estado-badge {
@@ -1622,7 +1751,8 @@ body {
 
 /* ── LOGOS ── */
 .gobierno-logo-img {
-  height: 52px;
+  height: 70px;
+  max-width: min(420px, 35vw);
   width: auto;
   object-fit: contain;
 }
@@ -1658,7 +1788,7 @@ body {
 
 .vista-btn.active {
   background: #fff;
-  color: #9f2241;
+  color: var(--sigta-header-active);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -1675,7 +1805,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #b3b3b3;
+  background: var(--sigta-card-empresa);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   gap: 1rem;
@@ -1767,7 +1897,7 @@ body {
 }
 
 .modo-edicion-hint {
-  color: #9f2241;
+  color: var(--sigta-header-active);
   font-size: 0.9rem;
   font-style: italic;
   margin: 0;
@@ -1787,7 +1917,7 @@ body {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #9f2241;
+  background: var(--sigta-header-active);
   color: white;
   border-radius: 50%;
   width: 22px;
@@ -1909,7 +2039,7 @@ body {
 
 .modal-field input:focus,
 .modal-field select:focus {
-  border-color: #9f2241;
+  border-color: var(--sigta-header-active);
 }
 
 .modal-field-row {
@@ -1981,7 +2111,7 @@ body {
 }
 
 .agregar-requisito-row input:focus {
-  border-color: #9f2241;
+  border-color: var(--sigta-header-active);
 }
 
 .btn-oblig-toggle {
@@ -2025,7 +2155,7 @@ body {
 .search-empty { color: #666; font-size: 0.95rem; text-align: center; }
 .search-total { color: #444; font-size: 0.9rem; margin: 0; }
 .search-section { display: flex; flex-direction: column; gap: 0.5rem; }
-.search-section-title { font-size: 0.8rem; font-weight: 700; color: #9f2241; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+.search-section-title { font-size: 0.8rem; font-weight: 700; color: var(--sigta-header-active); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
 .search-list { display: flex; flex-direction: column; gap: 0.4rem; }
 .search-result-row { display: flex; align-items: center; gap: 1rem; background: #f9f9f9; border-radius: 10px; padding: 0.8rem 1rem; cursor: pointer; transition: background 0.2s, transform 0.1s; }
 .search-result-row:hover { background: #f0f0f0; transform: translateX(4px); }
@@ -2040,7 +2170,7 @@ body {
 .notif-admin-container { padding: 2rem 3rem; width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
 .notif-header { display: flex; align-items: center; gap: 1rem; }
 .notif-titulo { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111; }
-.notif-badge-total { background: #9f2241; color: white; border-radius: 20px; padding: 0.2rem 0.8rem; font-size: 0.8rem; font-weight: 700; }
+.notif-badge-total { background: var(--sigta-header-active); color: white; border-radius: 20px; padding: 0.2rem 0.8rem; font-size: 0.8rem; font-weight: 700; }
 
 /* Filtros */
 .notif-filtros { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -2063,7 +2193,7 @@ body {
 .notif-plazo { font-size: 0.8rem; color: #b91c1c; font-weight: 600; }
 .notif-fecha { font-size: 0.8rem; color: #aaa; margin-left: auto; }
 .notif-obs { font-size: 0.85rem; color: #666; background: #fef3c7; border-radius: 6px; padding: 0.4rem 0.8rem; }
-.notif-arrow { color: #9f2241; font-weight: 700; font-size: 1.1rem; align-self: center; }
+.notif-arrow { color: var(--sigta-header-active); font-weight: 700; font-size: 1.1rem; align-self: center; }
 .notif-vacia { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding: 3rem; color: #666; }
 
 /* ── TRAMITES USER ── */

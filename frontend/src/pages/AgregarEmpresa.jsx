@@ -86,7 +86,7 @@ const AgregarEmpresa = () => {
         <button type="button" className="btn-volver" onClick={() => navigate('/admin/empresas')} disabled={loading}>
           ← Volver
         </button>
-        <h2 style={{ color: '#9f2241', margin: 0 }}>{empresaToEdit ? 'Editar empresa' : 'Agregar empresa'}</h2>
+        <h2 style={{ color: 'var(--sigta-header-active)', margin: 0 }}>{empresaToEdit ? 'Editar empresa' : 'Agregar empresa'}</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="agregar-empresa-form">

@@ -7,6 +7,7 @@ export interface IExpediente extends Document {
   folio: string;
   tipo: TipoTramite;
   usuario: Types.ObjectId;
+  periodo: number;
   estado: EstadoExpediente;
   fechaEnvio?: Date;
   fechaLimiteCorreccion?: Date;
@@ -60,6 +61,11 @@ const ExpedienteSchema = new Schema<IExpediente>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    periodo: {
+      type: Number,
+      required: true,
+      default: () => new Date().getFullYear(),
     },
     estado: {
       type: String,

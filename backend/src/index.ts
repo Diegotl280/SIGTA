@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import expedienteRoutes from "./routes/expediente.routes";
 import documentoRoutes from "./routes/documento.routes"
 import configTramiteRoutes from './routes/configTramite.routes';
+import aparienciaRoutes from './routes/apariencia.routes';
 import path from "path";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/expedientes", expedienteRoutes);
 app.use("/api/expedientes/:expedienteId/documentos", documentoRoutes);
 app.use('/api/config-tramites', configTramiteRoutes);
+app.use('/api/apariencia', aparienciaRoutes);
 
 // Manejador global de errores
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

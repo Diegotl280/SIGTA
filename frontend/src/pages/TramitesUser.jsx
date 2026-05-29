@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGetUser, useGetConfigTramites } from '../api/UserApi';
 import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
@@ -26,7 +26,7 @@ const TramitesUser = () => {
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const location = useLocation();
 
-  const expedientes = dataExpedientes?.expedientes || [];
+  const expedientes = useMemo(() => dataExpedientes?.expedientes || [], [dataExpedientes?.expedientes]);
   const configs = dataConfig?.tramites || [];
   const tramitesPermitidos = userData?.usuario?.tramitesPermitidos || [];
 
@@ -62,7 +62,11 @@ const TramitesUser = () => {
   };
 
   const getBackgroundColor = (index) => {
-    const colors = ['#cffafe', '#dcfce7', '#ffedd5', '#f3e8ff', '#fce7f3'];
+    const colors = [
+      'var(--sigta-card-tramite)',
+      'color-mix(in srgb, var(--sigta-card-tramite) 82%, #ffffff)',
+      'color-mix(in srgb, var(--sigta-card-tramite) 74%, #f5adab)',
+    ];
     return colors[index % colors.length];
   };
 

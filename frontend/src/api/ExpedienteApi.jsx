@@ -50,8 +50,8 @@ export function useCrearExpediente() {
             console.error(err);
             toast.error(err.response?.data?.msg || err.toString() || "Error al crear el expediente");
         },
-        onSuccess: () => {
-            toast.success("Trámite iniciado");
+        onSuccess: (data) => {
+            toast.success(data?.msg || "Trámite iniciado");
             queryClient.invalidateQueries({ queryKey: ['misExpedientes'] });
         }
     });

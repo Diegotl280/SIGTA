@@ -10,6 +10,7 @@ const ESTADO_COLORS = {
   en_revision:       { bg: '#fef3c7', text: '#92400e' },
   con_observaciones: { bg: '#fee2e2', text: '#b91c1c' },
   validado:          { bg: '#d1fae5', text: '#065f46' },
+  cancelado:         { bg: '#f3f4f6', text: '#991b1b' },
 };
 
 const ESTADO_LABELS = {
@@ -17,6 +18,7 @@ const ESTADO_LABELS = {
   en_revision:       'En revisión',
   con_observaciones: 'Con observaciones',
   validado:          'Validado',
+  cancelado:         'Cancelado',
 };
 
 const ESTADO_ICONOS = {
@@ -24,6 +26,7 @@ const ESTADO_ICONOS = {
   en_revision:       '🔍',
   con_observaciones: '⚠️',
   validado:          '✅',
+  cancelado:         '❌',
 };
 
 const NotificacionesAdmin = () => {
@@ -40,10 +43,10 @@ const NotificacionesAdmin = () => {
         });
         // Solo mostrar los que requieren atención del admin o están validados
         const pendientes = (res.data.expedientes || []).filter(e =>
-          ['enviado', 'en_revision', 'con_observaciones', 'validado'].includes(e.estado)
+          ['enviado', 'en_revision', 'con_observaciones', 'validado', 'cancelado'].includes(e.estado)
         );
         // Ordenar: con_observaciones primero, luego enviado, luego en_revision, luego validado
-        const orden = { con_observaciones: 0, enviado: 1, en_revision: 2, validado: 3 };
+        const orden = { con_observaciones: 0, enviado: 1, en_revision: 2, validado: 3, cancelado: 4 };
         pendientes.sort((a, b) => orden[a.estado] - orden[b.estado]);
         setExpedientes(pendientes);
       } catch (err) {
@@ -64,6 +67,7 @@ const NotificacionesAdmin = () => {
     en_revision:       expedientes.filter(e => e.estado === 'en_revision').length,
     con_observaciones: expedientes.filter(e => e.estado === 'con_observaciones').length,
     validado:          expedientes.filter(e => e.estado === 'validado').length,
+    cancelado:         expedientes.filter(e => e.estado === 'cancelado').length,
   };
 
   const irADetalleExpediente = (exp) => {
@@ -115,6 +119,12 @@ const NotificacionesAdmin = () => {
           onClick={() => setFiltro('validado')}
         >
           ✅ Validados ({conteo.validado})
+        </button>
+        <button
+          className={`notif-filtro-btn ${filtro === 'cancelado' ? 'active' : ''}`}
+          onClick={() => setFiltro('cancelado')}
+        >
+          ❌ Cancelados ({conteo.cancelado})
         </button>
       </div>
 

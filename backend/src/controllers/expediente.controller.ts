@@ -1,15 +1,26 @@
 import { Response, NextFunction } from 'express';
 import { maxWords } from '../utils/validation';
 import { Expediente } from '../models/Expediente';
+import { FolioCounter } from '../models/FolioCounter';
 import { ConfigTramite } from '../models/ConfigTramite';
+import { Documento } from '../models/Documento';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import fs from 'fs';
 import path from 'path';
 
 // Generar folio único: SIGTA-LAU-2026-0001
 async function generarFolio(tipo: string, periodo: number): Promise<string> {
-  const count = await Expediente.countDocuments({ tipo, periodo });
-  const numero = String(count + 1).padStart(4, '0');
+  const contador = await FolioCounter.findOneAndUpdate(
+    { clave: `${tipo}-${periodo}` },
+    { $inc: { secuencia: 1 } },
+    { new: true, upsert: true, setDefaultsOnInsert: true }
+  );
+
+  if (!contador) {
+    throw new Error('No fue posible generar el folio del expediente');
+  }
+
+  const numero = String(contador.secuencia).padStart(4, '0');
   return `SIGTA-${tipo}-${periodo}-${numero}`;
 }
 
@@ -33,6 +44,7 @@ export const expedienteController = {
         tipo, 
         usuario: req.user.uid, 
         periodo: periodoActual,
+        vigente: true,
       });
       
       if (existente) {
@@ -57,11 +69,10 @@ export const expedienteController = {
 
       let expediente;
       let retries = 0;
-      let folio;
 
-      while (retries < 3) {
+      while (retries < 10) {
         try {
-          folio = await generarFolio(tipo, periodoActual);
+          const folio = await generarFolio(tipo, periodoActual);
           expediente = await Expediente.create({
             folio,
             tipo,
@@ -69,19 +80,39 @@ export const expedienteController = {
             periodo: periodoActual,
             estado: 'borrador',
           });
-          break; // Si se crea exitosamente, salimos del bucle
+          break;
         } catch (error: any) {
-          if (error.code === 11000) {
+          if (error.code === 11000 && error.keyPattern?.folio) {
             retries++;
-            if (retries === 3) throw error; // Si falla 3 veces, lanzamos el error
+            if (retries === 10) throw error;
           } else {
-            throw error; // Cualquier otro error lo lanzamos
+            throw error;
           }
         }
       }
 
       res.status(201).json({ ok: true, expediente });
-    } catch (err) { next(err); }
+    } catch (err: any) {
+      if (err.code === 11000) {
+        const existente = await Expediente.findOne({
+          tipo: req.body.tipo,
+          usuario: req.user.uid,
+          periodo: new Date().getFullYear(),
+          vigente: true,
+        });
+
+        if (existente) {
+          res.status(200).json({
+            ok: true,
+            msg: `Ya existe un expediente de ${req.body.tipo} para el periodo ${new Date().getFullYear()}`,
+            expediente: existente,
+          });
+          return;
+        }
+      }
+
+      next(err);
+    }
   },
 
   // Ver mis expedientes (usuario ve los suyos, admin ve todos)
@@ -158,6 +189,36 @@ export const expedienteController = {
       if (expediente.estado !== 'borrador' && expediente.estado !== 'con_observaciones') {
         res.status(400).json({ ok: false, msg: `No se puede enviar un expediente en estado: ${expediente.estado}` });
         return;
+      }
+
+      if (expediente.estado === 'con_observaciones') {
+        const observacionesSinCorregir = await Documento.exists({
+          expediente: expediente._id,
+          estado: 'con_observaciones',
+          corregidoPendienteEnvio: false,
+        });
+
+        if (observacionesSinCorregir) {
+          res.status(400).json({ ok: false, msg: 'Debes corregir todos los documentos con observaciones antes de completar el trámite' });
+          return;
+        }
+
+        await Documento.updateMany(
+          {
+            expediente: expediente._id,
+            estado: 'con_observaciones',
+            corregidoPendienteEnvio: true,
+          },
+          {
+            $set: {
+              estado: 'pendiente',
+              corregidoPendienteEnvio: false,
+            },
+            $unset: { observacion: 1 },
+          }
+        );
+
+        expediente.correccionReenviada = true;
       }
 
       expediente.estado = 'enviado';

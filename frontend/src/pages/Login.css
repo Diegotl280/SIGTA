@@ -64,6 +64,44 @@
   opacity: 0.92;
 }
 
+.login-about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  margin-top: 1rem;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  opacity: 0.92;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.login-about-link:hover {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.login-about-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.login-about-mobile {
+  display: none;
+  color: var(--sigta-login-accent);
+}
+
 .login-right-pane {
   position: absolute;
   top: 0;
@@ -223,6 +261,11 @@
 
   .login-logo {
     margin-bottom: 1.7rem;
+  }
+
+  .login-about-mobile {
+    display: inline-flex;
+    margin-top: 1.4rem;
   }
 }
 

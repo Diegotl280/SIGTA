@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGetUser, useGetConfigTramites } from '../api/UserApi';
 import { useGetMisExpedientes, useCrearExpediente, useEnviarExpediente, descargarAcuseExpediente } from '../api/ExpedienteApi';
@@ -27,23 +27,37 @@ const TramitesUser = () => {
   const location = useLocation();
 
   const expedientes = useMemo(() => dataExpedientes?.expedientes || [], [dataExpedientes?.expedientes]);
+  const expedientesVigentes = useMemo(
+    () => expedientes.filter(exp => exp.estado !== 'cancelado' && exp.vigente !== false),
+    [expedientes]
+  );
   const configs = dataConfig?.tramites || [];
   const tramitesPermitidos = userData?.usuario?.tramitesPermitidos || [];
+  const tramitesVisibles = tramitesPermitidos;
+  const expedientesSolicitadosRef = useRef(new Set());
+
+  const asegurarExpediente = useCallback((tipo) => {
+    if (expedientesVigentes.some(e => e.tipo === tipo) || expedientesSolicitadosRef.current.has(tipo)) {
+      return;
+    }
+
+    expedientesSolicitadosRef.current.add(tipo);
+    crearExpediente(tipo, {
+      onSettled: () => expedientesSolicitadosRef.current.delete(tipo),
+    });
+  }, [crearExpediente, expedientesVigentes]);
 
   useEffect(() => {
-    if (location.state?.tramite && tramitesPermitidos.length > 0 && !isLoadingExpedientes) {
+    if (location.state?.tramite && tramitesVisibles.length > 0 && !isLoadingExpedientes) {
       const tipo = location.state.tramite;
       setTramiteSeleccionado(tipo);
-      
-      if (!expedientes.find(e => e.tipo === tipo)) {
-        crearExpediente(tipo);
-      }
+      asegurarExpediente(tipo);
 
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, tramitesPermitidos.length, isLoadingExpedientes, expedientes, crearExpediente]);
+  }, [location.state, tramitesVisibles.length, isLoadingExpedientes, asegurarExpediente]);
 
-  const expedienteActual = expedientes.find(e => e.tipo === tramiteSeleccionado);
+  const expedienteActual = expedientesVigentes.find(e => e.tipo === tramiteSeleccionado);
   const { data: dataDocumentos, isLoading: isLoadingDocumentos } = useGetDocumentosByExpediente(expedienteActual?._id);
 
   const fileInputRef = useRef({});
@@ -53,7 +67,7 @@ const TramitesUser = () => {
   }
 
   const getEstadoTramite = (tipo) => {
-    const exp = expedientes.find(e => e.tipo === tipo);
+    const exp = expedientesVigentes.find(e => e.tipo === tipo);
     if (!exp) return 'nuevo';
     if (exp.estado === 'borrador') return 'nuevo';
     if (exp.estado === 'validado' || exp.estado === 'cerrado') return 'aprobado';
@@ -73,9 +87,7 @@ const TramitesUser = () => {
   const handleSeleccionarTramite = (tipo) => {
     setTramiteSeleccionado(tipo);
     // Si no existe un expediente para este trámite, lo creamos automáticamente
-    if (!expedientes.find(e => e.tipo === tipo)) {
-      crearExpediente(tipo);
-    }
+    asegurarExpediente(tipo);
   };
 
   const handleFileUpload = (e, tipoRequisito) => {
@@ -101,13 +113,17 @@ const TramitesUser = () => {
       tipoRequisito,
       archivo: file
     });
+    e.target.value = '';
   };
 
   const isTrámiteCompleto = () => {
     if (!dataDocumentos?.checklist) return false;
     // Verificar que todos los requeridos estén subidos
     const requeridos = dataDocumentos.checklist.filter(req => req.obligatorio);
-    return requeridos.every(req => req.estado !== 'no_subido');
+    const observacionesSinCorregir = dataDocumentos.documentos?.some(
+      doc => doc.estado === 'con_observaciones' && !doc.corregidoPendienteEnvio
+    );
+    return requeridos.every(req => req.estado !== 'no_subido') && !observacionesSinCorregir;
   };
 
   const handleEnviarTramite = () => {
@@ -174,8 +190,8 @@ const TramitesUser = () => {
       {!tramiteSeleccionado ? (
         // VISTA 1: Lista de Trámites
         <div className="tramites-list">
-          {tramitesPermitidos.length > 0 ? (
-            tramitesPermitidos.map((tipo, index) => {
+          {tramitesVisibles.length > 0 ? (
+            tramitesVisibles.map((tipo, index) => {
               const config = configs.find(c => c.tipo === tipo);
               const nombreTramite = config ? config.nombre : tipo;
               const estado = getEstadoTramite(tipo);
@@ -202,7 +218,7 @@ const TramitesUser = () => {
         // VISTA 2: Documentos a subir
         <div className="documentos-list">
           {(() => {
-            const index = tramitesPermitidos.indexOf(tramiteSeleccionado);
+            const index = tramitesVisibles.indexOf(tramiteSeleccionado);
             const config = configs.find(c => c.tipo === tramiteSeleccionado);
             const nombreTramite = config ? config.nombre : tramiteSeleccionado;
             const estado = getEstadoTramite(tramiteSeleccionado);
@@ -273,7 +289,13 @@ const TramitesUser = () => {
                           >
                             Descargar
                           </button>
-                          {docSubido.estado === 'con_observaciones' ? (
+                          {(
+                            expedienteActual.estado === 'borrador' ||
+                            (
+                              expedienteActual.estado === 'con_observaciones' &&
+                              docSubido.estado === 'con_observaciones'
+                            )
+                          ) ? (
                             <label className="btn-reemplazar">
                               Reemplazar
                               <input
@@ -288,7 +310,7 @@ const TramitesUser = () => {
                               className="btn-reemplazar"
                               disabled
                               style={{ opacity: 0.5, cursor: 'not-allowed', border: 'none', background: '#ccc', color: '#666' }}
-                              title="Solo se puede reemplazar cuando hay observaciones del administrador"
+                              title="Solo puedes reemplazar documentos antes del primer envío o cuando tienen observaciones del administrador"
                             >
                               Reemplazar
                             </button>

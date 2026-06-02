@@ -31,6 +31,11 @@ const integrantes = [
     correo: 'dtorres102803@gmail.com',
     linkedin: 'https://www.linkedin.com/in/diego-alexis-torres-lemus-176768391',
   },
+  {
+    nombre: 'Jose Emiliano Villanueva Saucedo',
+    correo: 'emilianosaucedo41@gmail.com',
+    linkedin: 'www.linkedin.com/in/villanueva-saucedo-emiliano-a29691274'
+  }
 ];
 
 const SobreNosotros = () => {

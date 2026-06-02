@@ -87,7 +87,7 @@ async function seed() {
       await ConfigTramite.findOneAndUpdate(
         { tipo: tramite.tipo },
         tramite,
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
       console.log(` ${tramite.tipo} - ${tramite.nombre} cargado (${tramite.requisitos.length} requisitos)`);
     }

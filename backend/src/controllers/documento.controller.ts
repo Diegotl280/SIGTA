@@ -132,7 +132,7 @@ export const documentoController = {
               tipoRequisito,
             },
           },
-          { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+          { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true }
         );
       } catch (err: any) {
         if (err.code !== 11000) throw err;
@@ -146,7 +146,7 @@ export const documentoController = {
         documento = await Documento.findOneAndUpdate(
           { expediente: expedienteId as string, tipoRequisito },
           { $set: datosDocumento },
-          { new: true, runValidators: true }
+          { returnDocument: 'after', runValidators: true }
         );
       }
 

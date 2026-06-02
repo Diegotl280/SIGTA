@@ -143,18 +143,24 @@ const Dashboard = () => {
             <div className="search-section">
               <h3 className="search-section-title">Expedientes ({expedientes.length})</h3>
               <div className="search-list">
-                {expedientes.map(e => (
-                  <div
-                    key={e._id}
-                    className="search-result-row"
-                    onClick={() => {
-                      if (e.usuario?._id) {
-                        navigate(`/admin/empresas/detalle/${e.usuario._id}`, { state: { tipoAuto: e.tipo } });
-                      } else {
-                        navigate('/admin/empresas');
-                      }
-                    }}
-                  >
+                {expedientes.map(e => {
+                  const estaBloqueado = ['borrador', 'cancelado'].includes(e.estado);
+
+                  return (
+                    <div
+                      key={e._id}
+                      className={`search-result-row ${estaBloqueado ? 'disabled' : ''}`}
+                      aria-disabled={estaBloqueado}
+                      onClick={() => {
+                        if (estaBloqueado) return;
+
+                        if (e.usuario?._id) {
+                          navigate(`/admin/empresas/detalle/${e.usuario._id}`, { state: { tipoAuto: e.tipo } });
+                        } else {
+                          navigate('/admin/empresas');
+                        }
+                      }}
+                    >
                     <div className="search-result-icon">📄</div>
                     <div className="search-result-info">
                       <span className="search-result-title">{e.folio}</span>
@@ -171,8 +177,9 @@ const Dashboard = () => {
                     >
                       {ESTADO_LABELS[e.estado]}
                     </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

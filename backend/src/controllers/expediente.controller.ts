@@ -13,7 +13,7 @@ async function generarFolio(tipo: string, periodo: number): Promise<string> {
   const contador = await FolioCounter.findOneAndUpdate(
     { clave: `${tipo}-${periodo}` },
     { $inc: { secuencia: 1 } },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
+    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
   );
 
   if (!contador) {

@@ -138,12 +138,18 @@ const NotificacionesAdmin = () => {
         </div>
       ) : (
         <div className="notif-lista">
-          {filtrados.map(exp => (
-            <div
-              key={exp._id}
-              className="notif-card"
-              onClick={() => irADetalleExpediente(exp)}
-            >
+          {filtrados.map(exp => {
+            const estaBloqueado = ['borrador', 'cancelado'].includes(exp.estado);
+
+            return (
+              <div
+                key={exp._id}
+                className={`notif-card ${estaBloqueado ? 'disabled' : ''}`}
+                aria-disabled={estaBloqueado}
+                onClick={() => {
+                  if (!estaBloqueado) irADetalleExpediente(exp);
+                }}
+              >
               <div className="notif-card-icono">
                 {ESTADO_ICONOS[exp.estado]}
               </div>
@@ -190,9 +196,10 @@ const NotificacionesAdmin = () => {
                   </div>
                 )}
               </div>
-              <div className="notif-arrow">→</div>
-            </div>
-          ))}
+                {!estaBloqueado && <div className="notif-arrow">→</div>}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,0 +1,351 @@
+.empresa-detalle-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.detalle-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.empresa-titulo {
+  font-size: 24px;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.estado-label {
+  font-size: 14px;
+  color: #4b5563;
+  width: 120px;
+  text-align: center;
+  margin-right: 1rem;
+}
+
+.tramites-list, .documentos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tramite-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tramite-btn {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tramite-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.tramite-nombre {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.tramite-icon-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.tramite-main-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.status-box {
+  display: flex;
+  background-color: #e5e7eb;
+  padding: 0.5rem;
+  border-radius: 8px;
+  gap: 0.5rem;
+  align-items: center;
+  width: 120px;
+  justify-content: space-around;
+}
+
+.status-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.status-icon.active {
+  opacity: 1;
+}
+
+.status-icon.inactive {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+.requisitos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-left: 0;
+}
+
+.requisito-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #cffafe;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.req-texto {
+  font-size: 15px;
+  color: #1f2937;
+  flex: 1;
+}
+
+.req-acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-descargar-pdf {
+  background-color: #86efac;
+  color: #065f46;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-descargar-pdf:hover {
+  background-color: #4ade80;
+}
+
+.btn-reemplazar {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-reemplazar:hover:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+.btn-reemplazar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.acuse-admin-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background-color: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.acuse-admin-info,
+.acuse-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.acuse-admin-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.acuse-admin-info strong {
+  color: #065f46;
+  font-size: 15px;
+}
+
+.acuse-admin-info span {
+  color: #374151;
+  font-size: 14px;
+}
+
+.pdf-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.pdf-hover-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pdf-name-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: 320px;
+  min-width: 160px;
+  background: #1f2937;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  transition-delay: 0s;
+  z-index: 20;
+}
+
+.pdf-name-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #1f2937 transparent transparent;
+}
+
+.pdf-hover-wrapper:hover .pdf-name-tooltip {
+  opacity: 1;
+  transition-delay: 1s;
+}
+
+/* Footer form */
+.footer-seccion {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.obs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.obs-container label {
+  font-size: 16px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.obs-container textarea {
+  width: 100%;
+  height: 100px;
+  border: 1px dashed #9ca3af;
+  border-radius: 8px;
+  padding: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.footer-botones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.btn-left {
+  display: flex;
+}
+
+.btn-folios {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-folios:hover {
+  background-color: #dc2626;
+}
+
+.btn-right {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-cancelar {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-cancelar:hover {
+  background-color: #d97706;
+}
+
+.btn-continuar {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-continuar:hover {
+  background-color: #16a34a;
+}

@@ -35,6 +35,11 @@ const integrantes = [
     nombre: 'Jose Emiliano Villanueva Saucedo',
     correo: 'emilianosaucedo41@gmail.com',
     linkedin: 'www.linkedin.com/in/villanueva-saucedo-emiliano-a29691274'
+  },
+  {
+    nombre: 'Alberto Navarro Ruiz',
+    correo: 'albertonavarro168@gmail.com',
+    linkedin: 'https://www.linkedin.com/in/alberto-navarro-6786283a1/'
   }
 ];
 

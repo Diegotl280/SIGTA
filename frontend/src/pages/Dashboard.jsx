@@ -13,11 +13,13 @@ const ESTADO_COLORS = {
   con_observaciones: { bg: '#fee2e2', text: '#b91c1c' },
   validado:          { bg: '#d1fae5', text: '#065f46' },
   cerrado:           { bg: '#f3f4f6', text: '#6b7280' },
+  cancelado:         { bg: '#fee2e2', text: '#991b1b' },
 };
 
 const ESTADO_LABELS = {
   borrador: 'Borrador', enviado: 'Enviado', en_revision: 'En revisión',
   con_observaciones: 'Con observaciones', validado: 'Validado', cerrado: 'Cerrado',
+  cancelado: 'Cancelado',
 };
 
 const Dashboard = () => {
@@ -141,18 +143,24 @@ const Dashboard = () => {
             <div className="search-section">
               <h3 className="search-section-title">Expedientes ({expedientes.length})</h3>
               <div className="search-list">
-                {expedientes.map(e => (
-                  <div
-                    key={e._id}
-                    className="search-result-row"
-                    onClick={() => {
-                      if (e.usuario?._id) {
-                        navigate(`/admin/empresas/detalle/${e.usuario._id}`, { state: { tipoAuto: e.tipo } });
-                      } else {
-                        navigate('/admin/empresas');
-                      }
-                    }}
-                  >
+                {expedientes.map(e => {
+                  const estaBloqueado = ['borrador', 'cancelado'].includes(e.estado);
+
+                  return (
+                    <div
+                      key={e._id}
+                      className={`search-result-row ${estaBloqueado ? 'disabled' : ''}`}
+                      aria-disabled={estaBloqueado}
+                      onClick={() => {
+                        if (estaBloqueado) return;
+
+                        if (e.usuario?._id) {
+                          navigate(`/admin/empresas/detalle/${e.usuario._id}`, { state: { tipoAuto: e.tipo } });
+                        } else {
+                          navigate('/admin/empresas');
+                        }
+                      }}
+                    >
                     <div className="search-result-icon">📄</div>
                     <div className="search-result-info">
                       <span className="search-result-title">{e.folio}</span>
@@ -169,8 +177,9 @@ const Dashboard = () => {
                     >
                       {ESTADO_LABELS[e.estado]}
                     </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

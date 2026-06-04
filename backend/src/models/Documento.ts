@@ -11,6 +11,7 @@ export interface IDocumento extends Document {
   estado: EstadoDocumento;
   observacion?: string;        // comentario del administrador al rechazar
   fechaCorreccion?: Date;      // cuándo fue corregido por el usuario
+  corregidoPendienteEnvio: boolean;
 }
 
 const DocumentoSchema = new Schema<IDocumento>(
@@ -47,8 +48,17 @@ const DocumentoSchema = new Schema<IDocumento>(
     fechaCorreccion: {
       type: Date,
     },
+    corregidoPendienteEnvio: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
+);
+
+DocumentoSchema.index(
+  { expediente: 1, tipoRequisito: 1 },
+  { unique: true, name: 'documento_unico_por_expediente_requisito' }
 );
 
 export const Documento = model<IDocumento>('Documento', DocumentoSchema);

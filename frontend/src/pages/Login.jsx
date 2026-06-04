@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import samaLogo from '../assets/LogoSAMA.png';
 import { useAppearance } from '../appearance/useAppearance';
@@ -30,6 +30,10 @@ const Login = () => {
         <div className="login-brand-mark">
           <span>SIGTA</span>
           <strong>Trámites ambientales</strong>
+          <Link to="/sobre-nosotros" className="login-about-link">
+            <span className="login-about-icon" aria-hidden="true">i</span>
+            Sobre nosotros
+          </Link>
         </div>
       </div>
 
@@ -79,6 +83,11 @@ const Login = () => {
               </button>
             </div>
           </form>
+
+          <Link to="/sobre-nosotros" className="login-about-link login-about-mobile">
+            <span className="login-about-icon" aria-hidden="true">i</span>
+            Sobre nosotros
+          </Link>
         </div>
       </div>
     </div>

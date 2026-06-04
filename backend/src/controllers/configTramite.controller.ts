@@ -274,7 +274,7 @@ export const configTramiteController = {
       const tramite = await ConfigTramite.findByIdAndUpdate(
         req.params.id,
         { activo: false },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!tramite) {
@@ -296,7 +296,7 @@ export const configTramiteController = {
       const tramite = await ConfigTramite.findByIdAndUpdate(
         req.params.id,
         { activo: true },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!tramite) {

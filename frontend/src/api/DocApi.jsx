@@ -92,10 +92,11 @@ export function useValidarDocumento() {
             toast.error(err.response?.data?.msg || err.toString() || "Error al validar el documento");
         },
         onSuccess: (data, variables) => {
-            toast.success("Estado del documento actualizado");
+            toast.success(data?.msg || "Estado del documento actualizado");
             queryClient.invalidateQueries({ queryKey: ['documentosExpediente', variables.expedienteId] });
             // Al validar un documento, puede cambiar el estado del expediente general
             queryClient.invalidateQueries({ queryKey: ['expedientesEmpresa'] });
+            queryClient.invalidateQueries({ queryKey: ['empresas'] });
         }
     });
 }

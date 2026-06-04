@@ -1,0 +1,213 @@
+.about-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.about-header {
+  width: 100%;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem clamp(1.5rem, 7vw, 7rem);
+  border-bottom: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+.about-back-link {
+  color: var(--sigta-login-accent);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.about-back-link:hover {
+  text-decoration: underline;
+}
+
+.about-sama-logo {
+  max-width: 245px;
+  max-height: 66px;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.about-intro,
+.about-team {
+  width: min(100% - 3rem, 980px);
+  margin-inline: auto;
+}
+
+.about-intro {
+  padding: clamp(3rem, 7vw, 5.5rem) 0 2.5rem;
+}
+
+.about-eyebrow,
+.about-section-heading p {
+  margin: 0 0 0.65rem;
+  color: var(--sigta-login-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.about-intro h1 {
+  margin: 0 0 1.25rem;
+  color: #111827;
+  font-size: clamp(2.35rem, 5vw, 4.3rem);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.about-intro p:not(.about-eyebrow) {
+  max-width: 790px;
+  margin: 0 0 0.8rem;
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.about-team {
+  padding: 1.75rem 0 4rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.about-section-heading {
+  margin-bottom: 1.35rem;
+}
+
+.about-section-heading h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.8rem;
+  letter-spacing: 0;
+}
+
+.about-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1rem;
+}
+
+.about-profile {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.3rem;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid var(--sigta-login-button);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.05);
+}
+
+.about-profile-avatar {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sigta-login-bg) 58%, #ffffff);
+  color: var(--sigta-login-accent);
+}
+
+.about-profile-avatar svg,
+.about-contact-row svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.about-profile-details {
+  min-width: 0;
+}
+
+.about-profile-details h3 {
+  margin: 0 0 0.8rem;
+  color: #111827;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.about-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.about-contact-row svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.about-contact-row:hover {
+  color: var(--sigta-login-accent);
+}
+
+.about-linkedin {
+  color: #0a66c2;
+}
+
+.about-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: auto;
+  padding: 1rem clamp(1.5rem, 7vw, 7rem);
+  background: #525252;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.about-footer img {
+  width: 62px;
+  height: 44px;
+  object-fit: contain;
+}
+
+@media (max-width: 620px) {
+  .about-header {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .about-sama-logo {
+    max-width: min(100%, 230px);
+    object-position: left center;
+  }
+
+  .about-intro,
+  .about-team {
+    width: min(100% - 2rem, 980px);
+  }
+
+  .about-footer {
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+  }
+}

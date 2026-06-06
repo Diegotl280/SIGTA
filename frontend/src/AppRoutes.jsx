@@ -12,6 +12,7 @@ import TramitesUser from './pages/TramitesUser';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Layout from './layouts/Layout';
 import ConfiguracionAdmin from './pages/ConfiguracionAdmin';
+import SobreNosotros from './pages/SobreNosotros';
 
 const HomeRedirect = () => {
   const { user, loading } = useAuth();
@@ -24,6 +25,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/sobre-nosotros" element={<SobreNosotros />} />
 
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<HomeRedirect />} />

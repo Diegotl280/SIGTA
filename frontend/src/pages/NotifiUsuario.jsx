@@ -11,6 +11,7 @@ const ESTADO_COLORS = {
   con_observaciones: { bg: '#ebd02f', text: '#1a1a1a' },
   enviado: { bg: '#dbeafe', text: '#1d4ed8' },
   en_revision: { bg: '#fef3c7', text: '#92400e' },
+  cancelado: { bg: '#fee2e2', text: '#991b1b' },
   acuse: { bg: '#dcfce7', text: '#14532d' },
   asignado: { bg: '#e0f2fe', text: '#0369a1' },
 };
@@ -34,7 +35,11 @@ const NotifiUsuario = () => {
         const configs = configRes.data.tramites || [];
 
         let pendientes = todosExpedientes.filter(e =>
-          ['enviado', 'en_revision', 'con_observaciones'].includes(e.estado) || e.acuseRecepcion
+          e.estado === 'cancelado' ||
+          (
+            tramitesPermitidos.includes(e.tipo) &&
+            (['enviado', 'en_revision', 'con_observaciones'].includes(e.estado) || e.acuseRecepcion)
+          )
         );
 
         // Filtrar aquellos donde ya pasaron los 10 días
@@ -72,7 +77,9 @@ const NotifiUsuario = () => {
           // para que siempre aparezca la notificación cuando se asigna un trámite.
 
           // Tomamos el expediente más reciente de este tipo (vienen ordenados desc por el backend)
-          const exp = todosExpedientes.find(e => e.tipo === tipo);
+          const exp = todosExpedientes.find(
+            e => e.tipo === tipo && e.estado !== 'cancelado' && e.vigente !== false
+          );
           
           // Si no hay expediente, o si el más reciente está en borrador, mostramos la notificación
           if (!exp || exp.estado === 'borrador') {
@@ -130,7 +137,11 @@ const NotifiUsuario = () => {
         expedientes.map(exp => (
           <div
             key={exp._id}
-            onClick={() => navigate('/tramites', { state: { tramite: exp.tipo } })}
+            onClick={() => {
+              if (exp.estado !== 'cancelado') {
+                navigate('/tramites', { state: { tramite: exp.tipo } });
+              }
+            }}
             style={{
               backgroundColor: ESTADO_COLORS[exp.estado]?.bg || (exp.acuseRecepcion ? ESTADO_COLORS.acuse.bg : '#f5f5f5'),
               padding: '1.5rem',
@@ -138,7 +149,7 @@ const NotifiUsuario = () => {
               width: '100%',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               marginBottom: '1rem',
-              cursor: 'pointer',
+              cursor: exp.estado === 'cancelado' ? 'default' : 'pointer',
               transition: 'opacity 0.2s',
             }}
           >
@@ -152,6 +163,8 @@ const NotifiUsuario = () => {
                 <>La documentación del trámite <strong>{exp.tipo}</strong>
                 {exp.estado === 'con_observaciones'
                   ? ' está incompleta o es errónea, favor de corrección lo antes posible.'
+                  : exp.estado === 'cancelado'
+                    ? ' fue cancelado debido a que la documentación corregida volvió a presentar observaciones.'
                   : exp.acuseRecepcion
                     ? ' cuenta con un acuse de recepción disponible para descarga.'
                   : exp.estado === 'enviado'

@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export type TipoTramite = string;
-export type EstadoExpediente = 'borrador' | 'enviado' | 'en_revision' | 'con_observaciones' | 'validado' | 'cerrado';
+export type EstadoExpediente = 'borrador' | 'enviado' | 'en_revision' | 'con_observaciones' | 'validado' | 'cerrado' | 'cancelado';
 
 export interface IExpediente extends Document {
   folio: string;
@@ -9,9 +9,11 @@ export interface IExpediente extends Document {
   usuario: Types.ObjectId;
   periodo: number;
   estado: EstadoExpediente;
+  vigente: boolean;
   fechaEnvio?: Date;
   fechaLimiteCorreccion?: Date;
   diasParaCorreccion?: number;
+  correccionReenviada: boolean;
   observacionesGenerales?: string;
   acuseRecepcion?: {
     nombreArchivo: string;
@@ -69,8 +71,12 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
     estado: {
       type: String,
-      enum: ['borrador', 'enviado', 'en_revision', 'con_observaciones', 'validado', 'cerrado'],
+      enum: ['borrador', 'enviado', 'en_revision', 'con_observaciones', 'validado', 'cerrado', 'cancelado'],
       default: 'borrador',
+    },
+    vigente: {
+      type: Boolean,
+      default: true,
     },
     fechaEnvio: {
       type: Date,
@@ -81,6 +87,10 @@ const ExpedienteSchema = new Schema<IExpediente>(
     diasParaCorreccion: {
       type: Number,
     },
+    correccionReenviada: {
+      type: Boolean,
+      default: false,
+    },
     observacionesGenerales: {
       type: String,
     },
@@ -90,6 +100,15 @@ const ExpedienteSchema = new Schema<IExpediente>(
     },
   },
   { timestamps: true }
+);
+
+ExpedienteSchema.index(
+  { usuario: 1, tipo: 1, periodo: 1 },
+  {
+    unique: true,
+    name: 'expediente_vigente_unico_por_usuario_tipo_periodo',
+    partialFilterExpression: { vigente: true },
+  }
 );
 
 export const Expediente = model<IExpediente>('Expediente', ExpedienteSchema);

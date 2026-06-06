@@ -2159,6 +2159,8 @@ body {
 .search-list { display: flex; flex-direction: column; gap: 0.4rem; }
 .search-result-row { display: flex; align-items: center; gap: 1rem; background: #f9f9f9; border-radius: 10px; padding: 0.8rem 1rem; cursor: pointer; transition: background 0.2s, transform 0.1s; }
 .search-result-row:hover { background: #f0f0f0; transform: translateX(4px); }
+.search-result-row.disabled { cursor: not-allowed; opacity: 0.72; }
+.search-result-row.disabled:hover { background: #f9f9f9; transform: none; }
 .search-result-icon { font-size: 1.3rem; }
 .search-result-info { display: flex; flex-direction: column; flex: 1; gap: 0.1rem; }
 .search-result-title { font-weight: 600; font-size: 0.95rem; color: #111; }
@@ -2182,6 +2184,8 @@ body {
 .notif-lista { display: flex; flex-direction: column; gap: 0.8rem; }
 .notif-card { display: flex; align-items: flex-start; gap: 1rem; background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 1rem 1.2rem; cursor: pointer; transition: box-shadow 0.2s, transform 0.1s; }
 .notif-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.notif-card.disabled { cursor: default; }
+.notif-card.disabled:hover { box-shadow: none; transform: none; }
 .notif-card-icono { font-size: 1.6rem; padding-top: 0.1rem; }
 .notif-card-info { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
 .notif-card-top { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }

@@ -8,7 +8,9 @@ import expedienteRoutes from "./routes/expediente.routes";
 import documentoRoutes from "./routes/documento.routes"
 import configTramiteRoutes from './routes/configTramite.routes';
 import aparienciaRoutes from './routes/apariencia.routes';
-import path from "path";
+import { Documento } from './models/Documento';
+import { Expediente } from './models/Expediente';
+import { FolioCounter } from './models/FolioCounter';
 
 const app = express();
 app.use(cors());
@@ -29,7 +31,9 @@ app.use('/api/apariencia', aparienciaRoutes);
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Error no manejado:", err);
   if (err.name === 'MongoServerError' && err.code === 11000) {
-    res.status(400).json({ ok: false, msg: 'Error: Registro duplicado detectado' });
+    const campos = Object.keys(err.keyPattern || err.keyValue || {});
+    const detalle = campos.length > 0 ? `: ${campos.join(', ')}` : '';
+    res.status(400).json({ ok: false, msg: `Ya existe un registro con los mismos datos${detalle}` });
   } else {
     res.status(500).json({ ok: false, msg: err.message || 'Error interno del servidor' });
   }
@@ -43,6 +47,20 @@ async function start() {
     if (!MONGO_URI) throw new Error("Falta MONGO_URI en variables de entorno");
     await mongoose.connect(MONGO_URI);
     console.log("Mongo conectado");
+    await Expediente.updateMany(
+      { estado: 'cancelado', vigente: { $exists: false } },
+      { $set: { vigente: false } }
+    );
+    await Expediente.updateMany(
+      { vigente: { $exists: false } },
+      { $set: { vigente: true } }
+    );
+    await Promise.all([
+      Documento.syncIndexes(),
+      Expediente.syncIndexes(),
+      FolioCounter.syncIndexes(),
+    ]);
+    console.log("Índices sincronizados");
     app.listen(Number(PORT), "0.0.0.0", () => {
       console.log(`Backend en http://localhost:${PORT}`);
     });

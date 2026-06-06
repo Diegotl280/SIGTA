@@ -6,6 +6,13 @@
     "esModuleInterop": true,
     "verbatimModuleSyntax": false,
     "strict": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "exclude": [
+    "create_test_users.ts",
+    "node_modules",
+    "dist"
+  ]
 }

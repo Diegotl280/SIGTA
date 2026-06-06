@@ -395,7 +395,12 @@ const EmpresaDetalleAdmin = () => {
             ) : (
               configs.find(c => c.tipo === tramiteSeleccionado)?.requisitos.map((req, idx) => {
                 // Buscamos si hay un documento subido para este requisito
-                const docSubido = dataDocumentos?.documentos?.find(d => d.tipoRequisito === req.nombre);
+                const docSubido = dataDocumentos?.documentos?.find(
+                  d =>
+                    d.tipoRequisito === req.nombre &&
+                    expedienteActual?.estado !== 'borrador' &&
+                    !d.corregidoPendienteEnvio
+                );
                 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
                 return (

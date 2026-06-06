@@ -28,6 +28,7 @@ const ESTADO_COLORS = {
   con_observaciones: { bg: "#fee2e2", text: "#b91c1c" },
   validado: { bg: "#d1fae5", text: "#065f46" },
   cerrado: { bg: "#f3f4f6", text: "#6b7280" },
+  cancelado: { bg: "#fee2e2", text: "#991b1b" },
 };
 
 const ESTADO_LABELS = {
@@ -37,6 +38,7 @@ const ESTADO_LABELS = {
   con_observaciones: "Con observaciones",
   validado: "Validado",
   cerrado: "Cerrado",
+  cancelado: "Cancelado",
 };
 
 const modalBase = {
